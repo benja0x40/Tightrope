@@ -1,0 +1,25 @@
+Package: Tightrope
+Type: Package
+Title: Tightrope - Multivariate Analysis of Read Count data
+Version: 0.1.0
+Date: 2015-07-29
+Author: Benjamin Leblanc
+Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
+Imports:
+    triangle,
+    FNN,
+    mixtools,
+    GenomicAlignments,
+    GenomicRanges
+Depends:
+    R (>= 3.2.0),
+    triangle,
+    FNN,
+    mixtools,
+    GenomicAlignments,
+    GenomicRanges
+Description: Normalization, density estimation, variance stabilization and differential analysis on count data
+License: GPL (>= 2)
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Suggests: testthat
