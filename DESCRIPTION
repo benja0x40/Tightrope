@@ -1,6 +1,6 @@
 Package: Tightrope
 Type: Package
-Title: Tightrope - Multivariate Analysis of Read Count data
+Title: Tightrope
 Version: 0.1.0
 Date: 2015-07-29
 Author: Benjamin Leblanc
@@ -18,7 +18,7 @@ Depends:
     mixtools,
     GenomicAlignments,
     GenomicRanges
-Description: Normalization, density estimation, variance stabilization and differential analysis on count data
+Description: Analyzing global variations of transcription factor or histone modification levels with ChIP-seq
 License: GPL (>= 2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
