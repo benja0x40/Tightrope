@@ -398,23 +398,37 @@ makeScalingFactors <- function(aln, ctr, bgr=NULL, enr=NULL, use.bgr=NULL, use.e
 # =============================================================================.
 #' Center of differences between log transformed counts in different samples
 # -----------------------------------------------------------------------------.
-#' @param x matrix of log transformed read counts (columns = samples, rows = genomic intervals)
-#' @param invariable logical vector defining the subset of rows assumed to be invariable (default = all)
-#' @param center function for center of difference calculations.
+#' @param x
+#' matrix of log transformed read counts (columns = samples, rows = genomic intervals)
+#'
+#' @param invariable
+#' logical vector defining the set of rows in the read count matrix x that are
+#' assumed invariable (default = all).
+#'
+#' @param center
+#' function for center of difference calculations.
 #' The default center function is \link{findMode} which identifies the mode in
 #' a kernel density estimation of the distribution of read count differences
 #' using the generic R function \code{density}.
 #' This default function can be replaced by \code{median}, \code{mean}, or
 #' similar functions.
-#' @param replicates logical matrix indicating replicate columns (default = none)
-#' @param plot logical, activates the drawing of control scatterplots (default = F)
-#' @param xylim defining ranges of x and y axes for scatterplots (default = auto)
+#'
+#' @param replicates
+#' logical matrix indicating replicate columns (default = none)
+#'
+#' @param plot
+#' logical, activates the drawing of control scatterplots (default = F)
+#'
+#' @param xylim
+#' defining ranges of x and y axes for scatterplots (default = auto)
+#'
 #' @param ...
 #' graphical parameters passed to the \link{scPlotCounts} function.
 # -----------------------------------------------------------------------------.
-#' @return matrix of pairwise center of differences between all samples
+#' @return
+#' matrix of pairwise center of differences between all samples
 # -----------------------------------------------------------------------------.
-centerOfDifferences <- function(x, invariable=NULL, center=NULL, replicates=0, plot=F, xylim=NULL, ...) {
+centerOfDifferences <- function(x, invariable = NULL, center = NULL, replicates=0, plot=F, xylim=NULL, ...) {
 
   n <- ncol(x)
   m <- nrow(x)
@@ -467,19 +481,32 @@ centerOfDifferences <- function(x, invariable=NULL, center=NULL, replicates=0, p
 # =============================================================================.
 #' Normalization based on center of differences
 # -----------------------------------------------------------------------------.
-#' @param M matrix of read counts (columns = samples, rows = intervals)
-#' @param invariant logical
-#' @param method either "mode" (default), "median" or "mean"
-#' @note This is a deprecated function that will be removed in future versions
+#' @author Benjamin Leblanc
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{normalizeByPrincipalComponent}
+# -----------------------------------------------------------------------------.
+#' @param M
+#' matrix of log transformed read counts (columns = samples, rows = genomic intervals)
+#'
+#' @param invariable
+#' logical vector defining the set of rows in the read count matrix M that are
+#' assumed invariable (default = all).
+#'
+#' @param method
+#' either "mode" (default), "median" or "mean"
+#'
+#' @note
+#' This is a deprecated function that should be removed in future versions
 # -----------------------------------------------------------------------------.
 #' @return
 #' normalizeByCenterOfDifferences returns a \code{list} with the following elements:
 #' \item{X}{matrix of normalized read counts}
 #' \item{f}{matrix of pairwise normalization factors}
 # -----------------------------------------------------------------------------.
-normalizeByCenterOfDifferences <- function(M, invariant=NULL, method=c("mode", "median", "mean"), cod.matrix=NULL) {
+normalizeByCenterOfDifferences <- function(M, invariable = NULL, method=c("mode", "median", "mean"), cod.matrix=NULL) {
   if(is.null(cod.matrix)) {
-    f <- centerOfDifferences(M=M, invariable=invariant, method=method)
+    f <- centerOfDifferences(M=M, invariable=invariable, method=method)
   } else {
     f <- cod.matrix
   }
@@ -487,27 +514,37 @@ normalizeByCenterOfDifferences <- function(M, invariant=NULL, method=c("mode", "
   list(X=t(t(M) - f), f=f)
 }
 # =============================================================================.
-#' Parameters of a principal component
+#' Estimate normalization parameters based on principal component analysis
 # -----------------------------------------------------------------------------.
-#' @param M matrix of read counts (columns = samples, rows = intervals)
-#' @param invariant
-#' @param pc
+#' @author Benjamin Leblanc
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{normalizeByPrincipalComponent}
+# -----------------------------------------------------------------------------.
+#' @param M
+#' matrix of log transformed read counts (columns = samples, rows = genomic intervals)
 #'
-#' @return list
+#' @param invariable
+#' logical vector defining the set of rows in the read count matrix M that are
+#' assumed invariable (default = all).
+#'
+#' @param pc
+#' character defining which principal component should be extracted
+#' (default = "PC1").
 # -----------------------------------------------------------------------------.
 #' @return
 #' getPrincipalComponent returns a \code{list} with the following elements:
 #' \item{SLOPES}{matrix of b values according to the linear model y = b x + a}
 #' \item{INTRCP}{matrix of a values according to the linear model y = b x + a}
 # -----------------------------------------------------------------------------.
-getPrincipalComponent <- function(M, invariant=NULL, pc="PC1") {
+getPrincipalComponent <- function(M, invariable=NULL, pc="PC1") {
   n <- ncol(M)
   m <- nrow(M)
-  if(is.null(invariant)) {
-    invariant <- rep(T, m)
+  if(is.null(invariable)) {
+    invariable <- rep(T, m)
   }
   # Use PCA to extract the first principal component (axis of maximal variance)
-  r <- prcomp(M[which(finiteValues(M) & invariant),], retx = F)
+  r <- prcomp(M[which(finiteValues(M) & invariable),], retx = F)
   # Derive slope and intercept for each variable as a function of each other
   SLOPES <- matrix(NA, n, n)
   INTRCP <- matrix(NA, n, n)
@@ -522,10 +559,20 @@ getPrincipalComponent <- function(M, invariant=NULL, pc="PC1") {
 # =============================================================================.
 #' PCA-based normalization
 # -----------------------------------------------------------------------------.
-#' @param M matrix of read counts (columns = samples, rows = intervals)
-#' @param pc
+#' @author Benjamin Leblanc
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{getPrincipalComponent}
+# -----------------------------------------------------------------------------.
+#' @param M
+#' matrix of log transformed read counts (columns = samples, rows = genomic intervals)
 #'
-#' @return matrix
+#' @param pc
+#' normalization parameters resulting from function \link{getPrincipalComponent}
+#'
+# -----------------------------------------------------------------------------.
+#' @return
+#' matrix of normalized read counts
 # -----------------------------------------------------------------------------.
 normalizeByPrincipalComponent <- function(M, pc) {
   n <- ncol(M)

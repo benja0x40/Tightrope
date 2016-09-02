@@ -19,9 +19,18 @@ densityByKernel <- function(qry, k, sbj=NULL, FUN=NULL) {
 # =============================================================================.
 #' Use k-nearest neighbors as an estimator of the density P(x) ~ k / N V
 # -----------------------------------------------------------------------------.
+#' @author Benjamin Leblanc
+# -----------------------------------------------------------------------------.
 #' @param qry
+#' numeric matrix for which the empirical density will be estimated.
+#'
 #' @param k
+#' index of the nearest neighbor used for local density estimation.
+#'
 #' @param sbj
+#' numeric matrix providing the multivariate samples from which an empirical
+#' density will be derived (default = qry).
+#'
 #' @param FUN
 #'
 #' @return \code{list}
