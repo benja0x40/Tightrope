@@ -7,9 +7,9 @@
 detectCounts(cnt, detailed = F)
 }
 \arguments{
-\item{\code{cnt}}{matrix of read counts (columns = samples, rows = genomic intervals)}
+\item{cnt}{matrix of read counts (columns = samples, rows = genomic intervals)}
 
-\item{\code{detailed}}{logical, if TRUE return min and max read counts in each interval}
+\item{detailed}{logical, if TRUE return min and max read counts in each interval}
 }
 \value{
 detectCounts returns a \code{data.frame} with the following columns:
@@ -23,4 +23,3 @@ If \code{detailed} is equal to \code{TRUE}, the returned \code{data.frame} also 
 \description{
 Read count matrix summary
 }
-

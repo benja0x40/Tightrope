@@ -2,26 +2,16 @@
 % Please edit documentation in R/counts.R
 \name{ditherCounts}
 \alias{ditherCounts}
-\title{Dither read counts}
+\title{Dither counts}
 \usage{
-ditherCounts(cnt, pdf = c("triangle", "normal"), fwhm = 1, min.cnt = 0.5,
-  missing.cnt = F)
+ditherCounts(x)
 }
 \arguments{
-\item{\code{cnt}}{matrix of read counts (columns = samples, rows = intervals)}
-
-\item{\code{pdf}}{probability density of dithering values, either "triangle" (default) or "normal"}
-
-\item{\code{fwhm}}{full width at half maximum for normal pdf, default = 1}
-
-\item{\code{min.cnt}}{minimum count value after dithering, default = 0.5}
-
-\item{\code{missing.cnt}}{logical, if TRUE generate random values for a fraction of null counts}
+\item{x}{matrix of read counts (columns = samples, rows = intervals)}
 }
 \value{
-\code{matrix}
+ditherCounts returns a \code{matrix} of dithered counts
 }
 \description{
-Dither read counts
+Dither counts
 }
-

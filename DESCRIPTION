@@ -6,20 +6,24 @@ Date: 2015-07-29
 Author: Benjamin Leblanc
 Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
 Imports:
-    triangle,
+    igraph,
     FNN,
+    triangle,
     mixtools,
     GenomicAlignments,
-    GenomicRanges
+    GenomicRanges,
+    Barbouille
 Depends:
     R (>= 3.2.0),
-    triangle,
+    igraph,
     FNN,
+    triangle,
     mixtools,
     GenomicAlignments,
-    GenomicRanges
-Description: Analyzing global variations of transcription factor or histone modification levels with ChIP-seq
+    GenomicRanges,
+    Barbouille
+Description: ChIP-seq normalization for histone modification profiles
 License: GPL (>= 2)
 LazyData: TRUE
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests: testthat

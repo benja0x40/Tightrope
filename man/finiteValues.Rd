@@ -7,12 +7,11 @@
 finiteValues(x)
 }
 \arguments{
-\item{\code{x}}{}
+\item{x}{numeric matrix}
 }
 \value{
-\code{logical} vector
+finiteValues returns a \code{logical} vector
 }
 \description{
 Find finite values consistently in all samples (log transformed counts)
 }
-

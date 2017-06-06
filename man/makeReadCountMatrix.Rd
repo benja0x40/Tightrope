@@ -7,14 +7,14 @@
 makeReadCountMatrix(aln, grg, ...)
 }
 \arguments{
-\item{\code{aln}}{list of \link{GAlignments} objects with mapped reads from different samples}
+\item{aln}{list of \link{GAlignments} objects with mapped reads from different samples}
 
-\item{\code{grg}}{\link{GRanges} object defining the considered genomic intervals}
+\item{grg}{\link{GRanges} object defining the considered genomic intervals}
 }
 \value{
-\code{matrix} of read counts (columns = samples, rows = genomic intervals)
+makeReadCountMatrix returns a matrix of read counts
+(columns = samples, rows = genomic intervals)
 }
 \description{
 Count mapped reads overlapping with genomic intervals
 }
-
