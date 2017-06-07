@@ -13,7 +13,7 @@ colorize <- function(x) {
 
   q <- c(0, 0.33, 0.66, 1.0)
   k <- c("grey", "black", "red", "yellow")
-  x <- ranked_p(x)
+  x <- rankstat(x)
 
   clr_prm <- defineColors(thresholds = q, colors = k)
   clr <- makeColors(x, parameters = clr_prm)

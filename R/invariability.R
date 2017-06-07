@@ -1,9 +1,15 @@
 # FUNCTIONS | INVARIABILITY ####################################################
 
 # =============================================================================.
-# ranking
+#' rank statistics
 # -----------------------------------------------------------------------------.
-ranked_p <- function(x) { (rank(x) - 0.5) / length(x) }
+#' @param x
+#' numeric vector
+#'
+#' @return \eqn{(rank(x) - 0.5) / N} where N = length(x)
+# -----------------------------------------------------------------------------.
+#' @export
+rankstat <- function(x) { (rank(x) - 0.5) / length(x) }
 
 # =============================================================================.
 #' partition of multivariate observations
@@ -60,11 +66,11 @@ populations <- function(x, p, ns, columns = NULL, max_iter = 100) {
 # -----------------------------------------------------------------------------.
 #' @export
 bg_grp <- function(x, grp, bg_cols) {
-  bg <- x[grp$center, ]
-  bg <- cbind(rowMeans(bg[, - bg_cols]), rowMeans(bg[, bg_cols]))
-  print(bg)
-  bg <- which(bg[, 2] > bg[, 1])
-  bg
+  bg <- split(x, f = grp$membership)
+  z <- t(sapply(bg, colMeans))
+  a <- rowMeans(as.matrix(z[, - bg_cols]))
+  b <- rowMeans(as.matrix(z[, bg_cols]))
+  which.max(b - a)
 }
 
 # =============================================================================.
@@ -129,8 +135,8 @@ lowVariability <- function(
   x <- y
 
   # combine density and deviation
-  p.d <- ranked_p(d)
-  p.s <- ranked_p(1 / s)
+  p.d <- rankstat(d)
+  p.s <- rankstat(1 / s)
   v <- sqrt(p.d * p.s)
 
   layout(matrix(1:6, 3, 2, byrow = T))

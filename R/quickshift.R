@@ -17,6 +17,7 @@
 #' @export
 quickShift <- function (x, d, plot = F) {
   g <- graph.empty(n = nrow(x))
+  V(g)$d <- d
   i.a <- which(finiteValues(x) & ! is.na(d))
   if(plot) {
     plot(x[, 1], x[, 2], pch = 20, col=rgb(0, 0, 0, 0.1))
