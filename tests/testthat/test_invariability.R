@@ -174,6 +174,7 @@ test_that("bg_grp", {
 
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
+
   clr <- rainbow(grp$nbr, alpha = 0.5)
   clr <- plot_groups_2D(x, clr = clr[grp$membership], pch = 20)
   plot_sources_2D(
@@ -182,5 +183,41 @@ test_that("bg_grp", {
   points(matrix(grp$theta[[bg]]$mu, nrow = 1), pch = 19)
 
   expect_true(mean(abs(ctr - mu)) < 0.5)
+
+})
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+test_that("lowVariability", {
+  layout(matrix(1:9, 3, 3, byrow = T))
+
+  # Test ////
+  n <- 10000
+  # Generate random samples from a mixture of normal distributions
+  prm <- list(
+    list(alpha = 0.3, mu = c( 1.5, -1.5), sigma = matrix(c(1.5, 0.5, 0.5, 0.25), 2)),
+    list(alpha = 0.5, mu = c( 0.0,  0.0), sigma = matrix(c(3.0, 1.0, 1.0, 1.0), 2)),
+    list(alpha = 0.2, mu = c(-2.0,  2.0), sigma = matrix(c(2.0, 0.5, 0.5, 1.0), 2))
+  )
+  spl <- mv_rsg(n = n, theta = prm)
+  #
+  lst <- list(
+    spl[spl$group == 1, -1],
+    spl[spl$group == 2, -1],
+    spl[spl$group == 3, -1]
+  )
+  x <- 10 * (10 + do.call(rbind, lst))
+  x <- as.matrix(x)
+  nbr <- sapply(lst, nrow)[c(2, 1, 3)]
+  mbr <- c(rep(2, nbr[2]), rep(1, nbr[1]), rep(3, nbr[3]))
+  ctr <- 10 * (10 + sapply(lst, colMeans)[, c(2, 1, 3)])
+
+  # plot(x, pch = 20, col = grey(0, alpha = 0.1))
+
+  # res <- lowVariability(
+  #   2^x, bg_cols = 1,  fit_idx = 1:2, viz_idx = 1:2,
+  #   mincv = 0.1, n = 3, k = 96, dithering = 1
+  # )
 
 })

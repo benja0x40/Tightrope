@@ -4,8 +4,8 @@
 \alias{lowVariability}
 \title{lowVariability}
 \usage{
-lowVariability(cnt, bg_cols, fit_idx, viz_idx, n = 3, k = 64,
-  dithering = 3, max_iter = 100)
+lowVariability(cnt, bg_cols, fit_idx, viz_idx, mincv = 0.05, n = 3,
+  k = 64, dithering = 3, max_iter = 100)
 }
 \arguments{
 \item{cnt}{matrix of read counts (columns = samples, rows = intervals)}
@@ -15,6 +15,8 @@ lowVariability(cnt, bg_cols, fit_idx, viz_idx, n = 3, k = 64,
 \item{fit_idx}{columns considered for low variability analysis}
 
 \item{viz_idx}{columns for 2D plots}
+
+\item{mincv}{minimal component variance}
 
 \item{n}{number of clusters}
 

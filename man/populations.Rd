@@ -4,16 +4,16 @@
 \alias{populations}
 \title{partition of multivariate observations}
 \usage{
-populations(x, p, ns, columns = NULL, max_iter = 100)
+populations(x, tx = NULL, p, ns, max_iter = 100)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate observations}
 
+\item{tx}{numeric matrix representing transformed observations (default = x)}
+
 \item{p}{statistical score associated to observations (e.g. estimated density)}
 
 \item{ns}{number of clusters}
-
-\item{columns}{components to be considered}
 
 \item{max_iter}{maximum number of iterations for expectation-maximization}
 }
