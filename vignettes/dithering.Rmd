@@ -1,0 +1,163 @@
+---
+title: "Dithered read counts"
+author: "Benjamin Leblanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dithering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+suppressPackageStartupMessages(library(Tightrope))
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+empty.plot <- function(axes = T, xlab = '', ylab = '', ...) {
+  plot(0, type = 'n', axes = axes, xlab = xlab, ylab = ylab, ...)
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...) {
+
+  n <- length(x)
+
+  if(log) {
+    x <- log2(x)
+    y <- log2(y)
+  }
+
+  bins <- bins - 1
+  r <- diff(range(x, y, na.rm = T))
+  brk <- 0:bins/bins * (1.2 * r) - 0.1 * r + min(x, y, na.rm = T)
+  h.x <- hist(x, breaks = brk, plot = F)
+  h.y <- hist(y, breaks = brk, plot = F)
+
+  h.x$counts <- h.x$counts / n
+  h.y$counts <- h.y$counts / n
+
+  if(rel) {
+    chk <- h.x$counts > 0
+    h.x$counts[chk] <- with(h.x, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
+    chk <- h.y$counts > 0
+    h.y$counts[chk] <- with(h.y, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
+  }
+
+  if(is.null(xlim)) xlim = range(x, y)
+  ylim <- range(h.x$counts, h.y$counts)
+  ylim <- min(ylim) + c(0, 1.1 * diff(ylim))
+  empty.plot(xlim = xlim, ylim = ylim, yaxs = 'i', ...)
+  chk <- h.x$counts > 0
+  k <- length(h.y$mids)
+  x <- c(h.y$mids[1], h.y$mids, h.y$mids[k])
+  y <- c(0, h.y$counts, 0)
+  polygon(x, y, border = NA, col = rgb(1, 0.6, 0, 0.5))
+  chk <- h.y$counts > 0
+  points(h.y$mids[chk], h.y$counts[chk], type = 'l', col = rgb(1, 0, 0, 0.75), lwd = 2)
+  points(h.x$mids[chk], h.x$counts[chk], type = 'h', lwd = 2, col = grey(0.3))
+}
+```
+
+
+### Overview
+
+The distributions of read counts from ChIP-seq experiments result in the
+multiplication of identical values in the observations.
+
+Example with a weird counts distribution
+
+```{r, message=T, echo=F, warning=FALSE, include=FALSE}
+n <- 500000
+p <- rep(c(1, 1, 2, 3, 2, 1, 1), length.out = 14)
+x <- matrix(
+  sample(1:length(p), size = n, replace = T, prob = p / sum(p)),
+  nrow = n / 2, ncol = 2
+)
+y <- ditherCounts(x)
+```
+
+```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
+plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+# plotHistograms(x, y = x, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
+
+# p <- knn_stats(y, k = 200)$density
+# p <- p / max(p)
+# clr.prm <- defineColors(thresholds = c(0, 1), colors = grey(1:0), centered = T)
+# plot(
+#   y, cex = 0.5, col = makeColors(p, parameters = clr.prm), xlim = xylim, ylim = xylim,
+#   xlab = "y1", ylab = "y2"
+# )
+m <- cbind(
+  rep(1:14, 14),
+  rep(1:14, each = 14)
+)
+d <- p
+d <- d[m[, 1]] + d[m[, 2]]
+d <- (d / max(d))^1.5
+xylim <- range(x, y)
+plot(
+  m, cex = 0.5, col = grey(1 - d), xlim = xylim, ylim = xylim,
+  xlab = "x1", ylab = "x2"
+)
+h <- histogram2D(y[, 1], y[, 2], nx = 100, ny = 100, plot = T, xlim = xylim, ylim = xylim)
+```
+
+Example with counts following a poisson distribution (+ 1 pseudo count)
+
+```{r}
+n <- 100000
+x <- matrix(1 + rpois(n, lambda = 5), nrow = n / 2, ncol = 2)
+y <- ditherCounts(x)
+```
+
+```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
+plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
+
+xylim <- range(log2(x), log2(y))
+plot(
+  log2(x), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
+  xlab = "log2(x1)", ylab = "log2(x2)"
+)
+abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
+abline(a = 0, b = 1, col = grey(0.5))
+plot(
+  log2(y), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
+  xlab = "log2(y1)", ylab = "log2(y2)"
+)
+abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
+abline(a = 0, b = 1, col = grey(0.5))
+```
+
+Example with counts following a negative binomial distribution (+ 1 pseudo count)
+
+```{r}
+n <- 100000
+x <- matrix(1 + rnbinom(n, mu = 5, size = 2), nrow = n / 2, ncol = 2)
+y <- ditherCounts(x)
+```
+
+```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
+plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
+
+xylim <- range(log2(x), log2(y))
+plot(
+  log2(x), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
+  xlab = "log2(x1)", ylab = "log2(x2)"
+)
+abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
+abline(a = 0, b = 1, col = grey(0.5))
+plot(
+  log2(y), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
+  xlab = "log2(y1)", ylab = "log2(y2)"
+)
+abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
+abline(a = 0, b = 1, col = grey(0.5))
+```

@@ -1,7 +1,14 @@
 Tightrope
 ================================================================================
 
-Normalization and analysis of ChIP-seq on variant histones and histone marks.
+`Tightrope` is an R package with functions for the normalization and analysis
+of ChIP-seq data on histone marks and histone variants.
+
+### Main features ###
+
+See Gallery below for examples.
+
+Tutorials and documentation can be found in the package vignettes.
 
 ### Package installation ###
 
@@ -11,23 +18,19 @@ Normalization and analysis of ChIP-seq on variant histones and histone marks.
   - CRAN packages `devtools`, `igraph`, `FNN`, `triangle`, `mixtools`
   - [Bioconductor](http://www.bioconductor.org/) packages
     `GenomicAlignments`, `GenomicRanges`
-  - [GitHub](https://github.com/benja0x40/) package `Barbouille`
+  - [GitHub](https://github.com/benja0x40/) R package `Barbouille`
   
-Run the R code below to install CRAN and Bioconductor packages dependencies
-for Tightrope.
+Run the R code below to install CRAN and Bioconductor package dependencies
+for `Tightrope`.
 
 ```R
 # Already installed
 pkg <- installed.packages()[, "Package"]
 
 # CRAN packages
-lst <- c(
-"devtools", "igraph", "FNN", "triangle", "mixtools"
-)
+lst <- c("devtools", "igraph", "FNN", "triangle", "mixtools")
 lst <- setdiff(lst, pkg)
-if(length(lst) > 0) {
-  install.packages(lst, repos = "https://cloud.r-project.org/")
-}
+if(length(lst) > 0) install.packages(lst, repos = "https://cloud.r-project.org/")
 
 # Bioconductor packages
 lst <- c("GenomicAlignments", "GenomicRanges")
@@ -35,12 +38,16 @@ lst <- setdiff(lst, pkg)
 if(length(lst) > 0) {
   source("https://bioconductor.org/biocLite.R")
   biocLite(lst)
+
+# GitHub packages
+library("devtools")
+install_github("benja0x40/Barbouille")
 }
 ```
 
-#### Installations from github ####
+#### Installation from github ####
 
-Run the bash code below to build package Tightrope from github.
+Run the bash code below to build package `Tightrope` from github.
 
 ```bash
 # Clone github repository
@@ -55,7 +62,7 @@ git pull
 cd ..
 R CMD build Tightrope
 ```
-Run the R code below to install Tightrope.
+Run the R code below to install `Tightrope`.
 
 ```r
 # When package will be public
@@ -66,3 +73,6 @@ Run the R code below to install Tightrope.
 install.packages("Tightrope_0.1.0.tar.gz")
 ```
 
+### Gallery ###
+
+### Links/References ###
