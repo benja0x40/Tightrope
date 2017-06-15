@@ -1,3 +1,289 @@
+# GEOMETRY #####################################################################
+
+# =============================================================================.
+#' translation_2D
+# -----------------------------------------------------------------------------.
+#' @param v matrix
+#' @param dv vector
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+translation_2D <- function(v, dv) {
+  v + matrix(dv, nrow(v), length(dv), byrow = T)
+}
+
+# =============================================================================.
+#' RotationMatrix2D
+# -----------------------------------------------------------------------------.
+#' @param alpha angle
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+RotationMatrix2D <- function(alpha) {
+  r <- diag(rep(0, 2))
+  r[1, ] <- c(cos(alpha), -sin(alpha))
+  r[2, ] <- c(sin(alpha),  cos(alpha))
+  r
+}
+
+# PARAMETERS ###################################################################
+
+# =============================================================================.
+#' CovMat2D
+# -----------------------------------------------------------------------------.
+#' @param alpha angle in radians
+#' @param sx sigma2(x)
+#' @param sy sigma2(y)
+#'
+#' @return covariance matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+CovMat2D <- function(alpha, sx, sy) {
+  r <- RotationMatrix2D(alpha)
+  s <- diag(c(sx, sy))
+  sigma <- r %*% s %*% t(r)
+  sigma
+}
+
+# 2D PATTERNS ##################################################################
+
+# =============================================================================.
+#' make_square_grid_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_square_grid_2D <- function(n, normalized = T) {
+  x <- rep(1:n, n) - (n + 1) / 2
+  y <- rep(1:n, each = n) - (n + 1) / 2
+  xy <- cbind(x, y)
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#' make_disk_grid_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_disk_grid_2D <- function(n, normalized = T) {
+  x <- rep(1:n, n) - (n + 1) / 2
+  y <- rep(1:n, each = n) - (n + 1) / 2
+  d <- sqrt(x^2 + y^2)
+  xy <- cbind(x, y)[d < n / 2, ]
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#' make_ring_grid_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_ring_grid_2D <- function(n, normalized = T) {
+  x <- rep(1:n, n) - (n + 1) / 2
+  y <- rep(1:n, each = n) - (n + 1) / 2
+  d <- sqrt(x^2 + y^2)
+  xy <- cbind(x, y)[d < n / 2 & d > n / 4, ]
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#' make_square_unif_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_square_unif_2D <- function(n, normalized = T) {
+  x <- n * (runif(n * n) - 1 / 2)
+  y <- n * (runif(n * n) - 1 / 2)
+  xy <- cbind(x, y)
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#' make_disk_unif_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_disk_unif_2D <- function(n, normalized = T) {
+  x <- n * (runif(n * n) - 1 / 2)
+  y <- n * (runif(n * n) - 1 / 2)
+  d <- sqrt(x^2 + y^2)
+  xy <- cbind(x, y)[d < n / 2, ]
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#' make_ring_unif_2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param normalized logical (default = T)
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+make_ring_unif_2D <- function(n, normalized = T) {
+  x <- n * (runif(n * n) - 1 / 2)
+  y <- n * (runif(n * n) - 1 / 2)
+  d <- sqrt(x^2 + y^2)
+  xy <- cbind(x, y)[d < n / 2 & d > n / 4, ]
+  if(normalized) xy <- 2 / n * xy
+  xy
+}
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+# n <- 100
+# layout(matrix(1:9, 3, 3, byrow = T))
+# plot(make_square_grid_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+# plot(make_disk_grid_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+# plot(make_ring_grid_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+# plot(make_square_unif_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+# plot(make_disk_unif_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+# plot(make_ring_unif_2D(n), pch = 20, col = grey(0, alpha = 0.5))
+
+# ND GENERATORS ################################################################
+
+# =============================================================================.
+#' SquareGrid
+# -----------------------------------------------------------------------------.
+#' @param k integer
+#' @param d dimension
+#' @param radius distance of exclusion
+#' @param subset vector of indices
+#'
+#' @return list
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+SquareGrid <- function(k, d, radius = -1, subset = NULL) {
+  x <- matrix(0, k^d, d)
+  if(k > 1) {
+    for(i in 1:d) {
+      x[, i] <- as.numeric(gl(k, k^(i-1), length = k^d))
+    }
+    x <- 2 * ((x - 1) / (k - 1) - 1 / 2)
+  }
+  if(! is.null(subset)) {
+    x <- x[subset, , drop = F]
+  }
+  r <- apply(abs(x), 1, max)
+  chk <- r > radius
+  x <- x[chk, , drop = F]
+  list(n = nrow(x), d = d, k = k, x = x)
+}
+# =============================================================================.
+#' RoundGrid
+# -----------------------------------------------------------------------------.
+#' @param k integer
+#' @param d dimension
+#' @param radius distance of exclusion
+#' @param subset vector of indices
+#'
+#' @return list
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+RoundGrid <- function(k, d, radius = -1, subset = NULL) {
+  m <- SquareGrid(k, d)
+  r <- sqrt(rowSums(m$x^2))
+  chk <- r <= 1 & r > radius
+  m$x <- m$x[chk, , drop = F]
+  if(! is.null(subset)) {
+    m$x <- m$x[subset, , drop = F]
+  }
+  m$n <- nrow(m$x)
+  m
+}
+# =============================================================================.
+#' ClonalGaussian
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param mu mean
+#' @param sigma strandard deviation
+#'
+#' @return list
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+ClonalGaussian <- function(n, mu, sigma) {
+  mu <- as.matrix(mu)
+  d <- ncol(mu)
+  k <- nrow(mu)
+  if(length(sigma) == 1) sigma <- diag(sigma, d, d)
+  x <- matrix(0, n * k, d)
+  for(i in 1:k) {
+    g <- 1:n + (i - 1) * n
+    x[g, ] <- rmvnorm(n, mu = mu[i, ], sigma = sigma)
+  }
+  s <- rep(1:k, each = n)
+  list(n = n * k, d = d, k = k, src = s, x = x)
+}
+# =============================================================================.
+#' ClonalUniform
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param mu mean
+#' @param delta half width of the range
+#'
+#' @return list
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+ClonalUniform <- function(n, mu, delta) {
+  mu <- as.matrix(mu)
+  d <- ncol(mu)
+  k <- nrow(mu)
+  if(length(delta) == 1) delta <- matrix(delta, k, d)
+  x <- matrix(0, n * k, d)
+  for(i in 1:k) {
+    g <- 1:n + (i - 1) * n
+    for(j in 1:d) {
+      x[g, j] <- runif(
+        n, min = mu[i, j] - delta[i, j], max = mu[i, j] + delta[i, j]
+      )
+    }
+  }
+  s <- rep(1:k, each = n)
+  list(n = n * k, d = d, k = k, src = s, x = x)
+}
+
+# COUNTS #######################################################################
+
 # =============================================================================.
 #' Random counts
 # -----------------------------------------------------------------------------.

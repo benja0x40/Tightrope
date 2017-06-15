@@ -19,3 +19,4 @@ mv_expectation returns a vector of probabilities
 \description{
 Multivariate expectation
 }
+\keyword{internal}

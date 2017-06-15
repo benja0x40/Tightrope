@@ -17,3 +17,4 @@ mv_pdf returns a vector of probabilities
 \description{
 Multivariate normal distribution: probability density function
 }
+\keyword{internal}

@@ -11,37 +11,6 @@ vignette: >
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 suppressPackageStartupMessages(library(Tightrope))
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-plot_sample <- function(
-  x, idx = 1:2, prm = NULL, grp = NULL, grp_order = NULL, ordering = NULL,
-  symetric = T, clr = NULL, alpha = 0.1
-) {
-  rng = matrix(range(x), 2, 2)
-  x <- x[, idx]
-  xlab <- colnames(x)[1]
-  ylab <- colnames(x)[2]
-  
-  if(symetric) {
-    ab  = c(0, 1)
-  } else {
-    rng = apply(x, 2, range)
-    ab  = c(0, 0)
-  }
-  plot(0, type = 'n', xlab = xlab, ylab = ylab, xlim = rng[, 1], ylim = rng[, 2])
-  abline(a = ab[1], b = ab[2], col = grey(0.5))
-  if(is.null(clr)) {
-    points(x, col = grey(0, alpha = alpha))
-    if(! (is.null(prm) | is.null(grp))) {
-      grp_clr <- SuperRainbow(nrow(prm), alpha = alpha)
-      if(is.null(grp_order)) grp_order <- prm$id
-      for(g in grp_order) points(x[grp == g, ], col = grp_clr[g])
-    }
-  } else {
-    points(x, col = clr)
-  }
-}
 ```
 
 ### Overview
@@ -69,19 +38,17 @@ knitr::kable(rs$prm)
 ```
 
     TODO:
-    here there should be a graph illustrating the distribution of variations
+    Here add a graph illustrating the distribution of variations
     in each population, in reference to the common average value
     (as computed in the generator function but removing the noise)
+    The goal is to help visualize, formalize and explain how the simulation
+    is done and the role of the simulation parameters in controling the 
+    simulated dataset.
 
 ```{r Fig1, fig.width=7.15, fig.height=2.65}
 layout(matrix(1:3, 1, 3))
 par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 1.0, cex.axis = 1.0)
-plot_sample(log2(rs$x), idx = c(1, 2), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
-plot_sample(log2(rs$x), idx = c(1, 3), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
-plot_sample(log2(rs$x), idx = c(3, 2), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
+plot_samples(log2(rs$x), idx = c(1, 2), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
+plot_samples(log2(rs$x), idx = c(1, 3), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
+plot_samples(log2(rs$x), idx = c(3, 2), prm = rs$prm, grp = rs$grp, grp_order = 3:1, alpha = 0.05)
 ```
-
-### Equations
-
-$\displaystyle \sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i -\mu)^2$ where $\mu$ is the sample mean
-

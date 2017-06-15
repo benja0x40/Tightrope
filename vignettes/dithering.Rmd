@@ -2,7 +2,7 @@
 title: "Dithered read counts"
 author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{dithering}
   %\VignetteEngine{knitr::rmarkdown}
@@ -11,71 +11,30 @@ vignette: >
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 suppressPackageStartupMessages(library(Tightrope))
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-empty.plot <- function(axes = T, xlab = '', ylab = '', ...) {
-  plot(0, type = 'n', axes = axes, xlab = xlab, ylab = ylab, ...)
-}
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...) {
-
-  n <- length(x)
-
-  if(log) {
-    x <- log2(x)
-    y <- log2(y)
-  }
-
-  bins <- bins - 1
-  r <- diff(range(x, y, na.rm = T))
-  brk <- 0:bins/bins * (1.2 * r) - 0.1 * r + min(x, y, na.rm = T)
-  h.x <- hist(x, breaks = brk, plot = F)
-  h.y <- hist(y, breaks = brk, plot = F)
-
-  h.x$counts <- h.x$counts / n
-  h.y$counts <- h.y$counts / n
-
-  if(rel) {
-    chk <- h.x$counts > 0
-    h.x$counts[chk] <- with(h.x, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
-    chk <- h.y$counts > 0
-    h.y$counts[chk] <- with(h.y, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
-  }
-
-  if(is.null(xlim)) xlim = range(x, y)
-  ylim <- range(h.x$counts, h.y$counts)
-  ylim <- min(ylim) + c(0, 1.1 * diff(ylim))
-  empty.plot(xlim = xlim, ylim = ylim, yaxs = 'i', ...)
-  chk <- h.x$counts > 0
-  k <- length(h.y$mids)
-  x <- c(h.y$mids[1], h.y$mids, h.y$mids[k])
-  y <- c(0, h.y$counts, 0)
-  polygon(x, y, border = NA, col = rgb(1, 0.6, 0, 0.5))
-  chk <- h.y$counts > 0
-  points(h.y$mids[chk], h.y$counts[chk], type = 'l', col = rgb(1, 0, 0, 0.75), lwd = 2)
-  points(h.x$mids[chk], h.x$counts[chk], type = 'h', lwd = 2, col = grey(0.3))
-}
 ```
-
 
 ### Overview
 
 The distributions of read counts from ChIP-seq experiments result in the
-multiplication of identical values in the observations.
+multiplication of identical values in the observations. Dithering these counts
+consist in adding noise to the data in order to eliminate the presence of
+identical values.
 
-Example with a weird counts distribution
+    TODO:
+    Here add a short explanation of the dither function.
+
+```{r}
+library(Tightrope)
+```
+
+Example with a patterned distribution of counts
 
 ```{r, message=T, echo=F, warning=FALSE, include=FALSE}
-n <- 500000
+n <- 100000
 p <- rep(c(1, 1, 2, 3, 2, 1, 1), length.out = 14)
-x <- matrix(
-  sample(1:length(p), size = n, replace = T, prob = p / sum(p)),
-  nrow = n / 2, ncol = 2
-)
-y <- ditherCounts(x)
+rs <- RandomCounts(n, d = 2, p = p)
+x <- rs$x
+y <- ditherCounts(rs$x)
 ```
 
 ```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
@@ -84,7 +43,7 @@ plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "freq
 # plotHistograms(x, y = x, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
 legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
 
-# p <- knn_stats(y, k = 200)$density
+# p <- knn_density(y, k = 200)
 # p <- p / max(p)
 # clr.prm <- defineColors(thresholds = c(0, 1), colors = grey(1:0), centered = T)
 # plot(

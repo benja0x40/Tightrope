@@ -2,22 +2,27 @@
 % Please edit documentation in R/knn_stats.R
 \name{knn_density}
 \alias{knn_density}
-\title{k-nearest neighbors estimator of density P(x) ~ k / N V}
+\title{knn_density}
 \usage{
-knn_density(x, nn.idx, nn.dist, k)
+knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate observations.}
 
-\item{nn.idx}{matrix of nearest neighbor indexes}
+\item{k}{number of nearest neighbors (i.e. smoothing factor).}
 
-\item{nn.dist}{matrix of nearest neighbor distances}
+\item{i}{precomputed matrix of nearest neighbor indices.}
 
-\item{k}{number of nearest neighbors}
+\item{d}{precomputed matrix of nearest neighbor distances.}
+
+\item{smoothing}{perfom a knn average smoothing of the density (default = T, recommended).}
 }
 \value{
-knn_density returns a vector of densities
+knn_density returns a numeric vector.
 }
 \description{
-k-nearest neighbors estimator of density P(x) ~ k / N V
+k-nearest neighbors estimator of density \eqn{P(x) ~ k \over N V}
+}
+\seealso{
+\link{knn_musigma2}
 }

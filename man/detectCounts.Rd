@@ -23,3 +23,4 @@ If \code{detailed} is equal to \code{TRUE}, the returned \code{data.frame} also 
 \description{
 Read count matrix summary
 }
+\keyword{internal}

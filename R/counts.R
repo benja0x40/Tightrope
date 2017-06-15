@@ -65,6 +65,7 @@ finiteValues <- function(x) {
 #' \item{min}{integer vector representing the maximum count value for each row of the \code{cnt} matrix}
 #' \item{max}{integer vector representing the minimum count value for each row of the \code{cnt} matrix}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 detectCounts <- function(cnt, detailed = F) {
   cnt <- as.matrix(cnt)

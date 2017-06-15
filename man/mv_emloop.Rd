@@ -25,3 +25,4 @@ mv_emloop returns a \code{list} with the following elements
 \description{
 Multivariate expectation-maximization
 }
+\keyword{internal}

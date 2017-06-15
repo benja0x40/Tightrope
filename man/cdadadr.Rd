@@ -24,18 +24,21 @@ will be retained after dimensionality reduction.
 Setting dred = 0 bypasses the dimensionality reduction and performs
 density estimations in the original multivariate space of the dataset.}
 
-\item{smobs}{subtract the mean value of each observation}
+\item{smobs}{subtract the mean count value of each observation}
 
-\item{zscore}{}
+\item{zscore}{transform counts into z-scores (logical, default = F)}
 }
 \value{
 cdadadr returns a \code{list} with the following elements:
 \item{density}{knn density}
-\item{variance}{knn variance}
-\item{entropy}{knn entropy}
-\item{msg}{status of the dimensionality reduction}
-\item{x}{transformed data}
+\item{parameters}{list with the value of each cdadadr argument}
+\item{projection}{list}
 }
 \description{
 Count Density After Dithering And Dimensionality Reduction
+}
+\seealso{
+\link{ditherCounts},
+  \link{prcomp},
+  \link{knn_density}
 }

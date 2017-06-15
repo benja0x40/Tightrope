@@ -1,148 +1,245 @@
 # FUNCTIONS | KNN STATS ########################################################
 
-# =============================================================================.
+# # =============================================================================.
+# #' k-nearest neighbor statistics - DEPRECATED
+# # -----------------------------------------------------------------------------.
+# # TODO: qry and sbj are not handled properly
+# # TODO: implement the case were qry and sbj are one-dimension (single samples)
+# # -----------------------------------------------------------------------------.
+# #' @param qry
+# #' numeric matrix representing multivariate observations
+# #'
+# #' @param k
+# #' number of nearest neighbors
+# #'
+# #' @param sbj
+# #'
+# #' @param FUN
+# #' statistical function (default = \link{knn_density})
+# #'
+# #' @return knn_stat returns a numeric vector
+# # -----------------------------------------------------------------------------.
+# #' @keywords internal
+# #' @export
+# knn_stat <- function(qry, k, sbj = NULL, FUN = knn_density) {
 #
+#   N  <- nrow(qry)                 # total number of example values in the sample
+#   idx <- which(finiteValues(qry)) # detect NA and Inf
+#
+#   # find KNN
+#   if(is.null(sbj)) {
+#     # default: qry = sbj
+#     v <- get.knn(data = qry[idx, ], k = k, algorithm = "kd_tree")
+#   } else {
+#     # assume that sbj only contains usable values
+#     v <- get.knnx(data = sbj, query = qry[idx, ], k = k, algorithm = "kd_tree")
+#   }
+#
+#   # compute stat
+#   d <- FUN(qry[idx, ], v$nn.index, v$nn.dist, k)
+#   d_all <- rep(NA, N)
+#   d_all[idx] <- d
+#
+#   d
+# }
+
+# # =============================================================================.
+# #' knn statistics - DEPRECATED
+# # -----------------------------------------------------------------------------.
+# #' @seealso
+# #'   \link{knn_density},
+# #'   \link{knn_musigma2}
+# # -----------------------------------------------------------------------------.
+# #' @param data
+# #' numeric matrix representing multivariate observations
+# #'
+# #' @param k
+# #' number of nearest neighbors which corresponds to the smoothing parameter
+# #' of estimated statistics (larger values = smoother estimations).
+# #'
+# #' @return
+# #' knn_stats returns a \code{list} with the following elements:
+# #' \item{density}{knn density estimator}
+# #' \item{entropy}{knn entropies}
+# #' and additional elements resulting from \link{knn_musigma2}
+# # -----------------------------------------------------------------------------.
+# #' @keywords internal
+# #' @export
+# knn_stats <- function(data, k) {
+#
+#   entropy <- function(p) { - sum(p * log(p)) }
+#
+#   # get nearest neighbors
+#   r <- get.knn(data = data, k = k)
+#
+#   # compute local density
+#   p <- knn_density(data, k, d = r$nn.dist)
+#
+#   # compute local centroids and corresponding variance
+#   musigma2 <- knn_musigma2(data, k, i = r$nn.index, d = r$nn.dist)
+#
+#   # compute local entropy
+#   e <- knn_values(p, r$nn.index)
+#   e <- apply(e, 1, entropy)
+#
+#   c(list(density = p, entropy = e), musigma2)
+# }
+
+# =============================================================================.
+#' knn_values
 # -----------------------------------------------------------------------------.
+#' @param v
+#' numeric vector.
+#'
+#' @param i
+#' precomputed matrix of nearest neighbor indices.
+#'
+#' @return
+#' knn_values returns a matrix.
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
 knn_values <- function(v, i) {
   matrix(v[as.vector(i)], nrow(i), ncol(i))
 }
 
 # =============================================================================.
-#' k-nearest neighbors standard deviation
+#' knn_smoothing
 # -----------------------------------------------------------------------------.
-#' @param x
-#' numeric matrix representing multivariate observations
-#'
-#' @param nn.idx
-#' matrix of nearest neighbor indexes
-#'
-#' @param nn.dist
-#' matrix of nearest neighbor distances
-#'
-#' @param k
-#' number of nearest neighbors
-#'
-#' @return knn_sd returns a vector of standard deviations
+#' @seealso
+#'   \link{knn_density},
+#'   \link{knn_musigma2}
 # -----------------------------------------------------------------------------.
-#' @export
-knn_sd <- function(x, nn.idx, nn.dist, k) {
-  apply(nn.dist, MARGIN = 1, FUN = sd, na.rm = T)
-}
-
-# =============================================================================.
-#' k-nearest neighbors estimator of density P(x) ~ k / N V
-# -----------------------------------------------------------------------------.
-#' @param x
-#' numeric matrix representing multivariate observations
+#' @param v
+#' numeric vector.
 #'
-#' @param nn.idx
-#' matrix of nearest neighbor indexes
+#' @param i
+#' precomputed matrix of nearest neighbor indices.
 #'
-#' @param nn.dist
-#' matrix of nearest neighbor distances
-#'
-#' @param k
-#' number of nearest neighbors
-#'
-#' @return knn_density returns a vector of densities
-# -----------------------------------------------------------------------------.
-#' @export
-knn_density <- function(x, nn.idx, nn.dist, k) {
-  N  <- nrow(x)                 # total number of example values in the sample
-  D  <- ncol(x)                 # number of dimensions
-  V1 <- pi ^ (D / 2) / factorial(D / 2) # volume of the unit sphere in D dim.
-  k / (N * V1 * nn.dist[, k] ^ D)       # standard density estimator
-}
-
-# =============================================================================.
-#' k-nearest neighbor statistics
-# -----------------------------------------------------------------------------.
-# TODO: qry and sbj are not handled properly
-# TODO: implement the case were qry and sbj are one-dimension (single samples)
-# -----------------------------------------------------------------------------.
-#' @param qry
-#' numeric matrix representing multivariate observations
-#'
-#' @param k
-#' number of nearest neighbors
-#'
-#' @param sbj
-#'
-#' @param FUN
-#' statistical function (default = \link{knn_density})
-#'
-#' @return knn_stat returns a numeric vector
-# -----------------------------------------------------------------------------.
-#' @export
-knn_stat <- function(qry, k, sbj = NULL, FUN = knn_density) {
-
-  N  <- nrow(qry)                 # total number of example values in the sample
-  idx <- which(finiteValues(qry)) # detect NA and Inf
-
-  # find KNN
-  if(is.null(sbj)) {
-    # default: qry = sbj
-    v <- get.knn(data = qry[idx, ], k = k, algorithm = "kd_tree")
-  } else {
-    # assume that sbj only contains usable values
-    v <- get.knnx(data = sbj, query = qry[idx, ], k = k, algorithm = "kd_tree")
-  }
-
-  # compute stat
-  d <- FUN(qry[idx, ], v$nn.index, v$nn.dist, k)
-  d_all <- rep(NA, N)
-  d_all[idx] <- d
-
-  d
-}
-# =============================================================================.
-#' knn statistics
-# -----------------------------------------------------------------------------.
-#'
-#' @param data
-#' numeric matrix representing multivariate observations
-#'
-#' @param k
-#' number of nearest neighbors which corresponds to the smoothing parameter
-#' of estimated statistics (larger values = smoother estimations).
-#'
-#' @param smoothing
-#' default = T, recommended
+#' @param f
+#' smoothing function (default = mean).
 #'
 #' @return
-#' cdadadr returns a \code{list} with the following elements:
-#' \item{density}{knn density}
-#' \item{variance}{knn variance}
+#' knn_smoothing returns a numeric vector.
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+knn_smoothing <- function(v, i, f = mean) {
+  v <- knn_values(v, i)
+  v <- apply(v, 1, f)
+  v
+}
+
+# =============================================================================.
+#' knn_density
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{knn_musigma2}
+# -----------------------------------------------------------------------------.
+#' @description
+#' k-nearest neighbors estimator of density \eqn{P(x) ~ k \over N V}
+#'
+#' @param x
+#' numeric matrix representing multivariate observations.
+#'
+#' @param k
+#' number of nearest neighbors (i.e. smoothing factor).
+#'
+#' @param i
+#' precomputed matrix of nearest neighbor indices.
+#'
+#' @param d
+#' precomputed matrix of nearest neighbor distances.
+#'
+#' @param smoothing
+#' perfom a knn average smoothing of the density (default = T, recommended).
+#'
+#' @return
+#' knn_density returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @export
-knn_stats <- function(data, k, smoothing = T) {
+knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
 
-  entropy <- function(p) { - sum(p * log(p)) }
-
-  # get nearest neighbors
-  r <- get.knn(data = data, k = k)
-
-  # compute local density
-  p <- knn_density(data, r$nn.index, r$nn.dist, k)
-  if(smoothing) {
-    p <- knn_values(p, r$nn.index)
-    p <- apply(p, 1, mean)
+  if(is.null(i) | is.null(d)) {
+    r <- get.knn(data = x, k = k)
+    i <- r$nn.index
+    d <- r$nn.dist
   }
+
+  # compute density in D = ncol(x) dimensions
+  N  <- nrow(x)                 # total number of observations in the sample
+  D  <- ncol(x)                 # number of dimensions of each observation
+  V1 <- pi ^ (D / 2) / factorial(D / 2) # volume of the unit sphere
+  p <- k / (N * V1 * d[, k] ^ D)        # standard knn density estimator
+
+  if(smoothing) {
+    p <- knn_smoothing(p, i)
+  }
+
   p <- p / sum(p)
-
-  # compute local variance
-  m <- matrix(0, nrow(data), ncol(data))
-  for(i in 1:ncol(data)) m[, i] <- rowMeans(knn_values(data[, i], r$nn.index))
-  v <- rowMeans(knnx.dist(data = data, query = m, k = k)^2)
-
-  # compute local entropy
-  e <- knn_values(p, r$nn.index)
-  e <- apply(e, 1, entropy)
-
-  list(density = p, variance = v, entropy = e)
 }
+
+# =============================================================================.
+#' knn_musigma2
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{knn_density}
+# -----------------------------------------------------------------------------.
+#' @description
+#' k-nearest neighbors centroids and corresponding standard deviations,
+#'
+#' @param x
+#' numeric matrix representing multivariate observations.
+#'
+#' @param k
+#' number of nearest neighbors (i.e. smoothing factor).
+#'
+#' @param i
+#' precomputed matrix of nearest neighbor indices.
+#'
+#' @param d
+#' precomputed matrix of nearest neighbor distances.
+#'
+#' @param smoothing
+#' perfom a knn average smoothing of the standard deviations (default = F).
+#'
+#' @return
+#' knn_musigma2 returns a \code{list} with the following elements:
+#' \item{mu}{knn centroids}
+#' \item{sigma2}{knn variances (squared standard deviations)}
+# -----------------------------------------------------------------------------.
+#' @export
+knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
+
+  if(is.null(i) | is.null(d)) {
+    r <- get.knn(data = x, k = k)
+    i <- r$nn.index
+    d <- r$nn.dist
+  }
+
+  # compute centroids
+  m <- matrix(0, nrow(x), ncol(x))
+  for(j in 1:ncol(x)) {
+    m[, j] <- rowMeans(knn_values(x[, j], i))
+  }
+
+  # compute average distances to centroids
+  v <- rowMeans(knnx.dist(data = x, query = m, k = k)^2)
+
+  if(smoothing) {
+    v <- knn_smoothing(v, i)
+  }
+
+  list(mu = m, sigma2 = v)
+}
+
 # =============================================================================.
 #' Count Density After Dithering And Dimensionality Reduction
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ditherCounts},
+#'   \link{prcomp},
+#'   \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts (row = observations, columns = samples or conditions).
@@ -166,17 +263,16 @@ knn_stats <- function(data, k, smoothing = T) {
 #' density estimations in the original multivariate space of the dataset.
 #'
 #' @param smobs
-#' subtract the mean value of each observation
+#' subtract the mean count value of each observation
 #'
 #' @param zscore
+#' transform counts into z-scores (logical, default = F)
 #'
 #' @return
 #' cdadadr returns a \code{list} with the following elements:
 #' \item{density}{knn density}
-#' \item{variance}{knn variance}
-#' \item{entropy}{knn entropy}
-#' \item{msg}{status of the dimensionality reduction}
-#' \item{x}{transformed data}
+#' \item{parameters}{list with the value of each cdadadr argument}
+#' \item{projection}{list}
 # -----------------------------------------------------------------------------.
 #' @export
 cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
@@ -212,16 +308,17 @@ cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
     if(zscore) x <- t((t(x) - colMeans(x)) / apply(x, MARGIN = 2, sd))
 
     # Density estimation
-    l <- knn_stats(x, k = k)
-    if(is.null(r)) {
-      r <- l
-    } else {
-      for(id in names(r)) r[[id]] <- r[[id]] + l[[id]] / dither
-    }
+    p <- p + knn_density(x, k = k) / dither
 
     setTxtProgressBar(pb, i)
   }
   close(pb)
 
-  c(r, list(msg = msg, x = x))
+  list(
+    density = p,
+    parameters = list(
+      k = k, dither = dither, dred = dred, smobs = smobs, zscore = zscore
+    ),
+    projection = list(msg = msg, x = x)
+  )
 }

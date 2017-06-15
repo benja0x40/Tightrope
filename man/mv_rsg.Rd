@@ -17,3 +17,4 @@ mv_rsg returns a numeric matrix representing multivariate observations
 \description{
 Multivariate normal distribution: random sample generator
 }
+\keyword{internal}

@@ -92,7 +92,7 @@ test_that("quickShift", {
   mbr <- c(rep(3, (n / 3)^2), rep(2, (n / 2)^2), rep(1, (n / 1)^2))
   nbr <- (n / (1:3))^2
 
-  d <- knn_stat(x, k = 100)
+  d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
   g <- suppressWarnings(quickShift(x, d, plot = F))
@@ -113,7 +113,7 @@ test_that("quickShift", {
   mbr <- rep(1:3, each = n^2)
   nbr <- rep(n^2, 3)
 
-  d <- knn_stat(x, k = 100)
+  d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
   g <- suppressWarnings(quickShift(x, d, plot = F))

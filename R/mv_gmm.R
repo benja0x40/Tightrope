@@ -17,6 +17,7 @@
 #' \item{mu}{mean vector}
 #' \item{sigma}{covariance matrix}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_mle <- function(x, w = NULL, ML = T) {
 
@@ -51,6 +52,7 @@ mv_mle <- function(x, w = NULL, ML = T) {
 #'
 #' @return mv_pdf returns a vector of probabilities
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_pdf <- function(x, theta) {
   mixtools::dmvnorm(x, theta[[1]], theta[[2]])
@@ -67,6 +69,7 @@ mv_pdf <- function(x, theta) {
 #' @return
 #' mv_rsg returns a numeric matrix representing multivariate observations
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_rsg <- function(n, theta) {
   ns <- length(theta)                     # number of sources
@@ -96,6 +99,7 @@ mv_rsg <- function(n, theta) {
 #' @return
 #' mv_init_param returns a \code{list} of normal distribution parameters
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_init_param <- function(x, ns) {
   x <- as.matrix(x)
@@ -126,6 +130,7 @@ mv_init_param <- function(x, ns) {
 #'
 #' @return mv_expectation returns a vector of probabilities
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_expectation <- function(x, theta, p_fun = mv_pdf) {
   x <- as.matrix(x)
@@ -157,6 +162,7 @@ mv_expectation <- function(x, theta, p_fun = mv_pdf) {
 #' @return
 #' mv_maximization returns a list of multivariate distribution parameters
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
   x <- as.matrix(x)
@@ -192,6 +198,7 @@ mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
 #' \item{theta}{list of multivariate distribution parameters}
 #' \item{p}{vector of probabilities}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_emloop <- function(
   x, theta, p_fun = mv_pdf, mle_fun = mv_mle, max_iter = 100

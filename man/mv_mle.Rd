@@ -21,3 +21,4 @@ mv_mle returns a \code{list} with the following elements:
 \description{
 Multivariate normal distribution: maximum likelihood estimation
 }
+\keyword{internal}

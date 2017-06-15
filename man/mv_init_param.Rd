@@ -17,3 +17,4 @@ mv_init_param returns a \code{list} of normal distribution parameters
 \description{
 Multivariate normal distribution: parameter initialization
 }
+\keyword{internal}

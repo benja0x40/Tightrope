@@ -21,3 +21,4 @@ mv_maximization returns a list of multivariate distribution parameters
 \description{
 Multivariate maximization
 }
+\keyword{internal}
