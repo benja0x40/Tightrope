@@ -2,7 +2,7 @@
 title: "Tightrope"
 author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{Tightrope}
   %\VignetteEngine{knitr::rmarkdown}

@@ -1,4 +1,4 @@
-context("quickshift")
+context("QuickShift")
 
 # FUNCTIONS ####################################################################
 
@@ -78,7 +78,7 @@ make_ring_unif_2D <- function(n, normalized = T) {
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-test_that("quickShift", {
+test_that("QuickShift", {
 
   layout(matrix(1:9, 3, 3, byrow = T))
 
@@ -95,8 +95,8 @@ test_that("quickShift", {
   d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
-  g <- suppressWarnings(quickShift(x, d, plot = F))
-  grp <- quickShiftCutClusters(g, n = 3)
+  g <- suppressWarnings(QuickShift(x, d, plot = F))
+  grp <- QuickShiftCutClusters(g, n = 3)
   clr <- rainbow(grp$nbr, alpha = 0.5)
   clr <- plot_groups_2D(x, clr = clr[grp$membership], pch = 20)
 
@@ -116,8 +116,8 @@ test_that("quickShift", {
   d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
-  g <- suppressWarnings(quickShift(x, d, plot = F))
-  grp <- quickShiftCutClusters(g, n = 3)
+  g <- suppressWarnings(QuickShift(x, d, plot = F))
+  grp <- QuickShiftCutClusters(g, n = 3)
   clr <- rainbow(grp$nbr, alpha = 0.5)
   clr <- plot_groups_2D(x, clr = clr[grp$membership], pch = 20)
 

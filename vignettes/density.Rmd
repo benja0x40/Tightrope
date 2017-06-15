@@ -1,5 +1,5 @@
 ---
-title: "Density estimation"
+title: "Multivariate density estimation"
 author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -27,14 +27,15 @@ rs <- RandomCounts(n_obs, d = 2, p = p)
 ```
 
 ```{r}
-x <- ditherCounts(rs$x)
+x <- DitherCounts(rs$x)
 p <- knn_density(x, k = 100)
 ```
 
 ```{r , fig.width=7.15, fig.height=2.65}
 layout(matrix(1:3, 1, 3))
 par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 1.0, cex.axis = 1.0)
-plot_samples(x, idx = c(1, 2), clr = colorize(p), main = "density")
+h <- histogram2D(x, method = "ash", plot = T, main = "ash density")
+plot_samples(x, clr = colorize(p), cex = 0.2, main = "knn density")
 ```
 
 ```{r}
@@ -43,7 +44,7 @@ rs <- SimulatedCounts(n_obs, poorcounts = list(mu = 1.5, sigma = 1.5))
 ```
 
 ```{r}
-x <- log2(ditherCounts(rs$x))
+x <- log2(DitherCounts(rs$x))
 p <- knn_density(x, k = 100)
 ```
 
@@ -51,5 +52,5 @@ p <- knn_density(x, k = 100)
 ```{r , fig.width=7.15, fig.height=2.65}
 layout(matrix(1:3, 1, 3))
 par(mar = c(5, 4, 3, 1), pch = 20, cex = 0.5, cex.lab = 1.0, cex.axis = 1.0)
-plot_samples(x, idx = c(1, 2), clr = colorize(p), main = "density")
+plot_samples(x, idx = c(1, 2), clr = colorize(p, mode = "r"), main = "density")
 ```

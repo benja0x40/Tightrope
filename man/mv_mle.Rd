@@ -7,7 +7,8 @@
 mv_mle(x, w = NULL, ML = T)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{w}{numeric weight (i.e. probability) associated to observations}
 

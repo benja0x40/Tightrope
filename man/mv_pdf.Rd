@@ -7,7 +7,8 @@
 mv_pdf(x, theta)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{theta}{list of normal distribution parameters}
 }

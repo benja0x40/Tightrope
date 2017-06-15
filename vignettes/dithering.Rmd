@@ -34,7 +34,7 @@ n <- 100000
 p <- rep(c(1, 1, 2, 3, 2, 1, 1), length.out = 14)
 rs <- RandomCounts(n, d = 2, p = p)
 x <- rs$x
-y <- ditherCounts(rs$x)
+y <- DitherCounts(rs$x)
 ```
 
 ```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
@@ -62,7 +62,7 @@ plot(
   m, cex = 0.5, col = grey(1 - d), xlim = xylim, ylim = xylim,
   xlab = "x1", ylab = "x2"
 )
-h <- histogram2D(y[, 1], y[, 2], nx = 100, ny = 100, plot = T, xlim = xylim, ylim = xylim)
+h <- histogram2D(y, plot = T, xlim = xylim, ylim = xylim, method = "bin")
 ```
 
 Example with counts following a poisson distribution (+ 1 pseudo count)
@@ -70,7 +70,7 @@ Example with counts following a poisson distribution (+ 1 pseudo count)
 ```{r}
 n <- 100000
 x <- matrix(1 + rpois(n, lambda = 5), nrow = n / 2, ncol = 2)
-y <- ditherCounts(x)
+y <- DitherCounts(x)
 ```
 
 ```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
@@ -98,7 +98,7 @@ Example with counts following a negative binomial distribution (+ 1 pseudo count
 ```{r}
 n <- 100000
 x <- matrix(1 + rnbinom(n, mu = 5, size = 2), nrow = n / 2, ncol = 2)
-y <- ditherCounts(x)
+y <- DitherCounts(x)
 ```
 
 ```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}

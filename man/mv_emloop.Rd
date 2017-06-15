@@ -7,7 +7,8 @@
 mv_emloop(x, theta, p_fun = mv_pdf, mle_fun = mv_mle, max_iter = 100)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{theta}{list of multivariate distribution parameters}
 

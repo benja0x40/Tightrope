@@ -4,7 +4,8 @@
 #' Multivariate normal distribution: maximum likelihood estimation
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param w
 #' numeric weight (i.e. probability) associated to observations
@@ -32,7 +33,7 @@ mv_mle <- function(x, w = NULL, ML = T) {
   mu <- colSums(w * x, na.rm = T)
 
   # covariance matrix
-  # chk <- finiteValues(x)
+  # chk <- FiniteValues(x)
   x <- sqrt(w) * (x - matrix(1, n) %*% mu)
   sigma <- crossprod(x) # equivalent to: t(x) %*% (x)
 
@@ -45,7 +46,8 @@ mv_mle <- function(x, w = NULL, ML = T) {
 #' Multivariate normal distribution: probability density function
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param theta
 #' list of normal distribution parameters
@@ -67,7 +69,8 @@ mv_pdf <- function(x, theta) {
 #' list of normal distribution parameters
 #'
 #' @return
-#' mv_rsg returns a numeric matrix representing multivariate observations
+#' mv_rsg returns a numeric matrix representing pseudo random data
+#' where rows = observations and columns = samples or conditions.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -91,7 +94,8 @@ mv_rsg <- function(n, theta) {
 #' Multivariate normal distribution: parameter initialization
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param ns
 #' number of normal distributions to be initialised
@@ -120,7 +124,8 @@ mv_init_param <- function(x, ns) {
 #' Multivariate expectation
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param theta
 #' list of multivariate distribution parameters
@@ -148,7 +153,8 @@ mv_expectation <- function(x, theta, p_fun = mv_pdf) {
 #' Multivariate maximization
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param theta
 #' list of multivariate distribution parameters
@@ -180,7 +186,8 @@ mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
 #' Multivariate expectation-maximization
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param theta
 #' list of multivariate distribution parameters

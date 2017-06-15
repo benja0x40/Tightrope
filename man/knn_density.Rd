@@ -7,13 +7,14 @@
 knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations.}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{k}{number of nearest neighbors (i.e. smoothing factor).}
 
-\item{i}{precomputed matrix of nearest neighbor indices.}
+\item{i}{precomputed matrix of nearest neighbor indices (optional).}
 
-\item{d}{precomputed matrix of nearest neighbor distances.}
+\item{d}{precomputed matrix of nearest neighbor distances (optional).}
 
 \item{smoothing}{perfom a knn average smoothing of the density (default = T, recommended).}
 }
@@ -21,7 +22,10 @@ knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 knn_density returns a numeric vector.
 }
 \description{
-k-nearest neighbors estimator of density \eqn{P(x) ~ k \over N V}
+k-nearest neighbor (knn) estimator of the density \deqn{P(Xi) ~ k / N Vi}
+where \eqn{N} is the number of observations and \eqn{Vi} the volume of a
+sphere of radius equal to the distance between \eqn{Xi} and its k-nearest
+neighbor.
 }
 \seealso{
 \link{knn_musigma2}

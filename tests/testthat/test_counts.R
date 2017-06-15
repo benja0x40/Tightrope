@@ -3,10 +3,10 @@ context("counts")
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-test_that("ditherCounts", {
+test_that("DitherCounts", {
   # Test ////
   x <- rep(1, 1000)
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r)))
   expect_true(max(d) < 0.5)
@@ -14,7 +14,7 @@ test_that("ditherCounts", {
   expect_equal(round(max(r), 1), max(x) + 0.5)
   # Test ////
   x <- rep(5, 1000)
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r)))
   expect_true(max(d) < 0.5)
@@ -22,7 +22,7 @@ test_that("ditherCounts", {
   expect_equal(round(max(r), 1), max(x) + 0.5)
   # Test ////
   x <- rep(1:5, 1000)
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r)))
   expect_true(max(d) < 1.0)
@@ -30,7 +30,7 @@ test_that("ditherCounts", {
   expect_equal(round(max(r), 1), max(x) + 0.5)
   # Test ////
   x <- rep(5:9, 1000)
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r)))
   expect_true(max(d) < 1.0)
@@ -39,7 +39,7 @@ test_that("ditherCounts", {
   # Test ////
   x <- rep(c(0, 1:5), 1000)
   k <- x == 0
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r[!k])))
   expect_true(max(d) < 1.0)
@@ -49,7 +49,7 @@ test_that("ditherCounts", {
   # Test ////
   x <- rep(c(0, 5:9), 1000)
   k <- x == 0
-  r <- ditherCounts(x)
+  r <- DitherCounts(x)
   d <- abs(x - r)
   expect_false(any(duplicated(r[!k])))
   expect_true(max(d) < 1.0)
@@ -61,14 +61,14 @@ test_that("ditherCounts", {
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-test_that("finiteValues", {
+test_that("FiniteValues", {
   tst <- log(c(0,NA,1,Inf))
   res <- c(F,F,T,F)
-  expect_equal(finiteValues(tst), res)
-  expect_equal(finiteValues(cbind(tst, tst)), res)
-  expect_equal(finiteValues(cbind(1, tst)), res)
-  expect_equal(finiteValues(cbind(tst, 1)), res)
-  expect_equal(finiteValues(cbind(1, tst, 1)), res)
+  expect_equal(FiniteValues(tst), res)
+  expect_equal(FiniteValues(cbind(tst, tst)), res)
+  expect_equal(FiniteValues(cbind(1, tst)), res)
+  expect_equal(FiniteValues(cbind(tst, 1)), res)
+  expect_equal(FiniteValues(cbind(1, tst, 1)), res)
 })
 
 # =============================================================================.

@@ -1,10 +1,11 @@
 # FUNCTIONS | QUICKSHIFT #######################################################
 
 # =============================================================================.
-#' quickshift algorithm (Vedaldi & Soatto, 2008)
+#' QuickShift algorithm (Vedaldi & Soatto, 2008)
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param d
 #' statistical score associated to observations (e.g. estimated density)
@@ -12,13 +13,13 @@
 #' @param plot
 #' logical (default = F)
 #'
-#' @return quickShift returns a graph object (igraph package)
+#' @return QuickShift returns a graph object (igraph package)
 # -----------------------------------------------------------------------------.
 #' @export
-quickShift <- function (x, d, plot = F) {
+QuickShift <- function (x, d, plot = F) {
   g <- graph.empty(n = nrow(x))
   V(g)$d <- d
-  i.a <- which(finiteValues(x) & ! is.na(d))
+  i.a <- which(FiniteValues(x) & ! is.na(d))
   if(plot) {
     plot(x[, 1], x[, 2], pch = 20, col=rgb(0, 0, 0, 0.1))
   }
@@ -46,7 +47,7 @@ quickShift <- function (x, d, plot = F) {
 }
 
 # =============================================================================.
-#' quickshift root and top level branches
+#' QuickShift root and top level branches
 # -----------------------------------------------------------------------------.
 #' @param i
 #' node index
@@ -57,10 +58,10 @@ quickShift <- function (x, d, plot = F) {
 #' @param dmax
 #' maximum depth
 #'
-#' @return quickShiftSearchClusters returns a \code{data.frame}
+#' @return QuickShiftSearchClusters returns a \code{data.frame}
 # -----------------------------------------------------------------------------.
 #' @export
-quickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
+QuickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
   res <- NULL
   if(d < dmax) {
     if(i==0) {
@@ -77,7 +78,7 @@ quickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
       )
       for(k in j) {
         res <- rbind(
-          res, quickShiftSearchClusters(k, d + 1, dmax)
+          res, QuickShiftSearchClusters(k, d + 1, dmax)
         )
       }
     }
@@ -86,12 +87,12 @@ quickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
 }
 
 # =============================================================================.
-#' quickshift graph partition
+#' QuickShift graph partition
 # -----------------------------------------------------------------------------.
 # TODO: fix bug with ordering cluster sizes and memberships
 # -----------------------------------------------------------------------------.
 #' @param g
-#' quickshift graph resulting from the \link{quickShift} function
+#' QuickShift graph resulting from the \link{QuickShift} function
 #'
 #' @param n
 #' expected number of clusters
@@ -100,10 +101,10 @@ quickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
 #' maximum branch length
 #'
 #' @return
-#' quickShiftCutClusters return a \code{list} with the following elements
+#' QuickShiftCutClusters return a \code{list} with the following elements
 # -----------------------------------------------------------------------------.
 #' @export
-quickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
+QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
   if(is.null(ecut) & ! is.null(n)) {
     ecut <- mean(sort(E(g)$distance, decreasing = T)[c(n, n+1) - 1])
   }

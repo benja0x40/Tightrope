@@ -7,7 +7,7 @@
 detectCounts(cnt, detailed = F)
 }
 \arguments{
-\item{cnt}{matrix of read counts (columns = samples, rows = genomic intervals)}
+\item{cnt}{matrix of read counts (rows = observations, columns = samples or conditions).}
 
 \item{detailed}{logical, if TRUE return min and max read counts in each interval}
 }

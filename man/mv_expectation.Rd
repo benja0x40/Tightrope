@@ -7,7 +7,8 @@
 mv_expectation(x, theta, p_fun = mv_pdf)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{theta}{list of multivariate distribution parameters}
 

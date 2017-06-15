@@ -7,13 +7,14 @@
 knn_musigma2(x, k, i = NULL, d = NULL, smoothing = F)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations.}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{k}{number of nearest neighbors (i.e. smoothing factor).}
 
-\item{i}{precomputed matrix of nearest neighbor indices.}
+\item{i}{precomputed matrix of nearest neighbor indices (optional).}
 
-\item{d}{precomputed matrix of nearest neighbor distances.}
+\item{d}{precomputed matrix of nearest neighbor distances (optional).}
 
 \item{smoothing}{perfom a knn average smoothing of the standard deviations (default = F).}
 }
@@ -23,7 +24,7 @@ knn_musigma2 returns a \code{list} with the following elements:
 \item{sigma2}{knn variances (squared standard deviations)}
 }
 \description{
-k-nearest neighbors centroids and corresponding standard deviations,
+k-nearest neighbor (knn) centroid and corresponding standard deviation.
 }
 \seealso{
 \link{knn_density}

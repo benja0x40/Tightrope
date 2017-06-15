@@ -4,12 +4,12 @@
 #' Dither counts
 # -----------------------------------------------------------------------------.
 #' @param x
-#' matrix of read counts (columns = samples, rows = intervals)
+#' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
-#' @return ditherCounts returns a \code{matrix} of dithered counts
+#' @return DitherCounts returns a \code{matrix} of dithered counts
 # -----------------------------------------------------------------------------.
 #' @export
-ditherCounts <- function(x) {
+DitherCounts <- function(x) {
 
   zero <- x == 0
   xmin <- min(x[! zero], na.rm = T)
@@ -28,30 +28,33 @@ ditherCounts <- function(x) {
 
   x
 }
+
 # =============================================================================.
-#' Find finite values consistently in all samples (log transformed counts)
+#' Detect computable values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix
+#' numeric vector or matrix
 #'
-#' @return finiteValues returns a \code{logical} vector
+#' @return
+#' FiniteValues returns a \code{logical} vector
 # -----------------------------------------------------------------------------.
 #' @export
-finiteValues <- function(x) {
+FiniteValues <- function(x) {
   if(is.null(dim(x))) {
-    x <- sapply(x, FUN=is.finite)
+    x <- sapply(x, FUN = is.finite)
   } else {
     n <- ncol(x)
-    x <- t(apply(x, MARGIN=1, FUN=is.finite))
+    x <- t(apply(x, MARGIN = 1, FUN = is.finite))
     x <- rowSums(x) == n
   }
   x
 }
+
 # =============================================================================.
 #' Read count matrix summary
 # -----------------------------------------------------------------------------.
 #' @param cnt
-#' matrix of read counts (columns = samples, rows = genomic intervals)
+#' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
 #' @param detailed
 #' logical, if TRUE return min and max read counts in each interval
@@ -96,8 +99,9 @@ detectCounts <- function(cnt, detailed = F) {
 #' @param grg
 #' \link{GRanges} object defining the considered genomic intervals
 #'
-#' @return makeReadCountMatrix returns a matrix of read counts
-#' (columns = samples, rows = genomic intervals)
+#' @return
+#' makeReadCountMatrix matrix of read counts
+#' (rows = observations, columns = samples or conditions).
 # -----------------------------------------------------------------------------.
 #' @export
 makeReadCountMatrix <- function(aln, grg, ...) {

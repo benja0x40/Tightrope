@@ -7,7 +7,7 @@
 cdadadr(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F)
 }
 \arguments{
-\item{cnt}{matrix of read counts (row = observations, columns = samples or conditions).}
+\item{cnt}{matrix of read counts (rows = observations, columns = samples or conditions).}
 
 \item{k}{number of nearest neighbors which corresponds to the smoothing parameter
 of estimated densities (larger values = smoother).}
@@ -38,7 +38,7 @@ cdadadr returns a \code{list} with the following elements:
 Count Density After Dithering And Dimensionality Reduction
 }
 \seealso{
-\link{ditherCounts},
+\link{DitherCounts},
   \link{prcomp},
   \link{knn_density}
 }

@@ -12,7 +12,8 @@ mv_rsg(n, theta)
 \item{theta}{list of normal distribution parameters}
 }
 \value{
-mv_rsg returns a numeric matrix representing multivariate observations
+mv_rsg returns a numeric matrix representing pseudo random data
+where rows = observations and columns = samples or conditions.
 }
 \description{
 Multivariate normal distribution: random sample generator

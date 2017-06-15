@@ -7,7 +7,8 @@
 mv_maximization(x, theta, p, mle_fun = mv_mle)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{theta}{list of multivariate distribution parameters}
 

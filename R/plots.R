@@ -71,26 +71,6 @@ plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...)
 }
 
 # =============================================================================.
-#' quantile color mapping
-# -----------------------------------------------------------------------------.
-#' @param x
-#' numeric vector
-#'
-#' @return colorize returns a vector of colors
-# -----------------------------------------------------------------------------.
-#' @export
-colorize <- function(x) {
-
-  q <- c(0, 0.33, 0.66, 1.0)
-  k <- c("grey", "black", "red", "yellow")
-  x <- rankstat(x)
-
-  clr_prm <- defineColors(thresholds = q, colors = k)
-  clr <- makeColors(x, parameters = clr_prm)
-  clr
-}
-
-# =============================================================================.
 #' plot_samples
 # -----------------------------------------------------------------------------.
 #' @param x matrix

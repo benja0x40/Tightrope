@@ -4,33 +4,34 @@
 #' partition of multivariate observations
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric matrix representing multivariate observations
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param tx
-#' numeric matrix representing transformed observations (default = x)
+#' numeric matrix representing transformed observations (default = x).
 #'
 #' @param p
-#' statistical score associated to observations (e.g. estimated density)
+#' statistical score associated to observations (e.g. estimated density).
 #'
 #' @param ns
-#' number of clusters
+#' number of clusters.
 #'
 #' @param max_iter
 #' maximum number of iterations for expectation-maximization
 #'
 #' @return
 #' populations returns a \code{list} with the following elements:
-#' \item{grp}{list of clusters resulting from function \link{quickShiftCutClusters}}
-#' \item{qstree}{quickshift tree}
+#' \item{grp}{list of clusters resulting from function \link{QuickShiftCutClusters}}
+#' \item{qstree}{QuickShift tree}
 #' \item{theta}{list of multivariate distribution parameters}
 # -----------------------------------------------------------------------------.
 #' @export
 populations <- function(x, tx = NULL, p, ns, max_iter = 100) {
 
-  if(is.null(tx)) g <- quickShift(x, d = p)
-  else g <- quickShift(tx, d = p)
+  if(is.null(tx)) g <- QuickShift(x, d = p)
+  else g <- QuickShift(tx, d = p)
 
-  grp <- quickShiftCutClusters(g, n = ns)
+  grp <- QuickShiftCutClusters(g, n = ns)
 
   bg <- list()
   for(i in 1:ns) {
@@ -68,7 +69,7 @@ bg_grp <- function(x, grp, bg_cols) {
 #' lowVariability
 # -----------------------------------------------------------------------------.
 #' @param cnt
-#' matrix of read counts (columns = samples, rows = intervals)
+#' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
 #' @param bg_cols
 #' columns with background/control profiles (Input, IgG, etc.)
@@ -102,7 +103,7 @@ lowVariability <- function(
   n = 3, k = 64, dithering = 3, max_iter = 100
 ) {
 
-  chk <- finiteValues(log(cnt))
+  chk <- FiniteValues(log(cnt))
   i <- 0
   d <- 0
   s <- 0
@@ -111,7 +112,7 @@ lowVariability <- function(
   while(i < dithering) {
 
     x <- cnt
-    x <- ditherCounts(x)
+    x <- DitherCounts(x)
     x <- log2(x)
     x <- x[chk, ]
 

@@ -24,7 +24,7 @@
 # knn_stat <- function(qry, k, sbj = NULL, FUN = knn_density) {
 #
 #   N  <- nrow(qry)                 # total number of example values in the sample
-#   idx <- which(finiteValues(qry)) # detect NA and Inf
+#   idx <- which(FiniteValues(qry)) # detect NA and Inf
 #
 #   # find KNN
 #   if(is.null(sbj)) {
@@ -137,19 +137,23 @@ knn_smoothing <- function(v, i, f = mean) {
 #'   \link{knn_musigma2}
 # -----------------------------------------------------------------------------.
 #' @description
-#' k-nearest neighbors estimator of density \eqn{P(x) ~ k \over N V}
+#' k-nearest neighbor (knn) estimator of the density \deqn{P(Xi) ~ k / N Vi}
+#' where \eqn{N} is the number of observations and \eqn{Vi} the volume of a
+#' sphere of radius equal to the distance between \eqn{Xi} and its k-nearest
+#' neighbor.
 #'
 #' @param x
-#' numeric matrix representing multivariate observations.
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param k
 #' number of nearest neighbors (i.e. smoothing factor).
 #'
 #' @param i
-#' precomputed matrix of nearest neighbor indices.
+#' precomputed matrix of nearest neighbor indices (optional).
 #'
 #' @param d
-#' precomputed matrix of nearest neighbor distances.
+#' precomputed matrix of nearest neighbor distances (optional).
 #'
 #' @param smoothing
 #' perfom a knn average smoothing of the density (default = T, recommended).
@@ -186,19 +190,20 @@ knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
 #'   \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @description
-#' k-nearest neighbors centroids and corresponding standard deviations,
+#' k-nearest neighbor (knn) centroid and corresponding standard deviation.
 #'
 #' @param x
-#' numeric matrix representing multivariate observations.
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
 #'
 #' @param k
 #' number of nearest neighbors (i.e. smoothing factor).
 #'
 #' @param i
-#' precomputed matrix of nearest neighbor indices.
+#' precomputed matrix of nearest neighbor indices (optional).
 #'
 #' @param d
-#' precomputed matrix of nearest neighbor distances.
+#' precomputed matrix of nearest neighbor distances (optional).
 #'
 #' @param smoothing
 #' perfom a knn average smoothing of the standard deviations (default = F).
@@ -237,12 +242,12 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' Count Density After Dithering And Dimensionality Reduction
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{ditherCounts},
+#'   \link{DitherCounts},
 #'   \link{prcomp},
 #'   \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @param cnt
-#' matrix of read counts (row = observations, columns = samples or conditions).
+#' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
 #' @param k
 #' number of nearest neighbors which corresponds to the smoothing parameter
@@ -283,7 +288,7 @@ cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
   for(i in 1:dither) {
 
     # Count dithering
-    x <- log2(ditherCounts(cnt))
+    x <- log2(DitherCounts(cnt))
 
     # Centering
     if(centered) x <- x - rowMeans(x)

@@ -7,7 +7,8 @@
 mv_init_param(x, ns)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
 \item{ns}{number of normal distributions to be initialised}
 }

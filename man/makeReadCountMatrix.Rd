@@ -12,8 +12,8 @@ makeReadCountMatrix(aln, grg, ...)
 \item{grg}{\link{GRanges} object defining the considered genomic intervals}
 }
 \value{
-makeReadCountMatrix returns a matrix of read counts
-(columns = samples, rows = genomic intervals)
+makeReadCountMatrix matrix of read counts
+(rows = observations, columns = samples or conditions).
 }
 \description{
 Count mapped reads overlapping with genomic intervals

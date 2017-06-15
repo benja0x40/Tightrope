@@ -7,20 +7,21 @@
 populations(x, tx = NULL, p, ns, max_iter = 100)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate observations}
+\item{x}{numeric matrix representing multivariate data where rows = observations
+and columns = samples or conditions.}
 
-\item{tx}{numeric matrix representing transformed observations (default = x)}
+\item{tx}{numeric matrix representing transformed observations (default = x).}
 
-\item{p}{statistical score associated to observations (e.g. estimated density)}
+\item{p}{statistical score associated to observations (e.g. estimated density).}
 
-\item{ns}{number of clusters}
+\item{ns}{number of clusters.}
 
 \item{max_iter}{maximum number of iterations for expectation-maximization}
 }
 \value{
 populations returns a \code{list} with the following elements:
-\item{grp}{list of clusters resulting from function \link{quickShiftCutClusters}}
-\item{qstree}{quickshift tree}
+\item{grp}{list of clusters resulting from function \link{QuickShiftCutClusters}}
+\item{qstree}{QuickShift tree}
 \item{theta}{list of multivariate distribution parameters}
 }
 \description{

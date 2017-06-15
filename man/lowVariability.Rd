@@ -8,7 +8,7 @@ lowVariability(cnt, bg_cols, fit_idx, viz_idx, mincv = 0.05, n = 3,
   k = 64, dithering = 3, max_iter = 100)
 }
 \arguments{
-\item{cnt}{matrix of read counts (columns = samples, rows = intervals)}
+\item{cnt}{matrix of read counts (rows = observations, columns = samples or conditions).}
 
 \item{bg_cols}{columns with background/control profiles (Input, IgG, etc.)}
 
