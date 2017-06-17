@@ -4,25 +4,18 @@
 \alias{plot_samples}
 \title{plot_samples}
 \usage{
-plot_samples(x, idx = 1:2, prm = NULL, grp = NULL, grp_order = NULL,
-  symetric = T, clr = NULL, alpha = 0.1, ...)
+plot_samples(x, idx = 1:2, symetric = T, cex = 0.5, ...)
 }
 \arguments{
 \item{x}{matrix}
 
 \item{idx}{vector}
 
-\item{prm}{data.frame}
-
-\item{grp}{vector}
-
-\item{grp_order}{vector}
-
 \item{symetric}{logical}
 
-\item{clr}{charcater}
+\item{cex}{numeric}
 
-\item{alpha}{numeric}
+\item{...}{}
 }
 \description{
 plot_samples

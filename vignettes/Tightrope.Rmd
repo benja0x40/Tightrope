@@ -9,7 +9,163 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include=FALSE}
+suppressPackageStartupMessages(library(Tightrope))
+```
 
 ### Equations
 
 $\displaystyle \sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i -\mu)^2$ where $\mu$ is the sample mean
+
+### Example 1 - step by step
+
+```{r}
+library(Tightrope)
+```
+
+
+Define model parameters for a mixture of 3 bivariate normal distributions.
+
+```{r}
+prm <- list(
+  list(alpha = 0.3, mu = -1.5 * c(-1, 1) + 10, sigma = CovMat2D(pi / 4,  sx = 6.0, sy = 0.25)),
+  list(alpha = 0.5, mu =  0.0 * c(-1, 1) + 10, sigma = CovMat2D(pi / 4,  sx = 4.0, sy = 0.50)),
+  list(alpha = 0.2, mu =  2.0 * c(-1, 1) + 10, sigma = CovMat2D(pi / 4,  sx = 2.0, sy = 1.00))
+)
+```
+
+Generate random samples with 10000 observations.
+
+```{r}
+# Generate random samples
+spl <- mv_rsg(n = 10000, theta = prm)
+
+y <- ceiling(2^spl[, -1])
+x <- log2(DitherCounts(y))
+
+# ctr <- aggregate(x, by = list(group = mbr), mean)
+```
+
+Density estimation with dithered counts and dimensionality reduction.
+
+```{r}
+r <- cdadadr(y, k = 100, smobs = F, zscore = T)
+r <- list(x = r$projection$x, d = r$density)
+```
+
+Moderate density threshold to increase clustering robustness.
+
+```{r}
+h <- which(rankstat(r$d) > 0.15)
+h <- list(i = h, x = r$x[h, ], d = r$d[h])
+```
+
+Clustering by density gradient ascent.
+
+```{r}
+qs <- QuickShiftClustering(h$x, h$d, n = 3)
+```
+
+Find background cluster.
+
+```{r}
+grp <- bg_grp(x[h$i, ], grp = qs$membership, bg_cols = 1)
+bg <- h$i[qs$membership == grp[1]]
+```
+
+Fitting multivariate gaussian model to the background cluster.
+
+```{r}
+theta <- mv_init_param(x[bg, ], ns = 1)
+EM <- mv_emloop(x[bg, ], theta)
+sf <- EM$theta[[1]]
+```
+
+
+```{r}
+grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)
+grp.prm <- defineGroups(ids = grp, colors = grp.clr)
+```
+
+Visualize results.
+
+```{r, fig.width=5.28, fig.height=5.94}
+# layout 1 x 3 => 7.15 x 2.65
+# layout 2 x 2 => 4.77 x 5.3
+layout(matrix(1:4, 2, 2, byrow = T))
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 1.0, cex.axis = 1.0)
+
+plot_samples(r$x, col = colorize(r$d, mode = "rank", colors = "ry"), main = "density")
+plot_samples(r$x, col = colorize(r$d, mode = "rank"), main = "clustering")
+plot_samples(r$x[h$i, ], grp = qs$membership, grp.prm = grp.prm, alpha = 0.1, add = T)
+
+plot_samples(x, col = colorize(r$d, mode = "rank"), main = "selected background")
+plot_samples(x[bg, ], col = rgb(1, 0.5, 0), alpha = 0.1, add = T)
+
+plot_samples(x, col = colorize(r$d, mode = "rank"), main = "BRD")
+plot_sources_2D(theta = list(sf), clr = rgb(1, 0.5, 0), lwd = 1)
+abline(a = diff(sf$mu), b = 1, col = rgb(1, 0, 0), lwd = 1)
+```
+
+### Example 2 - Chip-seq simulation
+
+
+```{r}
+rs <- SimulatedCounts(n = 10000, poorcounts = list(mu = 1.5, sigma = 1.5))
+y <- rs$x
+x <- log2(DitherCounts(y))
+```
+
+
+Apply BRD.
+
+```{r}
+# Count Density After Dithering And Dimensionality Reduction
+r <- cdadadr(y, k = 100, smobs = F, zscore = T)
+r <- list(x = r$projection$x, d = r$density)
+
+# Moderate density threshold to increase clustering robustness
+h <- which(rankstat(r$d) > 0.3)
+h <- list(i = h, x = r$x[h, ], d = r$d[h])
+
+# Clustering by density gradient ascent
+qs <- QuickShiftClustering(h$x, h$d, n = 3)
+
+# Find background cluster
+grp <- bg_grp(x[h$i, ], grp = qs$membership, bg_cols = 1)
+bg <- h$i[qs$membership == grp[1]]
+
+# Fit multivariate gaussian model to the background cluster
+theta <- mv_init_param(x[bg, ], ns = 1)
+EM <- mv_emloop(x[bg, ], theta)
+sf <- EM$theta[[1]]
+```
+
+```{r}
+grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)
+grp.prm <- defineGroups(ids = grp, colors = grp.clr)
+```
+
+Visualize results.
+
+```{r, fig.width=5.28, fig.height=5.94}
+# layout 1 x 3 => 7.15 x 2.65
+# layout 2 x 2 => 4.77 x 5.3
+
+viz <- c(1, 3)
+
+layout(matrix(1:4, 2, 2, byrow = T))
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 1.0, cex.axis = 1.0)
+
+plot_samples(r$x, col = colorize(r$d, mode = "rank", colors = "ry"), main = "density")
+plot_samples(r$x, col = colorize(r$d, mode = "rank"), main = "clustering")
+plot_samples(r$x[h$i, ], grp = qs$membership, grp.prm = grp.prm, alpha = 0.1, add = T)
+
+plot_samples(x, viz, col = colorize(r$d, mode = "rank"), main = "selected background")
+plot_samples(x[bg, ], viz, col = rgb(1, 0.5, 0), alpha = 0.1, add = T)
+
+plot_samples(x, viz, col = colorize(r$d, mode = "rank"), main = "BRD")
+plot_sources_2D(theta = list(sf), components = viz, clr = rgb(1, 0.5, 0), lwd = 1)
+abline(a = diff(sf$mu[viz]), b = 1, col = rgb(1, 0, 0), lwd = 1)
+```
+

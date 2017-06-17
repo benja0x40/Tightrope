@@ -17,6 +17,30 @@ empty.plot <- function(axes = T, xlab = '', ylab = '', ...) {
 }
 
 # =============================================================================.
+#' PlotQuickShift
+# -----------------------------------------------------------------------------.
+#' @param x matrix
+#' @param g graph
+#' @param ...
+#'
+#' @return NULL
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+PlotQuickShift <- function(x, g, new = T, ...) {
+
+  if(new) plot(x[, 1], x[, 2], type='n')
+
+  el <- as_edgelist(g)
+  suppressWarnings(
+    arrows(
+      x[el[, 1], 1], x[el[, 1], 2], x[el[, 2], 1], x[el[, 2], 2],
+      length = 0.05, col = rgb(0, 0, 0, 0.2)
+    )
+  )
+}
+
+# =============================================================================.
 #' plotHistograms
 # -----------------------------------------------------------------------------.
 #' @param x numeric vector
@@ -75,44 +99,28 @@ plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...)
 # -----------------------------------------------------------------------------.
 #' @param x matrix
 #' @param idx vector
-#' @param prm data.frame
-#' @param grp vector
-#' @param grp_order vector
 #' @param symetric logical
-#' @param clr charcater
-#' @param alpha numeric
+#' @param cex numeric
+#' @param ...
 #'
 #' @return NULL
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-plot_samples <- function(
-  x, idx = 1:2, prm = NULL, grp = NULL, grp_order = NULL,
-  symetric = T, clr = NULL, alpha = 0.1, ...
-) {
+plot_samples <- function(x, idx = 1:2, symetric = T, cex = 0.5, ...) {
+
   rng = matrix(range(x), 2, 2)
   x <- x[, idx]
   xlab <- colnames(x)[1]
   ylab <- colnames(x)[2]
+  if(! symetric) rng <- apply(x, 2, range)
 
-  if(symetric) {
-    ab  = c(0, 1)
-  } else {
-    rng = apply(x, 2, range)
-    ab  = c(0, 0)
-  }
-  empty.plot(xlab = xlab, ylab = ylab, xlim = rng[, 1], ylim = rng[, 2], ...)
-  abline(a = ab[1], b = ab[2], col = grey(0.5))
-  if(is.null(clr)) {
-    points(x, col = grey(0, alpha = alpha))
-    if(! (is.null(prm) | is.null(grp))) {
-      grp_clr <- SuperRainbow(nrow(prm), alpha = alpha)
-      if(is.null(grp_order)) grp_order <- prm$id
-      for(g in grp_order) points(x[grp == g, ], col = grp_clr[g])
-    }
-  } else {
-    points(x, col = clr)
-  }
+  ScatterPlot(
+    x, xlim = rng[, 1], ylim = rng[, 2], cex = cex,
+    xlab = xlab, ylab = ylab, ...
+  )
+
+  # for(g in grp_order) points(x[grp == g, ], col = grp_clr[g], cex = cex)
 }
 
 # =============================================================================.

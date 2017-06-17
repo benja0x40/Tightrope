@@ -4,15 +4,15 @@
 \alias{QuickShift}
 \title{QuickShift algorithm (Vedaldi & Soatto, 2008)}
 \usage{
-QuickShift(x, d, plot = F)
+QuickShift(x, d, progress = F)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
 and columns = samples or conditions.}
 
-\item{d}{statistical score associated to observations (e.g. estimated density)}
+\item{d}{numeric vector representing the density estimation at each observation.}
 
-\item{plot}{logical (default = F)}
+\item{progress}{progress bar (logical, default = F)}
 }
 \value{
 QuickShift returns a graph object (igraph package)
@@ -20,3 +20,4 @@ QuickShift returns a graph object (igraph package)
 \description{
 QuickShift algorithm (Vedaldi & Soatto, 2008)
 }
+\keyword{internal}

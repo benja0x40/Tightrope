@@ -147,7 +147,8 @@ knn_smoothing <- function(v, i, f = mean) {
 #' and columns = samples or conditions.
 #'
 #' @param k
-#' number of nearest neighbors (i.e. smoothing factor).
+#' number of nearest neighbors, which corresponds to the smoothing parameter
+#' of estimated densities (larger values = smoother).
 #'
 #' @param i
 #' precomputed matrix of nearest neighbor indices (optional).
@@ -250,7 +251,7 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
 #' @param k
-#' number of nearest neighbors which corresponds to the smoothing parameter
+#' number of nearest neighbors, which corresponds to the smoothing parameter
 #' of estimated densities (larger values = smoother).
 #'
 #' @param dither
@@ -268,10 +269,10 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' density estimations in the original multivariate space of the dataset.
 #'
 #' @param smobs
-#' subtract the mean count value of each observation
+#' subtract the mean count value of each observation (logical, default = F).
 #'
 #' @param zscore
-#' transform counts into z-scores (logical, default = F)
+#' transform counts into z-scores (logical, default = T).
 #'
 #' @return
 #' cdadadr returns a \code{list} with the following elements:
@@ -280,22 +281,33 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' \item{projection}{list}
 # -----------------------------------------------------------------------------.
 #' @export
-cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
+cdadadr <- function(
+  cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = T, progress = F
+) {
 
-  r <- NULL
+  p <- 0
 
-  pb <- txtProgressBar(min = 0, max = dither, char = "|", style = 3)
+  msg <- list(
+    status   = "original dimensions",
+    original = ncol(cnt),
+    reduced  = NA,
+    dred     = ""
+  )
+
+  if(progress) pb <- txtProgressBar(min = 0, max = dither, char = "|", style = 3)
+
   for(i in 1:dither) {
 
     # Count dithering
     x <- log2(DitherCounts(cnt))
 
-    # Centering
-    if(centered) x <- x - rowMeans(x)
+    # Subtract mean of each observation
+    if(smobs) x <- x - rowMeans(x)
 
     # Dimensionality reduction
-    msg <- "original dimensions"
     if(dred > 0) {
+      msg$status <- "principal components"
+
       # Compute Principal Components (PC)
       x <- prcomp(x, retx = T, center = T, scale. = T)
 
@@ -303,9 +315,9 @@ cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
       idx <- which(cumsum(x$sdev) / sum(x$sdev) > 1 - dred)
       if(length(idx) < 2) {
         idx <- 1:2
-        warning("dimensionality reduction stringency (dred value) is too high")
+        msg$dred <- "threshold value was not applicable"
       }
-      msg <- paste("components =", length(idx))
+      msg$reduced <- length(idx)
       x <- x$x[, idx]
     }
 
@@ -315,9 +327,9 @@ cdadadr <- function(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = F) {
     # Density estimation
     p <- p + knn_density(x, k = k) / dither
 
-    setTxtProgressBar(pb, i)
+    if(progress) setTxtProgressBar(pb, i)
   }
-  close(pb)
+  if(progress) close(pb)
 
   list(
     density = p,

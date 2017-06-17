@@ -176,6 +176,61 @@ make_ring_unif_2D <- function(n, normalized = T) {
 # plot(make_disk_unif_2D(n), pch = 20, col = grey(0, alpha = 0.5))
 # plot(make_ring_unif_2D(n), pch = 20, col = grey(0, alpha = 0.5))
 
+# =============================================================================.
+#' Wave2D
+# -----------------------------------------------------------------------------.
+#' @description
+#' generator of 2D waves \deqn{(u + e)^a * cos(p + 2 * pi * u * f)}
+#' where \eqn{u} is the distance to the source.
+#'
+#' @param x
+#' matrix of sampling coordinates in the 2D space.
+#'
+#' @param mu
+#' matrix of source location coordinates in the 2D space.
+#'
+#' @param f
+#' frequencies vector
+#'
+#' @param r
+#' radius matrix
+#'
+#' @param p
+#' phases vector
+#'
+#' @param e
+#' energy vector,
+#'
+#' @param a
+#' attenuation vector
+#'
+#' @return
+#' Wave2D returns a vector
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+Wave2D <- function(x, mu = NULL, f = NULL, r = NULL, p = 0, e = 1, a = -1) {
+
+  n <- max(c(1, nrow(mu), length(f), nrow(r)))
+
+  if(is.null(mu)) mu <- matrix(0, n, 2)
+  if(is.null(f)) f <- rep(1, n)
+  if(is.null(r)) r <- matrix(1, n, 2)
+
+  f <- rep(f, length.out = n)
+  p <- rep(p, length.out = n)
+  e <- rep(e, length.out = n)
+  a <- rep(a, length.out = n)
+
+  z <- 0
+  for(i in 1:n) {
+    u <- t((t(x) - mu[i, ])^2 / r[i, ]^2)
+    u <- sqrt(rowSums(u))
+    z <- z + (u + e[i])^a[i] * cos(p[i] + 2 * pi * u * f[i])
+  }
+  z
+}
+
 # ND GENERATORS ################################################################
 
 # =============================================================================.

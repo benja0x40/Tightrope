@@ -10,7 +10,8 @@ knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 \item{x}{numeric matrix representing multivariate data where rows = observations
 and columns = samples or conditions.}
 
-\item{k}{number of nearest neighbors (i.e. smoothing factor).}
+\item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
+of estimated densities (larger values = smoother).}
 
 \item{i}{precomputed matrix of nearest neighbor indices (optional).}
 

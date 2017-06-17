@@ -8,86 +8,44 @@
 #' and columns = samples or conditions.
 #'
 #' @param d
-#' statistical score associated to observations (e.g. estimated density)
+#' numeric vector representing the density estimation at each observation.
 #'
-#' @param plot
-#' logical (default = F)
+#' @param progress
+#' progress bar (logical, default = F)
 #'
 #' @return QuickShift returns a graph object (igraph package)
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
-QuickShift <- function (x, d, plot = F) {
+QuickShift <- function (x, d, progress = F) {
+
+  if(progress) pb <- txtProgressBar(min = 1, max = nrow(x), char = "|", style= 3)
+
   g <- graph.empty(n = nrow(x))
-  V(g)$d <- d
   i.a <- which(FiniteValues(x) & ! is.na(d))
-  if(plot) {
-    plot(x[, 1], x[, 2], pch = 20, col=rgb(0, 0, 0, 0.1))
-  }
-  pb <- txtProgressBar(min = 1, max = nrow(x), char = "|", style= 3)
+
   while(length(i.a) > 1) {
+
     knn <- get.knnx(
-      data = x[i.a, ], query = x[i.a, ], k = 2, algorithm = "kd_tree"
+      data = x[i.a,], query = x[i.a,], k = 2, algorithm = "kd_tree"
     )
     i.b <- i.a[knn$nn.index[, 2]]
+
     chk <- d[i.b] >= d[i.a]
-    g <- g + igraph::edges(rbind(i.a, i.b)[, chk], distance = knn$nn.dist[chk, 2])
-    if(plot) {
-      arrows(
-        x[i.a[chk], 1], x[i.a[chk], 2], x[i.b[chk], 1], x[i.b[chk], 2],
-        length = 0.1, col = rgb(0, 0, 0, 0.5)
-      )
-    }
+    g <- g + igraph::edges(
+      rbind(i.a, i.b)[, chk], distance = knn$nn.dist[chk, 2]
+    )
     i.a <- i.a[! chk]
-    setTxtProgressBar(pb, nrow(x) - length(i.a) + 1)
+
+    if(progress) setTxtProgressBar(pb, nrow(x) - length(i.a) + 1)
   }
-  close(pb)
-  V(g)$weight <- ego_size(g, order = nrow(x), mode = "in")
-  E(g)$weight <- V(g)[ends(g, E(g))[, 1]]$weight
+  if(progress) close(pb)
+
   g
 }
 
 # =============================================================================.
-#' QuickShift root and top level branches
-# -----------------------------------------------------------------------------.
-#' @param i
-#' node index
-#'
-#' @param d
-#' depth level
-#'
-#' @param dmax
-#' maximum depth
-#'
-#' @return QuickShiftSearchClusters returns a \code{data.frame}
-# -----------------------------------------------------------------------------.
-#' @export
-QuickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
-  res <- NULL
-  if(d < dmax) {
-    if(i==0) {
-      i <- which(igraph::degree(g, mode = "out") == 0)
-    }
-    e <- incident_edges(g, i, mode = "in")[[1]]
-    if(length(e)>0) {
-      j <- ends(g, e)[,1]
-      # arrows(
-      #   x[j], y[j], x[i], y[i], col=rgb(1, 0, 0, 0.75), length = 0.1, lwd = 1
-      # )
-      res <- cbind(
-        edge = as.numeric(e), distance = e$distance, weight = V(g)[j]$weight
-      )
-      for(k in j) {
-        res <- rbind(
-          res, QuickShiftSearchClusters(k, d + 1, dmax)
-        )
-      }
-    }
-  }
-  res
-}
-
-# =============================================================================.
-#' QuickShift graph partition
+#' QuickShiftCutClusters
 # -----------------------------------------------------------------------------.
 # TODO: fix bug with ordering cluster sizes and memberships
 # -----------------------------------------------------------------------------.
@@ -101,8 +59,9 @@ QuickShiftSearchClusters <- function(i = 0, d = 0, dmax) {
 #' maximum branch length
 #'
 #' @return
-#' QuickShiftCutClusters return a \code{list} with the following elements
+#' QuickShiftCutClusters returnd a \code{list} with the following elements
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
   if(is.null(ecut) & ! is.null(n)) {
@@ -128,4 +87,29 @@ QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
   grp$csize <- grp$csize[o]
   grp$membership <- o[grp$membership]
   grp
+}
+
+# =============================================================================.
+#' QuickShiftClustering
+# -----------------------------------------------------------------------------.
+#' @param x
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
+#'
+#' @param d
+#' numeric vector representing the density estimation at each observation.
+#'
+#' @param n
+#' number of clusters
+#'
+#' @param ...
+#'
+#' @return
+#' QuickShiftClustering returns a \code{list} with the following elements
+# -----------------------------------------------------------------------------.
+#' @export
+QuickShiftClustering <- function (x, d, n, ...) {
+  qs <- QuickShift(x, d, ...)
+  qs <- QuickShiftCutClusters(qs, n = n)
+  qs
 }

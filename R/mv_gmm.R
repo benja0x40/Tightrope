@@ -33,7 +33,6 @@ mv_mle <- function(x, w = NULL, ML = T) {
   mu <- colSums(w * x, na.rm = T)
 
   # covariance matrix
-  # chk <- FiniteValues(x)
   x <- sqrt(w) * (x - matrix(1, n) %*% mu)
   sigma <- crossprod(x) # equivalent to: t(x) %*% (x)
 
@@ -42,6 +41,7 @@ mv_mle <- function(x, w = NULL, ML = T) {
 
   list(mu = mu, sigma = sigma)
 }
+
 # =============================================================================.
 #' Multivariate normal distribution: probability density function
 # -----------------------------------------------------------------------------.
@@ -59,6 +59,7 @@ mv_mle <- function(x, w = NULL, ML = T) {
 mv_pdf <- function(x, theta) {
   mixtools::dmvnorm(x, theta[[1]], theta[[2]])
 }
+
 # =============================================================================.
 #' Multivariate normal distribution: random sample generator
 # -----------------------------------------------------------------------------.
@@ -90,6 +91,7 @@ mv_rsg <- function(n, theta) {
   }
   spl
 }
+
 # =============================================================================.
 #' Multivariate normal distribution: parameter initialization
 # -----------------------------------------------------------------------------.
@@ -149,6 +151,7 @@ mv_expectation <- function(x, theta, p_fun = mv_pdf) {
   p <- p / rowSums(p)
   p
 }
+
 # =============================================================================.
 #' Multivariate maximization
 # -----------------------------------------------------------------------------.
@@ -182,6 +185,7 @@ mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
   }
   theta
 }
+
 # =============================================================================.
 #' Multivariate expectation-maximization
 # -----------------------------------------------------------------------------.
@@ -219,4 +223,3 @@ mv_emloop <- function(
   }
   list(theta = theta, p = p)
 }
-

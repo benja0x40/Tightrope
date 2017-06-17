@@ -58,11 +58,13 @@ populations <- function(x, tx = NULL, p, ns, max_iter = 100) {
 # -----------------------------------------------------------------------------.
 #' @export
 bg_grp <- function(x, grp, bg_cols) {
-  bg <- split(as.data.frame(as.matrix(x)), f = grp$membership)
+  bg <- split(as.data.frame(as.matrix(x)), f = grp)
+  ng <- length(bg)
   z <- t(sapply(bg, colMeans))
   a <- rowMeans(as.matrix(z[, - bg_cols]))
   b <- rowMeans(as.matrix(z[, bg_cols]))
-  which.max(b - a)
+  bg <- (1:ng)[order(b - a, decreasing = T)]
+  bg
 }
 
 # =============================================================================.

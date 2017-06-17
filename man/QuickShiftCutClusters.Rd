@@ -2,7 +2,7 @@
 % Please edit documentation in R/quickshift.R
 \name{QuickShiftCutClusters}
 \alias{QuickShiftCutClusters}
-\title{QuickShift graph partition}
+\title{QuickShiftCutClusters}
 \usage{
 QuickShiftCutClusters(g, n = NULL, ecut = NULL)
 }
@@ -14,8 +14,9 @@ QuickShiftCutClusters(g, n = NULL, ecut = NULL)
 \item{ecut}{maximum branch length}
 }
 \value{
-QuickShiftCutClusters return a \code{list} with the following elements
+QuickShiftCutClusters returnd a \code{list} with the following elements
 }
 \description{
-QuickShift graph partition
+QuickShiftCutClusters
 }
+\keyword{internal}
