@@ -189,46 +189,94 @@ make_ring_unif_2D <- function(n, normalized = T) {
 #' @param mu
 #' matrix of source location coordinates in the 2D space.
 #'
-#' @param f
-#' frequencies vector
-#'
 #' @param r
 #' radius matrix
+#'
+#' @param f
+#' frequencies vector
 #'
 #' @param p
 #' phases vector
 #'
 #' @param e
-#' energy vector,
+#' energy vector
 #'
 #' @param a
 #' attenuation vector
+#'
+#' @param w
+#' waveform vector
 #'
 #' @return
 #' Wave2D returns a vector
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-Wave2D <- function(x, mu = NULL, f = NULL, r = NULL, p = 0, e = 1, a = -1) {
+Wave2D <- function(
+  x, mu = NULL, r = NULL, f = 1, p = 0, e = 1, a = -1, w = "cos"
+) {
 
-  n <- max(c(1, nrow(mu), length(f), nrow(r)))
+  n <- max(c(1, nrow(mu), nrow(r), sapply(list(f, p, e, a, w), length)))
 
   if(is.null(mu)) mu <- matrix(0, n, 2)
-  if(is.null(f)) f <- rep(1, n)
   if(is.null(r)) r <- matrix(1, n, 2)
 
   f <- rep(f, length.out = n)
   p <- rep(p, length.out = n)
   e <- rep(e, length.out = n)
   a <- rep(a, length.out = n)
+  w <- rep(w, length.out = n)
+
+  waveform <- function(w, f, p, u) {
+
+    s <- cos(2 * pi * f * u + p)
+
+    # if(w == "cos") s <- (1 + s) / 2
+    if(w == "sqr") s <- (1 + sign(s)) / 2
+    if(w == "tri") s <- acos(s) / pi
+
+    s
+  }
 
   z <- 0
   for(i in 1:n) {
     u <- t((t(x) - mu[i, ])^2 / r[i, ]^2)
     u <- sqrt(rowSums(u))
-    z <- z + (u + e[i])^a[i] * cos(p[i] + 2 * pi * u * f[i])
+    z <- z + (u + e[i])^a[i] * waveform(w[i], f[i], p[i], u)
   }
   z
+}
+
+# =============================================================================.
+#' Random2D
+# -----------------------------------------------------------------------------.
+#' @param n number
+#' @param p probabilities
+#' @param v values
+#'
+#' @return matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+Random2D <- function(n, p, v = NULL) {
+
+  nx <- ncol(p)
+  ny <- nrow(p)
+
+  if(is.null(v)) {
+    v <- cbind(
+      rep(1:ny, nx),
+      rep(1:nx, each = ny)
+    )
+  }
+
+  p <- S01(p)
+  p <- p / sum(p)
+  p <- as.vector(p)
+
+  i <- sample(1:(nx * ny), size = n, replace = T, prob = p)
+
+  v[i, ]
 }
 
 # ND GENERATORS ################################################################

@@ -1,35 +1,6 @@
 # FUNCTIONS | READ COUNTS ######################################################
 
 # =============================================================================.
-#' Dither counts
-# -----------------------------------------------------------------------------.
-#' @param x
-#' matrix of read counts (rows = observations, columns = samples or conditions).
-#'
-#' @return DitherCounts returns a \code{matrix} of dithered counts
-# -----------------------------------------------------------------------------.
-#' @export
-DitherCounts <- function(x) {
-
-  zero <- x == 0
-  xmin <- min(x[! zero], na.rm = T)
-  xmax <- max(x[! zero], na.rm = T)
-
-  # dithering
-  x <- x + rtriangle(length(x), a = -1, b = 1)
-  # lower limit
-  k <- x < xmin & ! zero
-  x[k] <- runif(sum(k), xmin - 0.5, xmin)
-  # upper limit
-  k <- x > xmax
-  x[k] <- runif(sum(k), xmax, xmax + 0.5)
-  # no count
-  x[zero] <- 0
-
-  x
-}
-
-# =============================================================================.
 #' Detect computable values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @param x
@@ -60,7 +31,7 @@ FiniteValues <- function(x) {
 #' logical, if TRUE return min and max read counts in each interval
 #'
 #' @return
-#' detectCounts returns a \code{data.frame} with the following columns:
+#' DetectCounts returns a \code{data.frame} with the following columns:
 #' \item{all}{logical vector indicating rows of the \code{cnt} matrix with at least one count in all columns}
 #' \item{none}{logical vector indicating rows of the \code{cnt} matrix with no counts in all columns}
 #' \item{nbr}{integer vector representing the number of columns with at least one counts for each row of the \code{cnt} matrix}
@@ -70,10 +41,10 @@ FiniteValues <- function(x) {
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-detectCounts <- function(cnt, detailed = F) {
+DetectCounts <- function(cnt, detailed = F) {
   cnt <- as.matrix(cnt)
   n <- ncol(cnt)
-  k <- apply(cnt, MARGIN=1, FUN=function(x) { sum(x>0) })
+  k <- apply(cnt, MARGIN = 1, FUN = function(x) { sum(x > 0) })
   res <- data.frame(
     all  = k == n,
     none = k == 0,
@@ -82,11 +53,61 @@ detectCounts <- function(cnt, detailed = F) {
   if(detailed) {
     idx <- which(k > 0)
     res$min <- 0
-    res$min[idx] <- apply(cnt[idx,], 1, FUN=function(x) { min(x[x>0]) })
-    res$max <- apply(cnt, MARGIN=1, FUN=max)
+    res$min[idx] <- apply(cnt[idx, ], 1, FUN=function(x) { min(x[x > 0]) })
+    res$max <- apply(cnt, MARGIN = 1, FUN = max)
   }
   res
 }
+
+# =============================================================================.
+#' Dither counts
+# -----------------------------------------------------------------------------.
+#' @param x
+#' matrix of read counts (rows = observations, columns = samples or conditions).
+#'
+#' @return DitherCounts returns a \code{matrix} of dithered counts
+# -----------------------------------------------------------------------------.
+#' @export
+DitherCounts <- function(x) {
+
+  zero <- x == 0
+  xmin <- min(x[! zero], na.rm = T)
+  xmax <- max(x[! zero], na.rm = T)
+
+  # dithering
+  x <- x + rtriangle(length(x), a = -1, b = 1)
+  # lower limit
+  k <- x < xmin & ! zero
+  x[k] <- runif(sum(k), xmin - 0.5, xmin)
+  # upper limit
+  k <- x > xmax
+  x[k] <- runif(sum(k), xmax, xmax + 0.5)
+  # no count
+  x[zero] <- 0
+
+  x
+}
+
+# =============================================================================.
+#' MergeCounts
+# -----------------------------------------------------------------------------.
+#' @param x
+#' list of read count matrices
+#' (rows = observations, columns = samples or conditions).
+#'
+#' @param y
+#' list of read count matrices.
+#'
+#' @return DitherCounts returns a \code{list}
+# -----------------------------------------------------------------------------.
+#' @export
+MergeCounts <- function(x, y) {
+  for(lbl in names(x)) {
+    x[[lbl]] <- cbind(x[[lbl]], y[[lbl]])
+  }
+  x
+}
+
 # =============================================================================.
 #' Count mapped reads overlapping with genomic intervals
 # -----------------------------------------------------------------------------.

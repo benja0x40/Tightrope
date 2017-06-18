@@ -4,8 +4,8 @@
 \alias{cdadadr}
 \title{Count Density After Dithering And Dimensionality Reduction}
 \usage{
-cdadadr(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = T,
-  progress = F)
+cdadadr(cnt, k, smobs = F, dred = 0.05, npc = NA, zscore = T,
+  dither = 1, progress = F)
 }
 \arguments{
 \item{cnt}{matrix of read counts (rows = observations, columns = samples or conditions).}
@@ -13,8 +13,7 @@ cdadadr(cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = T,
 \item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
 of estimated densities (larger values = smoother).}
 
-\item{dither}{number of replicates of the dithered counts: 0 = no dithering,
-1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
+\item{smobs}{subtract the mean count value of each observation (logical, default = F).}
 
 \item{dred}{stringency of the dimensionality reduction which is performed by
 Principal Component Analysis. Dimensions retained after projection of the
@@ -25,9 +24,15 @@ will be retained after dimensionality reduction.
 Setting dred = 0 bypasses the dimensionality reduction and performs
 density estimations in the original multivariate space of the dataset.}
 
-\item{smobs}{subtract the mean count value of each observation (logical, default = F).}
+\item{npc}{number of dimensions retained after projection on principal components.
+When \code{npc} is specified, the \code{dred} parameter is ignored.}
 
 \item{zscore}{transform counts into z-scores (logical, default = T).}
+
+\item{dither}{number of replicates of the dithered counts: 0 = no dithering,
+1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
+
+\item{progress}{show progress bar (logical, default = F).}
 }
 \value{
 cdadadr returns a \code{list} with the following elements:

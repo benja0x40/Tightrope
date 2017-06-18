@@ -4,22 +4,25 @@
 \alias{Wave2D}
 \title{Wave2D}
 \usage{
-Wave2D(x, mu = NULL, f = NULL, r = NULL, p = 0, e = 1, a = -1)
+Wave2D(x, mu = NULL, r = NULL, f = 1, p = 0, e = 1, a = -1,
+  w = "cos")
 }
 \arguments{
 \item{x}{matrix of sampling coordinates in the 2D space.}
 
 \item{mu}{matrix of source location coordinates in the 2D space.}
 
-\item{f}{frequencies vector}
-
 \item{r}{radius matrix}
+
+\item{f}{frequencies vector}
 
 \item{p}{phases vector}
 
-\item{e}{energy vector,}
+\item{e}{energy vector}
 
 \item{a}{attenuation vector}
+
+\item{w}{waveform vector}
 }
 \value{
 Wave2D returns a vector

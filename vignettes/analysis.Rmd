@@ -1,0 +1,463 @@
+---
+title: "BRD normalization"
+author: "Benjamin Leblanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteIndexEntry{Analysis template}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Helper functions
+
+```{r, include=FALSE}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+ExperimentalAnnotations <- function(wks_name, xps = T) {
+  tbl <- get(wks_name)$ann[xps, ]
+  if(any(grepl("^geo\\.", colnames(tbl)))) {
+    skip <- c(
+      "experiment", "submission", "study", "sample", "run", "molecule"
+    )
+  } else {
+    skip <- c(
+      "project", "SampleNumber", "IsPairedEnd", "Read1", "Read2", "NumReadsPF"
+    )
+  }
+  skip <- c(
+    skip, "mapping_command", "basemount.host", "mapping_options", "mapping_index"
+  )
+  rex <- "^(geo|library_|platform_|instrument_)|(file|path)"
+  skip <- colnames(tbl) %in% skip | grepl(rex, colnames(tbl))
+  tbl <- tbl[, ! skip]
+  tbl
+}
+```
+
+### Initializations
+
+```{r, include=FALSE}
+# #############################################################################.
+suppressPackageStartupMessages(library(Tightrope))
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+CFG_DTS <- list()
+# -----------------------------------------------------------------------------.
+# ESC_BRD, NSC_K27M, E14_K27M, Lu_et_al
+load_dataset   <- "Lu_et_al"
+target_dataset <- "Lu_et_al"
+```
+
+### Collection of spike-in datasets
+
+```{r, include=FALSE}
+# =============================================================================.
+if(any(c("ESC_BRD", "ALL") %in% load_dataset)) {
+  ESC_BRD <- list()
+  
+  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R1_TEST/"
+  ESC_BRD$R1 <- list(
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  
+  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R2_TEST/"
+  ESC_BRD$R2 <- list(
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  rm(data_path)
+  
+  # Reshape to join replicates
+  ESC_BRD <- list(
+    name = "ESC_BRD",
+    ann = rbind(
+      ESC_BRD$R1$ann,
+      ESC_BRD$R2$ann
+    ),
+    CNT = with(ESC_BRD, MergeCounts(R1$CNT, R2$CNT))
+  )
+  
+  if(! with(ESC_BRD, all(ann$lt_id == colnames(CNT$GN)))) {
+    stop("Inconsistent annotation of samples in ESC_BRD")
+  }
+  # ---------------------------------------------------------------------------.
+  ESC_BRD <- list2env(ESC_BRD)
+}
+
+# =============================================================================.
+if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
+  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_K27M_spike_in/"
+  NSC_K27M <- list(
+    name = "NSC_K27M",
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  rm(data_path)
+  
+  if(! with(NSC_K27M, all(ann$lt_id == colnames(CNT$GN)))) {
+    stop("Inconsistent annotation of samples in NSC_K27M")
+  }
+  # ---------------------------------------------------------------------------.
+  NSC_K27M <- list2env(NSC_K27M)
+}
+
+# =============================================================================.
+if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
+  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/"
+  E14_EPZ <- list(
+    name = "E14_EPZ",
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  
+  if(! with(E14_EPZ, all(ann$lt_id == colnames(CNT$GN)))) {
+    stop("Inconsistent annotation of samples in E14_EPZ")
+  }
+  # ---------------------------------------------------------------------------.
+  E14_EPZ <- list2env(E14_EPZ)
+}
+
+# =============================================================================.
+if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
+  data_path <- "/Volumes/USB16GB/LT_WORKS/GSE63195_Lu_et_al_2016/"
+  Lu_et_al <- list(
+    name = "Lu_et_al",
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  rm(data_path)
+  
+  if(! with(Lu_et_al, all(ann$lt_id == colnames(CNT$GN)))) {
+    stop("Inconsistent annotation of samples in Lu_et_al")
+  }
+  # ---------------------------------------------------------------------------.
+  Lu_et_al <- list2env(Lu_et_al)
+}
+```
+
+#### 1. ESC_BRD
+
+SUZ12 WT + KO cell mix experiments in mouse ESCs.
+
+```{r, include=FALSE}
+wks_name <- "ESC_BRD"
+# =============================================================================.
+if(exists(wks_name)) {
+  wks <- get(wks_name)
+  CFG_DTS[[wks_name]] <- list(
+    xps = with(
+      wks$ann, antibody %in% c("H3K27me3", "Input") & replicate %in% c("R1", "R2")
+    ),
+    viz = list(
+      c("ESC_Input_0_R1", "ESC_H3K27me3_100_R1", "ESC_H3K27me3_10_R1", "ESC_H3K27me3_0_R1"),
+      c("ESC_Input_0_R2", "ESC_H3K27me3_100_R2", "ESC_H3K27me3_10_R2", "ESC_H3K27me3_0_R2")
+    ),
+    layout = matrix(1:9, 3, 3, byrow = T),
+    nxp  = 0,
+    rex  = "Input",
+    dred = 0.5,  # Select the most discriminative components
+    npc  = NA,
+    knn  = 200,
+    core = 0.5,
+    ncl  = 3
+  )
+  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  # ---------------------------------------------------------------------------.
+  rm(wks)
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+if(exists(wks_name)) {
+  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  rm(wks_name)
+}
+```
+
+#### 2. NSC_K27M
+
+H3WT versus K27M experiments in mouse NSCs.
+
+```{r, include=FALSE}
+wks_name <- "NSC_K27M"
+# =============================================================================.
+if(exists(wks_name)) {
+  wks <- get(wks_name)
+  CFG_DTS[[wks_name]] <- list(
+    xps = with(
+      wks$ann, antibody %in% c("H3K27me3", "Input") & replicate %in% c("R1", "R2")
+    ),
+    viz = list(
+      c("H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1"),
+      c("H3WT_DMSO_Input_R1",    "H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1"),
+      
+      c("H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2"),
+      c("H3WT_DMSO_Input_R2",    "H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2"),
+      
+      c("H3WT_DMSO_H3K27me3_R1", "H3WT_DMSO_H3K27me3_R2"),
+      c("K27M_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R2"),
+      c("H3WT_DMSO_Input_R1",    "H3WT_DMSO_Input_R2")
+    ),
+    layout = matrix(1:9, 3, 3, byrow = T),
+    nxp  = 0,
+    rex  = "Input",
+    dred = 0.5,  # Select the most discriminative components
+    npc  = NA,
+    knn  = 300,
+    core = 0.9,
+    ncl  = 1
+  )
+  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  # ---------------------------------------------------------------------------.
+  rm(wks)
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+if(exists(wks_name)) {
+  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  rm(wks_name)
+}
+```
+
+#### 3. E14_EPZ
+
+EZH2 inhibitor washout experiments in mouse ESCs.
+
+```{r, include=FALSE}
+wks_name <- "E14_EPZ"
+# =============================================================================.
+if(exists(wks_name)) {
+  wks <- get(wks_name)
+  CFG_DTS[[wks_name]] <- list(
+    xps = with(wks$ann, antibody %in% c("H3K27me3", "H3K27me2", "H3K27me1")),
+    viz = list(
+      c("H3K27me3_E14", "H3K27me3_7d", "H3K27me3_8h", "H3K27me3_24h"),
+      c("H3K27me2_E14", "H3K27me2_7d", "H3K27me2_8h", "H3K27me2_24h"),
+      c("H3K27me1_E14", "H3K27me1_7d", "H3K27me1_8h", "H3K27me1_24h")
+    ),
+    layout = matrix(1:9, 3, 3, byrow = T),
+    nxp  = 0,
+    rex  = "_7d$",
+    dred = 0.5, # Select the most discriminative components
+    npc  = NA,
+    knn  = 100,
+    core = 0.5,
+    ncl  = 3
+  )
+  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  # ---------------------------------------------------------------------------.
+  rm(wks)
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+if(exists(wks_name)) {
+  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  rm(wks_name)
+}
+```
+
+#### 4. Lu_et_al
+
+H3WT versus K36M experiments from Lu et al., 2016.
+
+```{r, include=FALSE}
+wks_name <- "Lu_et_al"
+# =============================================================================.
+if(exists(wks_name)) {
+  wks <- get(wks_name)
+  CFG_DTS[[wks_name]] <- list(
+    xps = with(wks$ann, antibody %in% c("H3K36me3", "Input")),
+    viz = list(
+      c("H3WT_H3K36me3", "K36M_H3K36me3"),
+      c("H3WT_Input", "H3WT_H3K36me3", "K36M_H3K36me3")
+    ),
+    layout = matrix(1:9, 3, 3, byrow = T),
+    nxp  = 0,
+    rex  = "Input",
+    dred = 0,
+    npc  = 3, # Force to conserve 3 dimensions of variation: H3WT, K36M, Input
+    knn  = 200,
+    core = 0.7,
+    ncl  = 2
+  )
+  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  # ---------------------------------------------------------------------------.
+  rm(wks)
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+if(exists(wks_name)) {
+  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  rm(wks_name)
+}
+```
+
+### BRD procedure
+
+#### Glopal settings
+
+```{r}
+ref_roi <- "GN"
+dither  <- 1
+smobs   <- T
+zscore  <- T
+```
+
+#### Dataset dependent settings
+
+```{r, echo=FALSE, results='asis'}
+tbl <- t(sapply(CFG_DTS, "[", -(1:3)))
+knitr::kable(tbl)
+rm(tbl)
+```
+
+#### Extraction of count data
+
+```{r, include=FALSE}
+# Select dataset to be analysed
+cfg  <- CFG_DTS[[target_dataset]]
+dred <- cfg$dred
+npc  <- cfg$npc
+knn  <- cfg$knn
+core <- cfg$core
+ncl  <- cfg$ncl
+viz  <- cfg$viz
+lyt  <- cfg$layout
+
+# Raw counts
+wks <- get(target_dataset)
+cnt <- with(wks, CNT[[ref_roi]][, cfg$xps])
+xps <- colnames(cnt)
+inp <- which(grepl(cfg$rex, xps, perl = T))
+
+# Dithered and log2 transformed counts
+ldc <- log2(DitherCounts(cnt))         
+
+# Quick and dirty
+chk <- FiniteValues(log(cnt))
+cnt <- cnt[chk, ]
+ldc <- ldc[chk, ]
+
+rm(cfg, wks, chk)
+```
+
+#### BRD estimation
+
+```{r, include=FALSE}
+# Count density after dithering and dimensionality reduction
+dr <- cdadadr(
+  cnt, k = knn, smobs = smobs, dred = dred, npc = npc, zscore = zscore, dither = dither
+)
+
+xr <- list(x = dr$projection$x, d = dr$density)
+
+# Moderate density threshold to increase clustering robustness
+h <- which(rankstat(xr$d) > core)
+h <- list(i = h, x = xr$x[h, ], d = xr$d[h])
+
+# Clustering by density gradient ascent
+qs <- QuickShiftClustering(h$x, h$d, n = ncl)
+
+# Find background cluster
+if(ncl > 1) {
+  grp <- bg_grp(ldc[h$i, ], grp = qs$membership, bg_cols = inp)
+} else {
+  grp <- 1
+}
+bg <- h$i[qs$membership == grp[1]]
+
+# Fit multivariate gaussian model to the background cluster
+mm <- mv_gmm(ldc[bg, ], ns = 1)
+nf <- mm$theta[[1]]
+```
+
+#### Results visualization
+
+##### Count density after dithering and dimensionality reduction
+
+```{r, echo=FALSE, results='asis'}
+tbl <- t(sapply(dr$projection$msg, rbind))
+knitr::kable(data.frame(tbl))
+```
+
+```{r, echo=FALSE, results='asis'}
+tbl <- data.frame(
+  cluster_size = qs$csize,
+  background   = 1:ncl == grp[1]
+)
+knitr::kable(tbl)
+```
+
+
+```{r, echo=FALSE, fig.width=6, fig.height=3.5}
+# layout 1 x 2 => 5.28 x 2.97
+# layout 2 x 2 => 5.28 x 5.94
+# layout 6 x 2 => 5.28 x 8.91
+
+grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)
+grp.clr <- c(rgb(1, 1, 0), grp.clr[2:ncl])
+grp.prm <- defineGroups(ids = grp, colors = grp.clr)
+
+clr.prm <- AutoColorParameters("ry")
+clr.prm$thresholds <- round(clr.prm$thresholds, 2)
+
+layout(matrix(1:2, 1, 2, byrow = T))
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+
+xlim <- range(xr$x[, 1]) * 1.2
+ylim <- range(xr$x[, 1:2])
+ylim <- ylim * 1.2 - diff(ylim) * 0.1 
+plot_samples(xr$x, xlim = xlim, ylim = ylim, col = colorize(xr$d, mode = "rank", colors = "ry"), main = "density")
+colorLegend("b", clr.prm, ticks = 0:4/4, horiz = T, size = c(70, 3), tick.pos = -1, cex = 0.75)
+
+plot_samples(xr$x, xlim = xlim, ylim = ylim, col = colorize(xr$d, mode = "rank"), main = "clustering")
+plot_samples(xr$x[h$i, ], grp = qs$membership, grp.prm = grp.prm, alpha = 0.1, add = T)
+```
+
+##### Selected background population and scaling factors
+
+```{r, echo=FALSE, fig.width=3, fig.height=3.5}
+# layout 1 x 1 => 2.64 x 2.97
+# layout 1 x 2 => 5.28 x 2.97
+# layout 2 x 2 => 5.28 x 5.94
+
+# layout(lyt)
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+for(cmp in viz) {
+  for(lbl in cmp[-1]) {
+  idx <- match(c(cmp[1], lbl), xps)
+  d <- knn_density(ldc[, idx], k = knn)
+  plot_samples(ldc, idx, col = colorize(d, mode = "rank"))
+  plot_samples(ldc[bg, ], idx, col = rgb(1, 1, 0), alpha = 0.05, add = T)
+  plot_sources_2D(theta = list(nf), components = idx, clr = rgb(1, 0, 0), lwd = 1)
+  abline(a = diff(nf$mu[idx]), b = 1, col = rgb(1, 0.5, 0), lwd = 1.5)
+  }
+}
+```
+
+```{r, include=FALSE}
+rm(cmp, lbl, idx, d)
+```
+

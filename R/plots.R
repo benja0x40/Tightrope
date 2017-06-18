@@ -107,13 +107,18 @@ plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...)
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-plot_samples <- function(x, idx = 1:2, symetric = T, cex = 0.5, ...) {
+plot_samples <- function(
+  x, idx = 1:2, symetric = T, cex = 0.5, xlim = NULL, ylim = NULL, ...
+) {
 
   rng = matrix(range(x), 2, 2)
   x <- x[, idx]
   xlab <- colnames(x)[1]
   ylab <- colnames(x)[2]
   if(! symetric) rng <- apply(x, 2, range)
+
+  if(! is.null(xlim)) rng[, 1] <- xlim
+  if(! is.null(ylim)) rng[, 2] <- ylim
 
   ScatterPlot(
     x, xlim = rng[, 1], ylim = rng[, 2], cex = cex,

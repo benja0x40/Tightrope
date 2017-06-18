@@ -223,3 +223,31 @@ mv_emloop <- function(
   }
   list(theta = theta, p = p)
 }
+
+# =============================================================================.
+#' Gaussian mixture model fitting
+# -----------------------------------------------------------------------------.
+#' @param x
+#' numeric matrix representing multivariate data where rows = observations
+#' and columns = samples or conditions.
+#'
+#' @param ns
+#' number of models to be fitted
+#'
+#' @param epsilon
+#' to be implemented
+#'
+#' @param max_iter
+#' maximum number of iterations (default = 100)
+#'
+#' @return mv_emloop returns a \code{list} with the following elements
+#' \item{theta}{list of multivariate distribution parameters}
+#' \item{p}{vector of probabilities}
+# -----------------------------------------------------------------------------.
+#' @export
+mv_gmm <- function(x, ns, epsilon = 1E-3, max_iter = 100) {
+  theta <- mv_init_param(x, ns)
+  mv_emloop(x, theta, p_fun = mv_pdf, mle_fun = mv_mle, max_iter = max_iter)
+}
+
+

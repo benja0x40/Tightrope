@@ -4,7 +4,8 @@
 \alias{plot_samples}
 \title{plot_samples}
 \usage{
-plot_samples(x, idx = 1:2, symetric = T, cex = 0.5, ...)
+plot_samples(x, idx = 1:2, symetric = T, cex = 0.5, xlim = NULL,
+  ylim = NULL, ...)
 }
 \arguments{
 \item{x}{matrix}

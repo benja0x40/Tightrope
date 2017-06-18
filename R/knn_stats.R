@@ -254,9 +254,8 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' number of nearest neighbors, which corresponds to the smoothing parameter
 #' of estimated densities (larger values = smoother).
 #'
-#' @param dither
-#' number of replicates of the dithered counts: 0 = no dithering,
-#' 1 = single (default), 2 = duplicate, 3 = triplicate, etc.
+#' @param smobs
+#' subtract the mean count value of each observation (logical, default = F).
 #'
 #' @param dred
 #' stringency of the dimensionality reduction which is performed by
@@ -268,11 +267,19 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' Setting dred = 0 bypasses the dimensionality reduction and performs
 #' density estimations in the original multivariate space of the dataset.
 #'
-#' @param smobs
-#' subtract the mean count value of each observation (logical, default = F).
+#' @param npc
+#' number of dimensions retained after projection on principal components.
+#' When \code{npc} is specified, the \code{dred} parameter is ignored.
 #'
 #' @param zscore
 #' transform counts into z-scores (logical, default = T).
+#'
+#' @param dither
+#' number of replicates of the dithered counts: 0 = no dithering,
+#' 1 = single (default), 2 = duplicate, 3 = triplicate, etc.
+#'
+#' @param progress
+#' show progress bar (logical, default = F).
 #'
 #' @return
 #' cdadadr returns a \code{list} with the following elements:
@@ -282,7 +289,7 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 # -----------------------------------------------------------------------------.
 #' @export
 cdadadr <- function(
-  cnt, k, dither = 1, dred = 0.05, smobs = F, zscore = T, progress = F
+  cnt, k, smobs = F, dred = 0.05, npc = NA, zscore = T, dither = 1, progress = F
 ) {
 
   p <- 0
@@ -305,17 +312,31 @@ cdadadr <- function(
     if(smobs) x <- x - rowMeans(x)
 
     # Dimensionality reduction
-    if(dred > 0) {
+    if(dred > 0 | ! is.na(npc)) {
       msg$status <- "principal components"
+
+      if(! is.na(npc)) {
+        # Retain PC as directly specified
+        msg$dred <- "fixed number of PC"
+        if(npc < 2) {
+          npc <- 2
+          msg$dred <- "irrelevant number of PC"
+        }
+        idx <- 1:npc
+      }
 
       # Compute Principal Components (PC)
       x <- prcomp(x, retx = T, center = T, scale. = T)
 
-      # Retain PC conserving 100 * (1 - dred) % of the variance
-      idx <- which(cumsum(x$sdev) / sum(x$sdev) > 1 - dred)
-      if(length(idx) < 2) {
-        idx <- 1:2
-        msg$dred <- "threshold value was not applicable"
+      if(is.na(npc)) {
+        # Retain PC conserving 100 * (1 - dred) % of the variance
+        msg$dred <- "variance threshold"
+        a <- 1 - cumsum(x$sdev / sum(x$sdev))
+        idx <- which(a > dred)
+        if(length(idx) < 2) {
+          idx <- 1:2
+          msg$dred <- "irrelevant variance threshold"
+        }
       }
       msg$reduced <- length(idx)
       x <- x$x[, idx]

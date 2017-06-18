@@ -74,7 +74,7 @@ test_that("FiniteValues", {
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-test_that("detectCounts", {
+test_that("DetectCounts", {
   tst <- rbind(
     c(0,0,0),
     c(0,0,1),
@@ -90,7 +90,7 @@ test_that("detectCounts", {
     none = c(T,F,F,F,F,F,F,F),
     nbr  = c(0,1,1,1,2,2,2,3)
   )
-  expect_equal(detectCounts(tst)$all, as.logical(res[,"all"]))
-  expect_equal(detectCounts(tst)$none, as.logical(res[,"none"]))
-  expect_equal(detectCounts(tst)$nbr, res[,"nbr"])
+  expect_equal(DetectCounts(tst)$all, as.logical(res[,"all"]))
+  expect_equal(DetectCounts(tst)$none, as.logical(res[,"none"]))
+  expect_equal(DetectCounts(tst)$nbr, res[,"nbr"])
 })
