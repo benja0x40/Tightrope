@@ -140,10 +140,11 @@ BRD <- function(
   if(! is.null(controls)) {
     res$status <- "BRD candidate cluster selected"
     bg_theta <- theta[[bg_clu]]
-    if(! is.na(bg_theta)) {
+    if(length(bg_theta) > 1) {
       res <- c(
         res, list(
           normfactors = mean(bg_theta$mu) - bg_theta$mu,
+          bg_clurank  = bg_rnk,
           bg_cluster  = bg_clu,
           bg_theta    = bg_theta,
           bg_members  = bg_idx

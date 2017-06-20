@@ -56,9 +56,10 @@ suppressPackageStartupMessages(library(Tightrope))
 CFG_DTS <- list()
 # -----------------------------------------------------------------------------.
 # ESC_BRD, NSC_K27M, E14_K27M, Lu_et_al
-load_dataset   <- "ESC_BRD"
-target_dataset <- "ESC_BRD"
-antibody <- "Suz12"
+load_dataset   <- "Lu_et_al"
+target_dataset <- "Lu_et_al"
+# H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
+antibody <- "H3K36me3"
 ```
 
 ### Collection of spike-in datasets
@@ -76,6 +77,7 @@ if(any(c("ESC_BRD", "ALL") %in% load_dataset)) {
     ),
     CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
   )
+  rm(data_path)
   
   data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R2_TEST/"
   ESC_BRD$R2 <- list(
@@ -98,7 +100,7 @@ if(any(c("ESC_BRD", "ALL") %in% load_dataset)) {
     ),
     CNT = with(ESC_BRD, JoinColumns(R1$CNT, R2$CNT))
   )
-  
+
   if(! with(ESC_BRD, all(ann$lt_id == colnames(CNT$GN)))) {
     stop("Inconsistent annotation of samples in ESC_BRD")
   }
@@ -346,7 +348,7 @@ rm(wks_name)
 
 ```{r}
 ref_roi <- "GN"
-dither  <- 3
+dither  <- 1
 smobs   <- T
 zscore  <- T
 mincs   <- 300
@@ -366,111 +368,101 @@ rm(tbl)
 # Select dataset to be analysed
 cfg  <- CFG_DTS[[target_dataset]]
 
-viz  <- cfg$viz
-lyt  <- cfg$layout
-
 # Raw counts
 wks <- get(target_dataset)
 cnt <- with(wks, CNT[[ref_roi]][, cfg$xps])
 
-# Experiment and controls
-xps <- colnames(cnt)
-inp <- which(grepl(cfg$rex, xps, perl = T))
-
-# Dithered and log2 transformed counts
-ldc <- log2(DitherCounts(cnt))         
-
-# Quick and dirty
-cleanup <- FiniteValues(log(cnt))
-cnt <- cnt[cleanup, ]
-ldc <- ldc[cleanup, ]
-
-rm(cfg, wks, chk)
+# Name of all experiments and controls
+experiments <- colnames(cnt)
+controls    <- experiments[grepl(cfg$rex, experiments, perl = T)]
 ```
 
 #### BRD estimation
 
-```{r, include=FALSE}
-
+```{r, echo=FALSE}
 brd <- with(
   cfg, BRD(
-    cnt, controls = , dither = dither,
+    cnt, controls = controls, dither = dither,
     smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
     knn = knn, cst = cst, ncl = ncl, mincs = mincs
   ) 
 )
-
-if(F) {
-  # Count density after dithering and dimensionality reduction
-  dr <- with(
-    cfg, cdadadr(
-      cnt, knn = knn, smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
-      dither = dither
-    ) 
-  )
-
-  xr <- list(x = dr$projection$x, d = dr$density)
-  
-  # Moderate density threshold to increase clustering robustness
-  h <- which(rankstat(xr$d) > cfg$cst )
-  h <- list(i = h, x = xr$x[h, ], d = xr$d[h])
-  
-  # Clustering by density gradient ascent
-  qs <- QuickShiftClustering(h$x, h$d, n = cfg$ncl)
-  
-  # Find background cluster
-  if(ncl > 1) {
-    grp <- bg_grp(ldc[h$i, ], grp = qs$membership, bg_cols = inp)
-  } else {
-    grp <- 1
-  }
-  bg <- h$i[qs$membership == grp[1]]
-  
-  # Fit multivariate gaussian model to the background cluster
-  mm <- mv_gmm(ldc[bg, ], ns = 1)
-  bg_theta <- mm$theta[[1]]
-}
+message("status: ", brd$status)
 ```
 
-#### Save scaling factors
+#### Saved results
 
-```{r}
-wks <- get(target_dataset)
-wks$experiments <- xps
-wks$CNT <- ExtractColumns(wks$CNT, xps)
-wks$BRD <- list(
-  ref_roi  = ref_roi,           # regions used for BRD
-  control  = xps[inp],          # samples used as Input/IgG
-  cleanup  = cleanup,           # observation with count > 0 in ref_roi data
-  drstatus = dr$projection$msg, # status of dimensionality reduction with cdadadr
-  reduced  = xr,                # dimensionality reduced count data 
-  coreset  = h,                 # observations with density above threshold
-  clusters = qs,                # clustering
-  ctrlgrps = grp,               # cluster ids ordered by decreasing control / ChIP averages
-  bg_theta = bg_theta,          # mv parameters of clusters (gmm fit using EM)
-  scaling  = mean(bg_theta$mu) - bg_theta$mu,
-  bg_index = bg
+```{r, include=FALSE}
+# Reshape dataset to match target experiments
+wks$experiments <- experiments
+wks$controls    <- controls
+wks$CFG         <- cfg
+wks$CNT         <- ExtractColumns(wks$CNT, experiments)
+wks$ann         <- with(wks, ann[match(experiments, ann$lt_id), ])
+rownames(wks$ann) <- NULL
+
+# Include BRD results
+wks$BRD <- c(
+  list(ref_roi = ref_roi), # regions used for BRD estimation
+  brd
 )
-wks$CFG <- CFG_DTS[[target_dataset]]
 
+# Save RData
 saveRDS(wks, paste0(wks$data_path, target_dataset, "_", antibody, ".RData"))
+
+# Cleanup
+
 ```
 
-#### Results visualization
+### Controls
 
-##### Count density after dithering and dimensionality reduction
+#### CDADADR
 
 ```{r, echo=FALSE, results='asis'}
-tbl <- t(sapply(dr$projection$msg, rbind))
+tbl <- as.data.frame(brd$dred$status[1:4])
 knitr::kable(data.frame(tbl))
 ```
 
+```{r, echo=FALSE, fig.height=3.5, fig.width=4}
+clr <- with(brd$dred$status, 1:original <= reduced)
+clr <- ifelse(clr, grey(0.5), rgb(0.5, 0, 0))
+with(
+  brd$dred$status,
+  barplot(cvpc, col = clr, border = clr, ylab = "% variance", las = 2)
+)
+```
+
+#### Clustering statistics
+
 ```{r, echo=FALSE, results='asis'}
 tbl <- data.frame(
-  cluster_size = qs$csize,
-  background   = 1:ncl == grp[1]
+  cluster_size = brd$clusters$csize,
+  background   = 1:cfg$ncl == brd$bg_cluster
 )
 knitr::kable(tbl)
+```
+
+#### Figures
+
+```{r, include=FALSE}
+# cnt <- cnt[brd$nonzero, ]
+# ldc <- brd$log2counts
+# xr  <- brd$dred$projection
+# cs  <- brd$coreset
+# 
+# viz  <- cfg$viz
+# lyt  <- cfg$layout
+
+grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)[2:cfg$ncl]
+if(cfg$ncl > 1) {
+  grp.clr <- c(rgb(1, 1, 0), grp.clr)
+} else {
+  grp.clr <- rgb(1, 1, 0)
+}
+grp.prm <- defineGroups(ids = brd$bg_clurank, colors = grp.clr)
+
+clr.prm <- AutoColorParameters("ry")
+clr.prm$thresholds <- round(clr.prm$thresholds, 2)
 ```
 
 
@@ -479,33 +471,45 @@ knitr::kable(tbl)
 # layout 2 x 2 => 5.28 x 5.94
 # layout 6 x 2 => 5.28 x 8.91
 
-grp.clr <- rgb(1, 1, 0)
-if(ncl > 1) {
-  grp.clr <- c(
-    grp.clr, transformColors(SuperRainbow(3), delta.H = 30)[2:ncl]
-  )
-}
-grp.prm <- defineGroups(ids = grp, colors = grp.clr)
-
-clr.prm <- AutoColorParameters("ry")
-clr.prm$thresholds <- round(clr.prm$thresholds, 2)
-
 layout(matrix(1:2, 1, 2, byrow = T))
-par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
-xlim <- range(xr$x[, 1]) * 1.2
-ylim <- range(xr$x[, 1:2])
-ylim <- ylim * 1.2 - diff(ylim) * 0.1 
-plot_samples(xr$x, xlim = xlim, ylim = ylim, col = colorize(xr$d, mode = "rank", colors = "ry"), main = "density")
-colorLegend("b", clr.prm, ticks = 0:4/4, horiz = T, size = c(70, 3), tick.pos = -1, cex = 0.75)
-
-plot_samples(xr$x, xlim = xlim, ylim = ylim, col = colorize(xr$d, mode = "rank"), main = "clustering")
-plot_samples(xr$x[h$i, ], grp = qs$membership, grp.prm = grp.prm, alpha = 0.1, add = T)
+lim <- xylim(
+  brd$dred$projection[, 1:2], spacing = c(0, -0.1), margin = 0.1
+)
+with(
+  brd$dred, plot_samples(
+    projection, xlim = lim$x, ylim = lim$y,
+    col = colorize(density, mode = "rank", colors = "ry"),
+    main = "density"
+  )
+)
+colorLegend(
+  "b", horiz = T, size = c(70, 3), parameters = clr.prm,
+  ticks = 0:4/4, tick.pos = -1, cex = 0.75
+)
+with(
+  brd$dred, plot_samples(
+    projection, xlim = lim$x, ylim = lim$y,
+    col = colorize(density, mode = "rank"),
+    main = "clustering"
+  )
+)
+with(
+  brd, plot_samples(
+    coreset$x, grp = clusters$membership,
+    grp.prm = grp.prm, alpha = 0.1, add = T
+  )
+)
+legend(
+  "bottomleft", legend = "best candidate", fill = grp.prm$colors[1], cex = 0.75,
+  bty = 'n'
+)
 ```
 
-##### Selected background population and scaling factors
+#### Scaling factors
 
-```{r, echo=FALSE, fig.width=3, fig.height=3.5}
+```{r, eval=FALSE, fig.height=3.5, fig.width=3, include=FALSE}
 # layout 1 x 1 => 2.64 x 2.97
 # layout 1 x 2 => 5.28 x 2.97
 # layout 2 x 2 => 5.28 x 5.94
@@ -524,7 +528,7 @@ for(cmp in viz) {
 }
 ```
 
-```{r, include=FALSE}
+```{r, eval=FALSE, include=FALSE}
 rm(cmp, lbl, idx, d)
 ```
 

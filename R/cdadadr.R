@@ -102,6 +102,8 @@ cdadadr <- function(
 
       status$pcsd <- x$sdev
       status$cvpc <- 1 - cumsum(x$sdev / sum(x$sdev))
+      names(status$pcsd) <- paste0("PC", 1:ncol(cnt))
+      names(status$cvpc) <- names(status$pcsd)
 
       if(is.na(npc)) {
         # Retain PC conserving 100 * (1 - cvt) % of the variance
