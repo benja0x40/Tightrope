@@ -2,8 +2,7 @@
 #' Signal Extraction Scaling (Diaz et al., 2012)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CPSES},
-#'   \link{BRD}
+#'   \link{CPSES}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' vector of read counts in the control condition (Input, IgG, etc.)
@@ -14,6 +13,7 @@
 #' @return
 #' scaling factor
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 Diaz.SES <- function(x, y) {
 
@@ -31,11 +31,11 @@ Diaz.SES <- function(x, y) {
 }
 
 # =============================================================================.
-#' Combined Pairwise SES
+#' Combined Pairwise Signal Extraction Scaling (SES)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{Diaz.SES},
-#'   \link{BRD}
+#'   \link{BRD},
+#'   \link{Diaz.SES}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts

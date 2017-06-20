@@ -3,6 +3,9 @@
 # =============================================================================.
 #' QuickShift algorithm (Vedaldi & Soatto, 2008)
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{QuickShiftClustering}
+# -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
 #' and columns = samples or conditions.
@@ -49,6 +52,9 @@ QuickShift <- function (x, d, progress = F) {
 # -----------------------------------------------------------------------------.
 # TODO: fix bug with ordering cluster sizes and memberships
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{QuickShiftClustering}
+# -----------------------------------------------------------------------------.
 #' @param g
 #' QuickShift graph resulting from the \link{QuickShift} function
 #'
@@ -91,6 +97,11 @@ QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
 
 # =============================================================================.
 #' QuickShiftClustering
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{BRD},
+#'   \link{QuickShift},
+#'   \link{QuickShiftCutClusters}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations

@@ -18,4 +18,9 @@ mv_pdf returns a vector of probabilities
 \description{
 Multivariate normal distribution: probability density function
 }
+\seealso{
+\link{mv_mle},
+  \link{mv_rsg},
+  \link{mv_gmm}
+}
 \keyword{internal}

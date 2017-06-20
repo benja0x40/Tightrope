@@ -195,7 +195,7 @@ if(exists(wks_name)) {
     layout = matrix(1:9, 3, 3, byrow = T),
     nxp  = 0,
     rex  = "Input",
-    vpc  = 0.5,  # select the most discriminative components
+    cvt  = 0.5,
     npc  = NA,
     knn  = 200,
     cst  = 0.5,
@@ -242,8 +242,8 @@ if(exists(wks_name)) {
     layout = matrix(1:9, 3, 3, byrow = T),
     nxp  = 0,
     rex  = "Input",
-    vpc  = 0.5,
-    npc  = NA, # dimensions of variation: H3WT, K27M, EPZ = Input
+    cvt  = 0.5,
+    npc  = NA,
     knn  = 300,
     cst  = 0.9,
     ncl  = 1
@@ -277,9 +277,8 @@ if(exists(wks_name)) {
     ),
     layout = matrix(1:9, 3, 3, byrow = T),
     nxp  = 0,
-    # Unfortunately only H3K27me3 seems to be really negative at 7d
-    rex  = c(H3K27me3 = "_7d$", H3K27me2 = "_E14$", H3K27me1 = "_7d$"),
-    vpc  = 0.5, # select the most discriminative components
+    rex  = c(H3K27me3 = "_7d$", H3K27me2 = "_7d$", H3K27me1 = "_7d$"),
+    cvt  = 0.5,
     npc  = NA,
     knn  = 300,
     cst  = c(H3K27me3 = .95, H3K27me2 = 0.5, H3K27me1 = 0.5),
@@ -321,7 +320,7 @@ if(exists(wks_name)) {
     layout = matrix(1:9, 3, 3, byrow = T),
     nxp  = 0,
     rex  = "Input",
-    vpc  = 0,
+    cvt  = 0,
     npc  = 3, # Force to conserve 3 dimensions of variation: H3WT, K36M, Input
     knn  = 300,
     cst  = 0.7,
@@ -350,6 +349,7 @@ ref_roi <- "GN"
 dither  <- 3
 smobs   <- T
 zscore  <- T
+mincs   <- 300
 ```
 
 #### Dataset dependent settings
@@ -365,17 +365,15 @@ rm(tbl)
 ```{r, include=FALSE}
 # Select dataset to be analysed
 cfg  <- CFG_DTS[[target_dataset]]
-vpc  <- cfg$vpc 
-npc  <- cfg$npc
-knn  <- cfg$knn
-cst  <- cfg$cst 
-ncl  <- cfg$ncl
+
 viz  <- cfg$viz
 lyt  <- cfg$layout
 
 # Raw counts
 wks <- get(target_dataset)
 cnt <- with(wks, CNT[[ref_roi]][, cfg$xps])
+
+# Experiment and controls
 xps <- colnames(cnt)
 inp <- which(grepl(cfg$rex, xps, perl = T))
 
@@ -393,31 +391,45 @@ rm(cfg, wks, chk)
 #### BRD estimation
 
 ```{r, include=FALSE}
-# Count density after dithering and dimensionality reduction
-dr <- cdadadr(
-  cnt, k = knn, smobs = smobs, vpc  = vpc , npc = npc, zscore = zscore, dither = dither
-) 
 
-xr <- list(x = dr$projection$x, d = dr$density)
+brd <- with(
+  cfg, BRD(
+    cnt, controls = , dither = dither,
+    smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
+    knn = knn, cst = cst, ncl = ncl, mincs = mincs
+  ) 
+)
 
-# Moderate density threshold to increase clustering robustness
-h <- which(rankstat(xr$d) > cst )
-h <- list(i = h, x = xr$x[h, ], d = xr$d[h])
+if(F) {
+  # Count density after dithering and dimensionality reduction
+  dr <- with(
+    cfg, cdadadr(
+      cnt, knn = knn, smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
+      dither = dither
+    ) 
+  )
 
-# Clustering by density gradient ascent
-qs <- QuickShiftClustering(h$x, h$d, n = ncl)
-
-# Find background cluster
-if(ncl > 1) {
-  grp <- bg_grp(ldc[h$i, ], grp = qs$membership, bg_cols = inp)
-} else {
-  grp <- 1
+  xr <- list(x = dr$projection$x, d = dr$density)
+  
+  # Moderate density threshold to increase clustering robustness
+  h <- which(rankstat(xr$d) > cfg$cst )
+  h <- list(i = h, x = xr$x[h, ], d = xr$d[h])
+  
+  # Clustering by density gradient ascent
+  qs <- QuickShiftClustering(h$x, h$d, n = cfg$ncl)
+  
+  # Find background cluster
+  if(ncl > 1) {
+    grp <- bg_grp(ldc[h$i, ], grp = qs$membership, bg_cols = inp)
+  } else {
+    grp <- 1
+  }
+  bg <- h$i[qs$membership == grp[1]]
+  
+  # Fit multivariate gaussian model to the background cluster
+  mm <- mv_gmm(ldc[bg, ], ns = 1)
+  bg_theta <- mm$theta[[1]]
 }
-bg <- h$i[qs$membership == grp[1]]
-
-# Fit multivariate gaussian model to the background cluster
-mm <- mv_gmm(ldc[bg, ], ns = 1)
-bg_theta <- mm$theta[[1]]
 ```
 
 #### Save scaling factors

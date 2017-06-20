@@ -18,4 +18,9 @@ ExtractColumns returns a \code{list}
 \description{
 Extract count data
 }
+\seealso{
+\link{JoinColumns},
+  \link{makeReadCountMatrix},
+  \link{makeReadCountsInROI}
+}
 \keyword{internal}

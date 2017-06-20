@@ -22,4 +22,8 @@ mv_maximization returns a list of multivariate distribution parameters
 \description{
 Multivariate maximization
 }
+\seealso{
+\link{mv_expectation},
+  \link{mv_emloop}
+}
 \keyword{internal}

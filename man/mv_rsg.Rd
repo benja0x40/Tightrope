@@ -18,4 +18,9 @@ where rows = observations and columns = samples or conditions.
 \description{
 Multivariate normal distribution: random sample generator
 }
+\seealso{
+\link{mv_pdf},
+  \link{mv_mle},
+  \link{mv_gmm}
+}
 \keyword{internal}

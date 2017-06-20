@@ -29,3 +29,4 @@ lowVariability(cnt, bg_cols, fit_idx, viz_idx, mincv = 0.05, n = 3,
 \description{
 lowVariability
 }
+\keyword{internal}

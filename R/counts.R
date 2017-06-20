@@ -3,6 +3,9 @@
 # =============================================================================.
 #' Detect computable values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{DetectCounts}
+# -----------------------------------------------------------------------------.
 #' @param x
 #' numeric vector or matrix
 #'
@@ -61,7 +64,10 @@ DetectCounts <- function(cnt, detailed = F) {
 }
 
 # =============================================================================.
-#' Dither counts
+#' Dither read count values
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{makeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts (rows = observations, columns = samples or conditions).
@@ -92,6 +98,11 @@ DitherCounts <- function(x) {
 # =============================================================================.
 #' Merge count data
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ExtractColumns},
+#'   \link{makeReadCountMatrix},
+#'   \link{makeReadCountsInROI}
+# -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
 #' (rows = observations, columns = samples or conditions).
@@ -112,6 +123,11 @@ JoinColumns <- function(x, y) {
 # =============================================================================.
 #' Extract count data
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{JoinColumns},
+#'   \link{makeReadCountMatrix},
+#'   \link{makeReadCountsInROI}
+# -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
 #' (rows = observations, columns = samples or conditions).
@@ -131,10 +147,16 @@ ExtractColumns <- function(x, lst) {
 }
 
 # =============================================================================.
-#' Count mapped reads overlapping with genomic intervals
+#' Count reads overlapping with genomic intervals
 # -----------------------------------------------------------------------------.
 # TODO: implement skipping existing count columns with provided counts
 # TODO: check if this can be faster and as/more flexible using summerizeOverlaps
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{DitherCounts},
+#'   \link{JoinColumns},
+#'   \link{ExtractColumns},
+#'   \link{makeReadCountsInROI}
 # -----------------------------------------------------------------------------.
 #' @param aln
 #' list of \link{GAlignments} objects with mapped reads from different samples
@@ -164,7 +186,11 @@ makeReadCountMatrix <- function(aln, grg, ...) {
 # TODO: implement read.extension
 # TODO: implement different inputs (bam files, GenomicAlignment)
 # -----------------------------------------------------------------------------.
-#'
+#' @seealso
+#'   \link{JoinColumns},
+#'   \link{ExtractColumns},
+#'   \link{makeReadCountMatrix}
+# -----------------------------------------------------------------------------.
 #' @param ALN
 #' mapped reads
 #'
@@ -187,6 +213,7 @@ makeReadCountMatrix <- function(aln, grg, ...) {
 #'
 #' @return makeReadCountsInROI returns a \code{list} of read count matrixes
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 makeReadCountsInROI <- function(
   ALN, ROI, CNT = NULL, labels = NULL, ignore.strand = T, read.extension = 0,

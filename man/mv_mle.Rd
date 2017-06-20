@@ -22,4 +22,9 @@ mv_mle returns a \code{list} with the following elements:
 \description{
 Multivariate normal distribution: maximum likelihood estimation
 }
+\seealso{
+\link{mv_pdf},
+  \link{mv_rsg},
+  \link{mv_gmm}
+}
 \keyword{internal}

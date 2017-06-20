@@ -20,4 +20,7 @@ QuickShift returns a graph object (igraph package)
 \description{
 QuickShift algorithm (Vedaldi & Soatto, 2008)
 }
+\seealso{
+\link{QuickShiftClustering}
+}
 \keyword{internal}

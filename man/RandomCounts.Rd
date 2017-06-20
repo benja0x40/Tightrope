@@ -26,3 +26,4 @@ RandomCounts returns a \code{list}
 \description{
 Generate pseudo random count values
 }
+\keyword{internal}

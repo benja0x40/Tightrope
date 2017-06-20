@@ -5,7 +5,6 @@
 #'   \link{BRD},
 #'   \link{DitherCounts},
 #'   \link{knn_density}
-#'   \link{prcomp},
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -21,13 +20,15 @@
 #' @param cvt
 #' percentage of variance in principal components to be ignored.
 #' The value of \code{cvt} determines the stringency of the dimensionality
-#' reduction which is performed by Principal Component Analysis.
+#' reduction which is performed by principal component analysis using
+#' \link{prcomp}.
 #' Dimensions retained after projection of the read count dataset on its
-#' principal components will preserve \code{100 * (1 - cvt)}% of the total
-#' variance.
-#' For instance with the default value (\code{cvt} = 0.05),
-#' 95% of the total variance will remain after dimensionality reduction.
-#' Setting cvt = 0 bypasses the dimensionality reduction and performs
+#' principal components will preserve \code{100 * (1 - cvt)} percents
+#' of the total variance.
+#' For instance, after dimensionality reduction with the default setting
+#' (\code{cvt} = 0.5), approximately 50 percents of the initial variance
+#' will remain in the reduced data.
+#' Setting \code{cvt} = 0 bypasses the dimensionality reduction and performs
 #' density estimations in the original multivariate measurement space
 #' of the dataset.
 #'
@@ -52,9 +53,10 @@
 #' \item{density}{knn density}
 #' \item{projection}{transformed count matrix}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 cdadadr <- function(
-  cnt, knn, smobs = F, cvt = 0.05, npc = NA, zscore = T, dither = 1, progress = F
+  cnt, knn, smobs = F, cvt = 0.5, npc = NA, zscore = T, dither = 1, progress = F
 ) {
 
   parameters <- list(

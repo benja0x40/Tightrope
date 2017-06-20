@@ -28,3 +28,4 @@ plot_groups_2D returns a vector of colors
 \description{
 2D scatter plot with groups
 }
+\keyword{internal}

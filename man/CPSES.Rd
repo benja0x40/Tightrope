@@ -2,10 +2,24 @@
 % Please edit documentation in R/CPSES.R
 \name{CPSES}
 \alias{CPSES}
-\title{Combined Pairwise Signal Extraction Scaling}
+\title{Combined Pairwise Signal Extraction Scaling (SES)}
 \usage{
-CPSES(x)
+CPSES(cnt, dither = 1)
+}
+\arguments{
+\item{dither}{number of replicates for count dithering:
+1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
+
+\item{x}{matrix of read counts
+(rows = observations, columns = measurement conditions).}
+}
+\value{
+scaling factors
 }
 \description{
-Combined Pairwise Signal Extraction Scaling
+Combined Pairwise Signal Extraction Scaling (SES)
+}
+\seealso{
+\link{BRD},
+  \link{Diaz.SES}
 }

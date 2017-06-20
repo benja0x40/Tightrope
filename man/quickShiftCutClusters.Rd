@@ -19,4 +19,7 @@ QuickShiftCutClusters returnd a \code{list} with the following elements
 \description{
 QuickShiftCutClusters
 }
+\seealso{
+\link{QuickShiftClustering}
+}
 \keyword{internal}

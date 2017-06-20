@@ -492,6 +492,7 @@ ClonalUniform <- function(n, mu, delta) {
 #' @return
 #' RandomCounts returns a \code{list}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
 
@@ -583,6 +584,7 @@ RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
 #' @return
 #' SimulatedCounts returns a list
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 SimulatedCounts <- function(
   n, d = 3, mu = 5, sigma = 3,

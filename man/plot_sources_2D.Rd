@@ -23,3 +23,4 @@ plot_sources_2D(theta, components = NULL, p = 0.5, clr = NULL,
 \description{
 plot 2D normal distributions
 }
+\keyword{internal}

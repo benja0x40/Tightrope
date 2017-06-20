@@ -17,4 +17,7 @@ SX2Y returns x rescaled such that range(x) = range(y)
 \description{
 rescale x into range(y)
 }
+\seealso{
+\link{S01}
+}
 \keyword{internal}

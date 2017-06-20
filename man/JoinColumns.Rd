@@ -18,4 +18,9 @@ JoinColumns returns a \code{list}
 \description{
 Merge count data
 }
+\seealso{
+\link{ExtractColumns},
+  \link{makeReadCountMatrix},
+  \link{makeReadCountsInROI}
+}
 \keyword{internal}

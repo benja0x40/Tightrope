@@ -15,4 +15,7 @@ S01 returns x rescaled such that range(x) = [0, 1]
 \description{
 rescale x into [0, 1]
 }
+\seealso{
+\link{SX2Y}
+}
 \keyword{internal}

@@ -22,3 +22,8 @@ QuickShiftClustering returns a \code{list} with the following elements
 \description{
 QuickShiftClustering
 }
+\seealso{
+\link{BRD},
+  \link{QuickShift},
+  \link{QuickShiftCutClusters}
+}

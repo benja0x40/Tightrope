@@ -28,3 +28,9 @@ makeReadCountsInROI returns a \code{list} of read count matrixes
 \description{
 makeReadCountsInROI
 }
+\seealso{
+\link{JoinColumns},
+  \link{ExtractColumns},
+  \link{makeReadCountMatrix}
+}
+\keyword{internal}

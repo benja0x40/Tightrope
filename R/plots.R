@@ -1,7 +1,5 @@
 # FUNCTIONS | 2D PLOTS #########################################################
 
-
-
 # =============================================================================.
 #' empty.plot
 # -----------------------------------------------------------------------------.
@@ -155,6 +153,7 @@ plot_samples <- function(
 #'
 #' @return plot_groups_2D returns a vector of colors
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 plot_groups_2D <- function(x, p = NULL, posterior = 0, contrast = 1, clr = NULL, alpha = 0.1, ...) {
 
@@ -202,6 +201,7 @@ plot_groups_2D <- function(x, p = NULL, posterior = 0, contrast = 1, clr = NULL,
 #'
 #' @return NULL
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 plot_sources_2D <- function(theta, components = NULL, p = 0.5, clr = NULL, center = F, ...) {
 

@@ -7,13 +7,17 @@
 Diaz.SES(x, y)
 }
 \arguments{
-\item{x}{Input or IgG raw read counts}
+\item{x}{vector of read counts in the control condition (Input, IgG, etc.)}
 
-\item{y}{ChIP raw read counts}
+\item{y}{vector of read counts in the specific condition}
 }
 \value{
-list
+scaling factor
 }
 \description{
 Signal Extraction Scaling (Diaz et al., 2012)
 }
+\seealso{
+\link{CPSES}
+}
+\keyword{internal}

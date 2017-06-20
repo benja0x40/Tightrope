@@ -2,7 +2,7 @@
 % Please edit documentation in R/counts.R
 \name{makeReadCountMatrix}
 \alias{makeReadCountMatrix}
-\title{Count mapped reads overlapping with genomic intervals}
+\title{Count reads overlapping with genomic intervals}
 \usage{
 makeReadCountMatrix(aln, grg, ...)
 }
@@ -16,5 +16,11 @@ makeReadCountMatrix matrix of read counts
 (rows = observations, columns = samples or conditions).
 }
 \description{
-Count mapped reads overlapping with genomic intervals
+Count reads overlapping with genomic intervals
+}
+\seealso{
+\link{DitherCounts},
+  \link{JoinColumns},
+  \link{ExtractColumns},
+  \link{makeReadCountsInROI}
 }

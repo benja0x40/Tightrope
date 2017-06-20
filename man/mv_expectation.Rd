@@ -20,4 +20,8 @@ mv_expectation returns a vector of probabilities
 \description{
 Multivariate expectation
 }
+\seealso{
+\link{mv_maximization},
+  \link{mv_emloop}
+}
 \keyword{internal}

@@ -4,7 +4,7 @@
 \alias{cdadadr}
 \title{Count Density After Dithering And Dimensionality Reduction}
 \usage{
-cdadadr(cnt, knn, smobs = F, cvt = 0.05, npc = NA, zscore = T,
+cdadadr(cnt, knn, smobs = F, cvt = 0.5, npc = NA, zscore = T,
   dither = 1, progress = F)
 }
 \arguments{
@@ -18,13 +18,15 @@ of estimated densities (larger values = smoother).}
 
 \item{cvt}{percentage of variance in principal components to be ignored.
 The value of \code{cvt} determines the stringency of the dimensionality
-reduction which is performed by Principal Component Analysis.
+reduction which is performed by principal component analysis using
+\link{prcomp}.
 Dimensions retained after projection of the read count dataset on its
-principal components will preserve \code{100 * (1 - cvt)}% of the total
-variance.
-For instance with the default value (\code{cvt} = 0.05),
-95% of the total variance will remain after dimensionality reduction.
-Setting cvt = 0 bypasses the dimensionality reduction and performs
+principal components will preserve \code{100 * (1 - cvt)} percents
+of the total variance.
+For instance, after dimensionality reduction with the default setting
+(\code{cvt} = 0.5), approximately 50 percents of the initial variance
+will remain in the reduced data.
+Setting \code{cvt} = 0 bypasses the dimensionality reduction and performs
 density estimations in the original multivariate measurement space
 of the dataset.}
 
@@ -33,7 +35,7 @@ When \code{npc} is specified, the \code{cvt} parameter is ignored.}
 
 \item{zscore}{transform counts into z-scores (logical, default = T).}
 
-\item{dither}{number of replicates for count dithering: 0 = no dithering,
+\item{dither}{number of replicates for count dithering:
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
 \item{progress}{show progress bar (logical, default = F).}
@@ -52,5 +54,5 @@ Count Density After Dithering And Dimensionality Reduction
 \link{BRD},
   \link{DitherCounts},
   \link{knn_density}
-  \link{prcomp},
 }
+\keyword{internal}

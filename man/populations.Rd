@@ -27,3 +27,4 @@ populations returns a \code{list} with the following elements:
 \description{
 partition of multivariate observations
 }
+\keyword{internal}

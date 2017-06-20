@@ -2,32 +2,34 @@
 % Please edit documentation in R/BRD.R
 \name{BRD}
 \alias{BRD}
-\title{Background read density clustering}
+\title{Background Read Density}
 \usage{
 BRD(cnt, controls = NULL, dither = 3, smobs = T, cvt = 0.5, npc = NA,
-  zscore = T, knn = 200, cst = 0.5, ncl = 3, mcs = 100,
+  zscore = T, knn = 200, cst = 0.5, ncl = 3, mincs = 300,
   progress = F)
 }
 \arguments{
 \item{cnt}{matrix of read counts
 (rows = observations, columns = measurement conditions).}
 
-\item{controls}{columns corresponding to control measurements (Input, IgG, etc.)}
+\item{controls}{columns corresponding to control measurements (Input, IgG, etc.).}
 
-\item{dither}{number of replicates for count dithering: 0 = no dithering,
+\item{dither}{number of replicates for count dithering:
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
 \item{smobs}{subtract the mean count value of each observation (logical, default = F).}
 
 \item{cvt}{percentage of variance in principal components to be ignored.
 The value of \code{cvt} determines the stringency of the dimensionality
-reduction which is performed by Principal Component Analysis.
+reduction which is performed by principal component analysis using
+\link{prcomp}.
 Dimensions retained after projection of the read count dataset on its
-principal components will preserve \code{100 * (1 - cvt)}% of the total
-variance.
-For instance with the default value (\code{cvt} = 0.05),
-95% of the total variance will remain after dimensionality reduction.
-Setting cvt = 0 bypasses the dimensionality reduction and performs
+principal components will preserve \code{100 * (1 - cvt)} percents
+of the total variance.
+For instance, after dimensionality reduction with the default setting
+(\code{cvt} = 0.5), approximately 50 percents of the initial variance
+will remain in the reduced data.
+Setting \code{cvt} = 0 bypasses the dimensionality reduction and performs
 density estimations in the original multivariate measurement space
 of the dataset.}
 
@@ -39,17 +41,30 @@ When \code{npc} is specified, the \code{cvt} parameter is ignored.}
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
 of estimated densities (larger values = smoother).}
 
-\item{cst}{core subset density threshold}
+\item{cst}{core subset density threshold.}
 
-\item{ncl}{number of clusters}
+\item{ncl}{number of clusters used to partition the core subset.}
 
-\item{mcs}{minimum size of the background cluster}
+\item{mincs}{minimum size of each cluster, as number of observations.}
 
 \item{progress}{show progress bar (logical, default = F).}
 }
 \value{
-BRD returns a \code{list}
+\code{BRD} returns a \code{list} with the following elements:
+\item{parameters}{call parameters of the function}
+\item{status}{execution status}
+\item{nonzero}{indices of initial observations with count > 0}
+\item{dred}{result of \link{cdadadr} applied to non-zero observations}
+\item{coreset}{indices of non-zero observations selected as core subset}
+\item{clusters}{result of \link{QuickShiftClustering} applied to the core subset}
+\item{theta}{distribution parameters for each cluster in the core subset}
+\item{log2counts}{dithered and log2 transformed counts}
 }
 \description{
-Background read density clustering
+Background Read Density
+}
+\seealso{
+\link{CPSES},
+  \link{QuickShiftClustering},
+  \link{cdadadr}
 }

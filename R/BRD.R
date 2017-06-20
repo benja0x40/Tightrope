@@ -1,6 +1,9 @@
 # =============================================================================.
 #' Average ranking for control measurements
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{BRD}
+# -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts
 #' (rows = observations, columns = measurement conditions).
@@ -30,30 +33,43 @@ bg_ranking <- function(x, by, controls) {
 }
 
 # =============================================================================.
-#' Background read density clustering
+#' Background Read Density
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{CPSES},
+#'   \link{QuickShiftClustering},
+#'   \link{cdadadr}
 # -----------------------------------------------------------------------------.
 #' @inheritParams cdadadr
 #'
 #' @param controls
-#' columns corresponding to control measurements (Input, IgG, etc.)
+#' columns corresponding to control measurements (Input, IgG, etc.).
 #'
 #' @param cst
-#' core subset density threshold
+#' core subset density threshold.
 #'
 #' @param ncl
-#' number of clusters
+#' number of clusters used to partition the core subset.
 #'
-#' @param mcs
-#' minimum size of the background cluster
+#' @param mincs
+#' minimum size of each cluster, as number of observations.
 #'
 #' @return
-#' BRD returns a \code{list}
+#' \code{BRD} returns a \code{list} with the following elements:
+#' \item{parameters}{call parameters of the function}
+#' \item{status}{execution status}
+#' \item{nonzero}{indices of initial observations with count > 0}
+#' \item{dred}{result of \link{cdadadr} applied to non-zero observations}
+#' \item{coreset}{indices of non-zero observations selected as core subset}
+#' \item{clusters}{result of \link{QuickShiftClustering} applied to the core subset}
+#' \item{theta}{distribution parameters for each cluster in the core subset}
+#' \item{log2counts}{dithered and log2 transformed counts}
 # -----------------------------------------------------------------------------.
 #' @export
 BRD <- function(
   cnt, controls = NULL,
   dither = 3, smobs = T, cvt = 0.5, npc = NA, zscore = T,
-  knn = 200, cst = 0.5, ncl = 3, mcs = 100, progress = F
+  knn = 200, cst = 0.5, ncl = 3, mincs = 300, progress = F
 ) {
 
   if(is.null(colnames(cnt))) stop("missing column names in the count matrix")
@@ -64,7 +80,7 @@ BRD <- function(
   parameters <- list(
     experiments = xps, controls = xps[inp],
     dither = dither, smobs = smobs, cvt = cvt, npc = npc, zscore = zscore,
-    knn = knn, cst = cst, ncl = ncl, mcs = mcs
+    knn = knn, cst = cst, ncl = ncl, mincs = mincs
   )
 
   # Cleanup of missing values
@@ -101,7 +117,7 @@ BRD <- function(
   theta <- list()
   for(grp in 1:ncl) {
     idx <- core$i[qsc$membership == grp] # select cluster
-    if(length(idx) > mcs) {
+    if(length(idx) > mincs) {
       mm <- mv_gmm(ldc[idx, ], ns = 1)   # EM fitting
       theta[[grp]] <- mm$theta[[1]]
     } else {
@@ -115,8 +131,9 @@ BRD <- function(
     nonzero    = which(cleanup), # observation with count > 0
     dred       = dred,           # cdadadr results
     coreset    = core,           # core subset of observations
-    clusters   = qsc,            # clusters in the core subset
-    theta      = theta           # mv gaussian parameters for each cluster
+    clusters   = qsc,            # QuickShiftClustering results
+    theta      = theta,          # distribution parameters for each cluster
+    log2counts = ldc             # dithered and log2 transformed counts
   )
 
   # Background cluster

@@ -31,3 +31,4 @@ SimulatedCounts returns a list
 \description{
 Random counts representing 3 populations
 }
+\keyword{internal}
