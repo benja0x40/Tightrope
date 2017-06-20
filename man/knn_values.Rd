@@ -2,7 +2,7 @@
 % Please edit documentation in R/knn_stats.R
 \name{knn_values}
 \alias{knn_values}
-\title{knn_values}
+\title{Extract local values from knn index matrix}
 \usage{
 knn_values(v, i)
 }
@@ -15,6 +15,6 @@ knn_values(v, i)
 knn_values returns a matrix.
 }
 \description{
-knn_values
+Extract local values from knn index matrix
 }
 \keyword{internal}

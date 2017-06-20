@@ -9,6 +9,7 @@
 #' @return
 #' FiniteValues returns a \code{logical} vector
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 FiniteValues <- function(x) {
   if(is.null(dim(x))) {
@@ -89,7 +90,7 @@ DitherCounts <- function(x) {
 }
 
 # =============================================================================.
-#' MergeCounts
+#' Merge count data
 # -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
@@ -98,12 +99,33 @@ DitherCounts <- function(x) {
 #' @param y
 #' list of read count matrices.
 #'
-#' @return DitherCounts returns a \code{list}
+#' @return JoinColumns returns a \code{list}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
-MergeCounts <- function(x, y) {
+JoinColumns <- function(x, y) {
   for(lbl in names(x)) {
     x[[lbl]] <- cbind(x[[lbl]], y[[lbl]])
+  }
+  x
+}
+# =============================================================================.
+#' Extract count data
+# -----------------------------------------------------------------------------.
+#' @param x
+#' list of read count matrices
+#' (rows = observations, columns = samples or conditions).
+#'
+#' @param lst
+#' column names or indices to be extracted
+#'
+#' @return ExtractColumns returns a \code{list}
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+ExtractColumns <- function(x, lst) {
+  for(lbl in names(x)) {
+    x[[lbl]] <- x[[lbl]][, lst]
   }
   x
 }

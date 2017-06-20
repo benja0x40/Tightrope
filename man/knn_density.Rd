@@ -2,13 +2,13 @@
 % Please edit documentation in R/knn_stats.R
 \name{knn_density}
 \alias{knn_density}
-\title{knn_density}
+\title{knn density estimator}
 \usage{
 knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
-and columns = samples or conditions.}
+and columns = measurement conditions.}
 
 \item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
 of estimated densities (larger values = smoother).}

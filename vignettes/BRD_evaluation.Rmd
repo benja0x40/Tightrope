@@ -1,0 +1,276 @@
+---
+title: "BRD evaluation"
+author: "Benjamin Leblanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteIndexEntry{BRD evaluation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Helper functions
+
+```{r, include=FALSE}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+ParallelDensity <- function(data, k = 100, spacing = 0.2, jitter = "unif") {
+  nc <- ncol(data)
+  nr <- nrow(data)
+  if(jitter == "triangle") {
+    j <- rtriangle(nc * nr, a = -1, b = 1, c = 0)
+  } else {
+    j <- runif(nc * nr, -1, 1)
+  }
+  j <- j * (1 - spacing) / 2
+  x <- rep(1:nc, each = nr)
+  r <- 100 * diff(range(data))
+  m <- cbind(r * x + j, as.vector(data))
+  m <- cbind(m, knn_density(m, k = k))
+  m[, 1] <- x + j
+  m
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+PlotParallelDensity <- function(x, k, clr = "ry", spacing = 0.2, grid = T, ...) {
+
+  m <- ParallelDensity(x, k, spacing)
+  nc <- ncol(x)
+  
+  lim <- xylim(m[, 1:2], spacing = c(0, 0))
+  empty.plot(xlim = lim$x, ylim = lim$y, axes = F, ...)
+  if(grid) grid(nx = 0, ny = NULL)
+  axis(2)
+  axis(1, at = 1:nc, labels = colnames(x), las = 2, tick = F)
+  clr <- colorize(m[, 3], mode = "rank", col = clr)
+  clr <- transformColors(clr, S.range = 0.9)
+  points(m, cex = 0.5, col = clr)
+}
+```
+
+### Initializations
+
+```{r, include=FALSE}
+suppressPackageStartupMessages(library(triangle))
+suppressPackageStartupMessages(library(Tightrope))
+```
+
+### E14_EPZ
+
+EZH2 inhibitor washout experiments in mouse ESCs.
+
+```{r, echo=FALSE, fig.height=3.5, fig.width=3.5}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/_RDATA_/"
+
+ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
+
+E14_EPZ.me3 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me3.RData"))
+E14_EPZ.me2 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me2_Norm_7d.RData"))
+E14_EPZ.me1 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me1.RData"))
+# -----------------------------------------------------------------------------.
+
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+roi <- "CGI_UCSC"
+
+for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+  wks <- get(wks_name)
+  xps <- with(wks, match(experiments, ann$lt_id))
+  
+  cnt <- wks$CNT[[roi]]
+  chk <- FiniteValues(log2(cnt))
+  cnt <- log2(DitherCounts(cnt[chk, ]))
+  
+  brd <- t(t(cnt) + wks$BRD$scaling)
+  
+  crx <- wks$ann$mapped.nbr.dm3[xps]
+  crx <-  log2(mean(crx) / crx)
+  crx <- t(t(cnt) + crx)
+    
+  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
+  PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
+}
+
+```
+
+
+### ESC_BRD
+
+SUZ12 WT + KO cell mix experiments in mouse ESCs.
+
+```{r, eval=FALSE, include=FALSE}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_RDATA/"
+
+ESC_BRD <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
+# -----------------------------------------------------------------------------.
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+roi <- "CGI_UCSC"
+
+wks <- ESC_BRD
+xps <- with(wks, match(experiments, ann$lt_id))
+
+cnt <- wks$CNT[[roi]]
+chk <- FiniteValues(log2(cnt))
+cnt <- log2(DitherCounts(cnt[chk, ]))
+
+brd <- t(t(cnt) + wks$BRD$scaling)
+
+idx <- as.vector(rbind(7:12, 19:24)) 
+PlotParallelDensity(brd[, idx], k = 200, ylab = "log2(counts)", main = "BRD")
+```
+
+### Lu_et_al
+
+H3WT versus K36M experiments from Lu et al., 2016.
+
+```{r, eval=FALSE, include=FALSE}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+data_path <- "/Volumes/USB16GB/LT_WORKS/GSE63195_Lu_et_al_2016/_RDATA_/"
+ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
+
+Lu_et_al <- readRDS(paste0(data_path, "Lu_et_al_H3K36me3.RData"))
+# -----------------------------------------------------------------------------.
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+wks <- Lu_et_al
+xps <- with(wks, match(experiments, ann$lt_id))
+
+ovl <- with(ROI.LST, countOverlaps(WHOLE_GENOME, GN, type = "within"))
+ovl <- which(ovl > 0)
+ovl <- sample(ovl, size = 50000)
+
+cnt <- wks$CNT$WHOLE_GENOME[ovl, ]
+chk <- FiniteValues(log2(cnt))
+cnt <- log2(DitherCounts(cnt[chk, ]))
+
+brd <- t(t(cnt) + wks$BRD$scaling)
+
+PlotParallelDensity(brd[grepl()], k = 100, ylab = "log2(counts)", main = "BRD")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval=FALSE, include=FALSE}
+
+cgi.me3 <- E14_EPZ.me3$CNT$CGI_UCSC
+cgi.me2 <- E14_EPZ.me2$CNT$CGI_UCSC
+cgi.me1 <- E14_EPZ.me1$CNT$CGI_UCSC
+
+chk <- FiniteValues(log2(cbind(cgi.me3, cgi.me2, cgi.me1)))
+
+cgi.me3 <- cgi.me3[chk, ]
+cgi.me2 <- cgi.me2[chk, ]
+cgi.me1 <- cgi.me1[chk, ]
+
+cgi.me3 <- log2(DitherCounts(cgi.me3)) 
+cgi.me2 <- log2(DitherCounts(cgi.me2)) 
+cgi.me1 <- log2(DitherCounts(cgi.me1)) 
+
+cgi.me3 <- t(t(cgi.me3) + E14_EPZ.me3$BRD$scaling)
+cgi.me2 <- t(t(cgi.me2) + E14_EPZ.me2$BRD$scaling)
+cgi.me1 <- t(t(cgi.me1) + E14_EPZ.me1$BRD$scaling)
+
+
+o <- order(rowMeans(cgi.me3[, c(1, 8)]), decreasing = T)
+
+cgi.me3 <- cgi.me3[o, ]
+cgi.me2 <- cgi.me2[o, ]
+cgi.me1 <- cgi.me1[o, ]
+
+n <- ncol(cgi.me3) - 2
+clr <- c("black", rgb(0:n/n, 0.5*n:0/n, n:0/n))
+
+nc <- ncol(cgi.me3)
+nr <- nrow(cgi.me3)
+
+
+layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(10, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+
+boxplot(cgi.me3, las = 2, main = "H3K27me3")
+abline(h = median(cgi.me3[, 1]))
+boxplot(cgi.me2, las = 2, main = "H3K27me2")
+abline(h = median(cgi.me2[, 1]))
+boxplot(cgi.me1, las = 2, main = "H3K27me1")
+abline(h = median(cgi.me1[, 1]))
+
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+
+empty.plot(xlim = c(1, nr), ylim = range(cgi.me3))
+for(i in 1:nc) points(runmed(cgi.me3[, i], 255), type = "l", col = clr[i])
+
+empty.plot(xlim = c(1, nr), ylim = range(cgi.me2))
+for(i in 1:nc) points(runmed(cgi.me2[, i], 255), type = "l", col = clr[i])
+
+empty.plot(xlim = c(1, nr), ylim = range(cgi.me1))
+for(i in 1:nc) points(runmed(cgi.me1[, i], 255), type = "l", col = clr[i])
+
+x <- rep(1:nc, each = nr)
+x <- x + runif(nc * nr, -1, 1) / 2 # (2 * x + DitherCounts(x)) / 3
+y <- rep(1:nr, nc)
+y <- 10 * (y + DitherCounts(y)) / (2 * nr)
+
+
+layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
+empty.plot(xlim = 1:ncol(cgi.me3), )
+plot(x = as.factor(colnames(cgi.me3)), y = rep(NA, ncol(cgi.me3)), type = "n", ylim = range(m[, 2]))
+
+m <- mk_xyd(cgi.me3, k = 200)
+plot(m, cex = 0.5, col = colorize(sqrt(m[, 3]), mode = "rank", col = "ry"))
+
+m <- mk_xyd(cgi.me2, k = 200)
+plot(m, cex = 0.5, col = colorize(sqrt(m[, 3]), mode = "rank", col = "ry"))
+
+m <- mk_xyd(cgi.me1, k = 200)
+plot(m, cex = 0.5, col = colorize(sqrt(m[, 3]), mode = "rank", col = "ry"))
+
+# violin <- function(x, d) {
+#   d <- d / max(d)
+#   x <- x + d * runif(length(x), -1, 1) / 3
+#   x
+# }
+# 
+# x <- rep(1:nc, each = nr)
+# 
+# z <- as.vector(cgi.me3)
+# d <- knn_density(z, k = 50)
+# z <- cbind(violin(x, d), z)
+# plot(z, cex = 0.5, col = colorize(sqrt(d), mode = "01", col = "ry"))
+
+
+# library(rgl)
+
+# z <- cbind(x, y, as.vector(cgi.me3))
+# plot3d(z[, 1], z[, 2], z[, 3], col = grey(0.3), alpha = 0.1)
+# z <- cbind(x, y, as.vector(cgi.me2))
+# plot3d(z[, 1], z[, 2], z[, 3], col = grey(0.3), alpha = 0.1)
+# z <- cbind(x, y, as.vector(cgi.me1))
+# plot3d(z[, 1], z[, 2], z[, 3], col = grey(0.3), alpha = 0.1)
+
+
+```
+

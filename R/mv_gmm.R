@@ -246,6 +246,7 @@ mv_emloop <- function(
 # -----------------------------------------------------------------------------.
 #' @export
 mv_gmm <- function(x, ns, epsilon = 1E-3, max_iter = 100) {
+
   theta <- mv_init_param(x, ns)
   mv_emloop(x, theta, p_fun = mv_pdf, mle_fun = mv_mle, max_iter = max_iter)
 }

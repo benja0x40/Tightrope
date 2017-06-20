@@ -2,7 +2,7 @@
 % Please edit documentation in R/knn_stats.R
 \name{knn_smoothing}
 \alias{knn_smoothing}
-\title{knn_smoothing}
+\title{Apply smoothing function to local values}
 \usage{
 knn_smoothing(v, i, f = mean)
 }
@@ -17,7 +17,7 @@ knn_smoothing(v, i, f = mean)
 knn_smoothing returns a numeric vector.
 }
 \description{
-knn_smoothing
+Apply smoothing function to local values
 }
 \seealso{
 \link{knn_density},

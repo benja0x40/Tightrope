@@ -109,6 +109,7 @@ QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
 # -----------------------------------------------------------------------------.
 #' @export
 QuickShiftClustering <- function (x, d, n, ...) {
+
   qs <- QuickShift(x, d, ...)
   qs <- QuickShiftCutClusters(qs, n = n)
   qs

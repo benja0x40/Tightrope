@@ -25,6 +25,7 @@
 #' \item{qstree}{QuickShift tree}
 #' \item{theta}{list of multivariate distribution parameters}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 populations <- function(x, tx = NULL, p, ns, max_iter = 100) {
 
@@ -42,29 +43,6 @@ populations <- function(x, tx = NULL, p, ns, max_iter = 100) {
   }
 
   c(grp, list(qstree = g, theta = bg))
-}
-
-
-# =============================================================================.
-#' background population
-# -----------------------------------------------------------------------------.
-#' @param x
-#'
-#' @param grp
-#'
-#' @param bg_cols
-#'
-#' @return cluster id
-# -----------------------------------------------------------------------------.
-#' @export
-bg_grp <- function(x, grp, bg_cols) {
-  bg <- split(as.data.frame(as.matrix(x)), f = grp)
-  ng <- length(bg)
-  z <- t(sapply(bg, colMeans))
-  a <- rowMeans(as.matrix(z[, - bg_cols]))
-  b <- rowMeans(as.matrix(z[, bg_cols]))
-  bg <- (1:ng)[order(b - a, decreasing = T)]
-  bg
 }
 
 # =============================================================================.
@@ -99,6 +77,7 @@ bg_grp <- function(x, grp, bg_cols) {
 #'
 #' @return NULL
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 lowVariability <- function(
   cnt, bg_cols, fit_idx, viz_idx, mincv = 0.05,

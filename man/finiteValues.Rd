@@ -15,3 +15,4 @@ FiniteValues returns a \code{logical} vector
 \description{
 Detect computable values (i.e. not NA nor Inf)
 }
+\keyword{internal}

@@ -2,13 +2,13 @@
 % Please edit documentation in R/knn_stats.R
 \name{knn_musigma2}
 \alias{knn_musigma2}
-\title{knn_musigma2}
+\title{Local mean and variance}
 \usage{
 knn_musigma2(x, k, i = NULL, d = NULL, smoothing = F)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
-and columns = samples or conditions.}
+and columns = measurement conditions.}
 
 \item{k}{number of nearest neighbors (i.e. smoothing factor).}
 
