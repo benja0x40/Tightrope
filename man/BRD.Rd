@@ -19,13 +19,13 @@ BRD(cnt, controls = NULL, dither = 3, smobs = T, cvt = 0.5, npc = NA,
 
 \item{smobs}{subtract the mean count value of each observation (logical, default = F).}
 
-\item{cvt}{percentage of variance in principal components to be ignored.
+\item{cvt}{percentage of variance to be ignored.
 The value of \code{cvt} determines the stringency of the dimensionality
 reduction which is performed by principal component analysis using
 \link{prcomp}.
 Dimensions retained after projection of the read count dataset on its
 principal components will preserve \code{100 * (1 - cvt)} percents
-of the total variance.
+of the initial variance.
 For instance, after dimensionality reduction with the default setting
 (\code{cvt} = 0.5), approximately 50 percents of the initial variance
 will remain in the reduced data.

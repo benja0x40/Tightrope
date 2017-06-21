@@ -8,20 +8,23 @@
 #' vector of read counts in the control condition (Input, IgG, etc.)
 #'
 #' @param y
-#' vector of read counts in the specific condition
+#' vector of read counts in the specific condition.
+#'
+#' @param o
+#' precomputed ordering of \code{y} (default = NULL).
 #'
 #' @return
 #' scaling factor
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-Diaz.SES <- function(x, y) {
+Diaz.SES <- function(x, y, o = NULL) {
 
-  i <- order(y)
-  Y <- cumsum(y[i])
-  X <- cumsum(x[i])
+  if(is.null(o)) o <- order(y)
+  Y <- cumsum(y[o])
+  X <- cumsum(x[o])
 
-  n <- length(i)
+  n <- length(o)
   p <- Y/Y[n]
   q <- X/X[n]
 
@@ -32,6 +35,8 @@ Diaz.SES <- function(x, y) {
 
 # =============================================================================.
 #' Combined Pairwise Signal Extraction Scaling (SES)
+# -----------------------------------------------------------------------------.
+# TODO:
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{BRD},
@@ -53,16 +58,17 @@ CPSES <- function(cnt, dither = 1) {
 
   n <- ncol(cnt)
 
-  alpha <- matrix(diag(n), n, n, dimnames = list(colnames(x), colnames(x)))
+  alpha <- matrix(diag(n), n, n, dimnames = list(colnames(cnt), colnames(cnt)))
 
   for(d in 1:dither) {
     x <- DitherCounts(cnt)
 
     # SES for all pairs
-    for(i in 1:n) {
-      for(j in 1:n) {
+    for(j in 1:n) {
+      o <- order(x[, j]) # avoid replicate sorting
+      for(i in 1:n) {
         if(i != j) {
-          alpha[i, j] <- alpha[i, j] + Diaz.SES(x[, i], x[, j]) / dither
+          alpha[i, j] <- alpha[i, j] + Diaz.SES(x[, i], x[, j], o = o) / dither
         }
       }
     }

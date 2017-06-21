@@ -4,12 +4,14 @@
 \alias{Diaz.SES}
 \title{Signal Extraction Scaling (Diaz et al., 2012)}
 \usage{
-Diaz.SES(x, y)
+Diaz.SES(x, y, o = NULL)
 }
 \arguments{
 \item{x}{vector of read counts in the control condition (Input, IgG, etc.)}
 
-\item{y}{vector of read counts in the specific condition}
+\item{y}{vector of read counts in the specific condition.}
+
+\item{o}{precomputed ordering of \code{y} (default = NULL).}
 }
 \value{
 scaling factor

@@ -70,31 +70,54 @@ data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/_RDATA_/"
 ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
 
 E14_EPZ.me3 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me3.RData"))
-E14_EPZ.me2 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me2_Norm_7d.RData"))
+E14_EPZ.me2 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me2_B.RData"))
 E14_EPZ.me1 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me1.RData"))
 # -----------------------------------------------------------------------------.
 
 # layout(matrix(1:9, 3, 3, byrow = T))
 par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
-roi <- "CGI_UCSC"
-
+roi <- "WHOLE_GENOME"
+ses_alpha <- list()
 for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+  message(wks_name)
   wks <- get(wks_name)
-  xps <- with(wks, match(experiments, ann$lt_id))
   
   cnt <- wks$CNT[[roi]]
   chk <- FiniteValues(log2(cnt))
-  cnt <- log2(DitherCounts(cnt[chk, ]))
+  cnt <- cnt[chk, ]
+  ses_alpha[[wks_name]] <- CPSES(cnt, dither = 1)
+}
+
+roi <- "CGI_UCSC"
+wks_name <- "E14_EPZ.me2"
+
+for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
   
-  brd <- t(t(cnt) + wks$BRD$scaling)
+  roi <- "CGI_UCSC"
+  wks_name <- "E14_EPZ.me2"
+  wks_name <- "E14_EPZ.me3"
   
-  crx <- wks$ann$mapped.nbr.dm3[xps]
+  message(wks_name)
+  wks <- get(wks_name)
+
+  cnt <- wks$CNT[[roi]]
+  chk <- FiniteValues(log2(cnt))
+  cnt <- cnt[chk, ]
+  ldc <- log2(DitherCounts(cnt))
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
+  
+  # ses   <- log2(t(t(2^ldc) * ses_alpha[[wks_name]]))
+  
+  crx <- wks$ann$mapped.nbr.dm3
   crx <-  log2(mean(crx) / crx)
-  crx <- t(t(cnt) + crx)
+  crx <- t(t(ldc) + crx)
     
-  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
   PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
+  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
+  # PlotParallelDensity(ses, k = 100, ylab = "log2(counts)", main = "CPSES")
+  empty.plot(axes = F)
 }
 
 ```
@@ -110,24 +133,28 @@ SUZ12 WT + KO cell mix experiments in mouse ESCs.
 # -----------------------------------------------------------------------------.
 data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_RDATA/"
 
-ESC_BRD <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
+ESC_BRD.H3K27me3 <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
+ESC_BRD.Suz12    <- readRDS(paste0(data_path, "ESC_BRD_Suz12.RData"))
 # -----------------------------------------------------------------------------.
 # layout(matrix(1:9, 3, 3, byrow = T))
 par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
 roi <- "CGI_UCSC"
 
-wks <- ESC_BRD
-xps <- with(wks, match(experiments, ann$lt_id))
+for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
+  
+  message(wks_name)
+  wks <- get(wks_name)
 
-cnt <- wks$CNT[[roi]]
-chk <- FiniteValues(log2(cnt))
-cnt <- log2(DitherCounts(cnt[chk, ]))
+  cnt <- wks$CNT[[roi]]
+  chk <- FiniteValues(log2(cnt))
+  cnt <- cnt[chk, ]
+  ldc <- log2(DitherCounts(cnt))
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
 
-brd <- t(t(cnt) + wks$BRD$scaling)
-
-idx <- as.vector(rbind(7:12, 19:24)) 
-PlotParallelDensity(brd[, idx], k = 200, ylab = "log2(counts)", main = "BRD")
+  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
+}
 ```
 
 ### Lu_et_al

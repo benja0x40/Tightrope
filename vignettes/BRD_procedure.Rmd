@@ -55,11 +55,11 @@ suppressPackageStartupMessages(library(Tightrope))
 # -----------------------------------------------------------------------------.
 CFG_DTS <- list()
 # -----------------------------------------------------------------------------.
-# ESC_BRD, NSC_K27M, E14_K27M, Lu_et_al
-load_dataset   <- "Lu_et_al"
-target_dataset <- "Lu_et_al"
+# ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
+load_dataset   <- "E14_EPZ"
+target_dataset <- "E14_EPZ"
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
-antibody <- "H3K36me3"
+antibody <- "H3K27me2"
 ```
 
 ### Collection of spike-in datasets
@@ -197,12 +197,17 @@ if(exists(wks_name)) {
     layout = matrix(1:9, 3, 3, byrow = T),
     nxp  = 0,
     rex  = "Input",
-    cvt  = 0.5,
+    cvt  = c(H3K27me3 = 0.5, Suz12 = 0.5),
     npc  = NA,
-    knn  = 200,
-    cst  = 0.5,
-    ncl  = 2
+    knn  = c(H3K27me3 = 200, Suz12 = 300),
+    cst  = c(H3K27me3 = 0.5, Suz12 = .90),
+    ncl  = c(H3K27me3 =   2, Suz12 =   1)
   )
+  CFG_DTS[[wks_name]]$cvt  <- CFG_DTS[[wks_name]]$cvt[antibody]
+  CFG_DTS[[wks_name]]$knn  <- CFG_DTS[[wks_name]]$knn[antibody]
+  CFG_DTS[[wks_name]]$cst  <- CFG_DTS[[wks_name]]$cst[antibody]
+  CFG_DTS[[wks_name]]$ncl  <- CFG_DTS[[wks_name]]$ncl[antibody]
+  
   CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
   CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
   # ---------------------------------------------------------------------------.
@@ -283,8 +288,8 @@ if(exists(wks_name)) {
     cvt  = 0.5,
     npc  = NA,
     knn  = 300,
-    cst  = c(H3K27me3 = .95, H3K27me2 = 0.5, H3K27me1 = 0.5),
-    ncl  = c(H3K27me3 =   1, H3K27me2 =   2, H3K27me1 =   3)
+    cst  = c(H3K27me3 = .95, H3K27me2 = 0.9, H3K27me1 = 0.9),
+    ncl  = c(H3K27me3 =   1, H3K27me2 =   1, H3K27me1 =   1)
   )
   CFG_DTS[[wks_name]]$rex  <- CFG_DTS[[wks_name]]$rex[antibody]
   CFG_DTS[[wks_name]]$cst  <- CFG_DTS[[wks_name]]$cst[antibody]
@@ -409,9 +414,6 @@ wks$BRD <- c(
 
 # Save RData
 saveRDS(wks, paste0(wks$data_path, target_dataset, "_", antibody, ".RData"))
-
-# Cleanup
-
 ```
 
 ### Controls
@@ -423,7 +425,8 @@ tbl <- as.data.frame(brd$dred$status[1:4])
 knitr::kable(data.frame(tbl))
 ```
 
-```{r, echo=FALSE, fig.height=3.5, fig.width=4}
+```{r, echo=FALSE, fig.height=3.5, fig.width=5}
+par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 clr <- with(brd$dred$status, 1:original <= reduced)
 clr <- ifelse(clr, grey(0.5), rgb(0.5, 0, 0))
 with(
@@ -440,19 +443,12 @@ tbl <- data.frame(
   background   = 1:cfg$ncl == brd$bg_cluster
 )
 knitr::kable(tbl)
+rm(tbl)
 ```
 
-#### Figures
+### Figures
 
 ```{r, include=FALSE}
-# cnt <- cnt[brd$nonzero, ]
-# ldc <- brd$log2counts
-# xr  <- brd$dred$projection
-# cs  <- brd$coreset
-# 
-# viz  <- cfg$viz
-# lyt  <- cfg$layout
-
 grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)[2:cfg$ncl]
 if(cfg$ncl > 1) {
   grp.clr <- c(rgb(1, 1, 0), grp.clr)
@@ -509,27 +505,38 @@ legend(
 
 #### Scaling factors
 
-```{r, eval=FALSE, fig.height=3.5, fig.width=3, include=FALSE}
+```{r, echo=FALSE, fig.height=3.5, fig.width=3}
 # layout 1 x 1 => 2.64 x 2.97
 # layout 1 x 2 => 5.28 x 2.97
 # layout 2 x 2 => 5.28 x 5.94
 
-# layout(lyt)
-par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
-for(cmp in viz) {
+# layout(cfg$layout)
+par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+cnt <- cnt[brd$nonzero, ]
+
+for(cmp in cfg$viz) {
   for(lbl in cmp[-1]) {
-  idx <- match(c(cmp[1], lbl), xps)
-  d <- knn_density(ldc[, idx], k = knn)
-  plot_samples(log2(cnt), idx, col = colorize(d, mode = "rank"))
-  plot_samples(log2(cnt)[bg, ], idx, col = rgb(1, 1, 0), alpha = 0.05, add = T)
-  plot_sources_2D(theta = list(bg_theta), components = idx, clr = rgb(1, 0, 0), lwd = 1)
-  abline(a = diff(bg_theta$mu[idx]), b = 1, col = rgb(1, 0.5, 0), lwd = 1.5)
+    
+    idx <- match(c(cmp[1], lbl), experiments)
+    d <- knn_density(brd$log2counts[, idx], k = cfg$knn)
+    plot_samples(
+      log2(cnt), idx, col = colorize(d, mode = "rank")
+    )
+    plot_samples(
+      log2(cnt)[brd$bg_members, ], idx,
+      col = rgb(1, 1, 0), alpha = 0.05, add = T
+    )
+    plot_sources_2D(
+      list(brd$bg_theta), components = idx,
+      clr = rgb(1, 0, 0), lwd = 1
+    )
+    abline(
+      a = diff(brd$bg_theta$mu[idx]), b = 1,
+      col = rgb(1, 0.5, 0), lwd = 1.5
+    )
   }
 }
-```
-
-```{r, eval=FALSE, include=FALSE}
-rm(cmp, lbl, idx, d)
 ```
 
 ### END
