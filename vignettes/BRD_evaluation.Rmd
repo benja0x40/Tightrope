@@ -15,6 +15,14 @@ vignette: >
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
+CleanCounts <- function(cnt) {
+  chk <- FiniteValues(log2(cnt))
+  cnt <- cnt[chk, ]
+  cnt
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
 ParallelDensity <- function(data, k = 100, spacing = 0.2, jitter = "unif") {
   nc <- ncol(data)
   nr <- nrow(data)
@@ -29,6 +37,7 @@ ParallelDensity <- function(data, k = 100, spacing = 0.2, jitter = "unif") {
   m <- cbind(r * x + j, as.vector(data))
   m <- cbind(m, knn_density(m, k = k))
   m[, 1] <- x + j
+  colnames(m) <- c("x", "y", "d")
   m
 }
 # =============================================================================.
@@ -61,7 +70,7 @@ suppressPackageStartupMessages(library(Tightrope))
 
 EZH2 inhibitor washout experiments in mouse ESCs.
 
-```{r, echo=FALSE, fig.height=3.5, fig.width=3.5}
+```{r, echo=FALSE, fig.height=3.5, fig.width=4, message=FALSE, warning=FALSE}
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
@@ -77,47 +86,35 @@ E14_EPZ.me1 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me1.RData"))
 # layout(matrix(1:9, 3, 3, byrow = T))
 par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
-roi <- "WHOLE_GENOME"
-ses_alpha <- list()
-for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
-  message(wks_name)
-  wks <- get(wks_name)
-  
-  cnt <- wks$CNT[[roi]]
-  chk <- FiniteValues(log2(cnt))
-  cnt <- cnt[chk, ]
-  ses_alpha[[wks_name]] <- CPSES(cnt, dither = 1)
-}
-
-roi <- "CGI_UCSC"
+wks_name <- "E14_EPZ.me1"
 wks_name <- "E14_EPZ.me2"
+wks_name <- "E14_EPZ.me3"
 
-for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+roi <- "CGI_WU"
+roi <- "CGI_UCSC"
   
-  roi <- "CGI_UCSC"
-  wks_name <- "E14_EPZ.me2"
-  wks_name <- "E14_EPZ.me3"
+for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
   
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- wks$CNT[[roi]]
-  chk <- FiniteValues(log2(cnt))
-  cnt <- cnt[chk, ]
+  cnt <- CleanCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
   
-  brd <- t(t(ldc) + wks$BRD$normfactors)
-  
-  # ses   <- log2(t(t(2^ldc) * ses_alpha[[wks_name]]))
+  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- CPSES(ses, dither = 5)
+  # ses <- log2(t(t(2^ldc) * ses))
   
   crx <- wks$ann$mapped.nbr.dm3
   crx <-  log2(mean(crx) / crx)
   crx <- t(t(ldc) + crx)
-    
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
+
   PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
   PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
   # PlotParallelDensity(ses, k = 100, ylab = "log2(counts)", main = "CPSES")
-  empty.plot(axes = F)
+  # empty.plot(axes = F)
 }
 
 ```

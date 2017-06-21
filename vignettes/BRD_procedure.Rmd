@@ -59,7 +59,7 @@ CFG_DTS <- list()
 load_dataset   <- "E14_EPZ"
 target_dataset <- "E14_EPZ"
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
-antibody <- "H3K27me2"
+antibody <- "H3K27me3"
 ```
 
 ### Collection of spike-in datasets
@@ -288,7 +288,7 @@ if(exists(wks_name)) {
     cvt  = 0.5,
     npc  = NA,
     knn  = 300,
-    cst  = c(H3K27me3 = .95, H3K27me2 = 0.9, H3K27me1 = 0.9),
+    cst  = c(H3K27me3 = .95, H3K27me2 = .95, H3K27me1 = .95),
     ncl  = c(H3K27me3 =   1, H3K27me2 =   1, H3K27me1 =   1)
   )
   CFG_DTS[[wks_name]]$rex  <- CFG_DTS[[wks_name]]$rex[antibody]
@@ -352,8 +352,8 @@ rm(wks_name)
 #### Glopal settings
 
 ```{r}
-ref_roi <- "GN"
-dither  <- 1
+ref_roi <- "GN_ENS"
+dither  <- 3
 smobs   <- T
 zscore  <- T
 mincs   <- 300
@@ -413,7 +413,11 @@ wks$BRD <- c(
 )
 
 # Save RData
-saveRDS(wks, paste0(wks$data_path, target_dataset, "_", antibody, ".RData"))
+saveRDS(
+  wks, paste0(
+    wks$data_path, ref_roi, "_", target_dataset, "_", antibody, ".RData"
+  )
+)
 ```
 
 ### Controls
