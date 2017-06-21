@@ -54,8 +54,53 @@ PlotParallelDensity <- function(x, k, clr = "ry", spacing = 0.2, grid = T, ...) 
   axis(2)
   axis(1, at = 1:nc, labels = colnames(x), las = 2, tick = F)
   clr <- colorize(m[, 3], mode = "rank", col = clr)
-  clr <- transformColors(clr, S.range = 0.9)
+  # clr <- transformColors(clr, S.range = 0.9)
   points(m, cex = 0.5, col = clr)
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+ParallelDensityFast <- function(
+  data, nx, ny, spacing = 0.2, jitter = "unif", method = "bin"
+) {
+  nc <- ncol(data)
+  nr <- nrow(data)
+  if(jitter == "triangle") {
+    j <- rtriangle(nc * nr, a = -1, b = 1, c = 0)
+  } else {
+    j <- runif(nc * nr, -1, 1)
+  }
+  j <- j * (1 - spacing) / 2
+  x <- rep(1:nc, each = nr)
+  h <- cbind(x + j, as.vector(data))
+  h <- histogram2D(h, nx = nx, ny = ny, method = method)
+  h
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+PlotParallelDensityFast <- function(x, k, clr = "ry", spacing = 0.2, grid = T, method = "bin", ...) {
+
+  nc <- ncol(x)
+  nx <- k
+  ny <- k
+  h <- ParallelDensityFast(x, nx = nx, ny = ny, spacing = spacing, method = method)
+  
+  lim <- xylim(h$x, rep(h$y, length.out = length(h$x)), spacing = c(0, 0))
+  empty.plot(xlim = lim$x, ylim = lim$y, axes = F, ...)
+  if(grid) grid(nx = 0, ny = NULL)
+  axis(2)
+  axis(1, at = 1:nc, labels = colnames(x), las = 2, tick = F)
+
+  cm <- rep(NA, nx * ny)
+  chk <- h$z > 0
+  cm[chk] <- colorize(h$z[chk], mode = "rank", col = clr)
+  cm <- transformColors(cm, S.range = 0.9)
+  cm <- matrix(cm, nx, ny)
+  image(
+    x = h$x, y = h$y, z = matrix(1:length(cm), nrow(cm), ncol(cm)),
+    col = cm, add = T
+  )
 }
 ```
 
@@ -63,37 +108,38 @@ PlotParallelDensity <- function(x, k, clr = "ry", spacing = 0.2, grid = T, ...) 
 
 ```{r, include=FALSE}
 suppressPackageStartupMessages(library(triangle))
+suppressPackageStartupMessages(library(Barbouille))
 suppressPackageStartupMessages(library(Tightrope))
 ```
 
-### E14_EPZ
+### Global settings
 
-EZH2 inhibitor washout experiments in mouse ESCs.
+```{r, include=FALSE}
+base_path <- "/Volumes/USB16GB/LT_WORKS/"        # iMac
+base_path <- "/media/benjamin/USB16GB/LT_WORKS/" # mistral
+```
 
-```{r, echo=FALSE, fig.height=3.5, fig.width=4, message=FALSE, warning=FALSE}
+### Lu_et_al
+
+H3WT versus K36M experiments from Lu et al., 2016.
+
+
+```{r, eval=FALSE, fig.height=5, fig.width=2.5, message=FALSE, warning=FALSE, include=FALSE}
 # =============================================================================.
-#
+data_path <- paste0(base_path, "GSE63195_Lu_et_al_2016/_RDATA_/")
 # -----------------------------------------------------------------------------.
-data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/_RDATA_/"
-
 ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
-
-E14_EPZ.me3 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me3.RData"))
-E14_EPZ.me2 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me2_B.RData"))
-E14_EPZ.me1 <- readRDS(paste0(data_path, "E14_EPZ_H3K27me1.RData"))
 # -----------------------------------------------------------------------------.
-
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
+Lu_et_al.H3K36me3 <- readRDS(paste0(data_path, "Lu_et_al_H3K36me3.RData"))
+Lu_et_al.H3K27me3 <- readRDS(paste0(data_path, "Lu_et_al_H3K27me3.RData"))
+# =============================================================================.
 # layout(matrix(1:9, 3, 3, byrow = T))
-par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
-
-wks_name <- "E14_EPZ.me1"
-wks_name <- "E14_EPZ.me2"
-wks_name <- "E14_EPZ.me3"
-
-roi <- "CGI_WU"
-roi <- "CGI_UCSC"
-  
-for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+# -----------------------------------------------------------------------------.
+roi <- "TSS_ENS"
+for(wks_name in c("Lu_et_al.H3K36me3", "Lu_et_al.H3K27me3")) {
   
   message(wks_name)
   wks <- get(wks_name)
@@ -101,24 +147,23 @@ for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
   cnt <- CleanCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
   
-  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
-  # ses <- CPSES(ses, dither = 5)
-  # ses <- log2(t(t(2^ldc) * ses))
+  ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  ses <- CPSES(ses, dither = 5)
+  ses <- log2(t(t(2^ldc) * ses))
   
-  crx <- wks$ann$mapped.nbr.dm3
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
   crx <-  log2(mean(crx) / crx)
   crx <- t(t(ldc) + crx)
   
   brd <- t(t(ldc) + wks$BRD$normfactors)
 
-  PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
-  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
-  # PlotParallelDensity(ses, k = 100, ylab = "log2(counts)", main = "CPSES")
+  PlotParallelDensityFast(crx, k = 300, ylab = "log2(counts)", main = "spike-in")
+  PlotParallelDensityFast(brd, k = 300, ylab = "log2(counts)", main = "BRD")
+  PlotParallelDensityFast(ses, k = 300, ylab = "log2(counts)", main = "CPSES")
   # empty.plot(axes = F)
 }
-
 ```
-
 
 ### ESC_BRD
 
@@ -128,10 +173,20 @@ SUZ12 WT + KO cell mix experiments in mouse ESCs.
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_RDATA/"
-
-ESC_BRD.H3K27me3 <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R1_TEST/_RDATA_/mapped_spikein.RData")
+# r1 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R2_TEST/_RDATA_/mapped_spikein.RData")
+# r2 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/mapped_spikein.rdata")
+# saveRDS(rbind(r1, r2), fpath)
+# rm(r1, r2)
+# =============================================================================.
+data_path <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/")
+# -----------------------------------------------------------------------------.
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
 ESC_BRD.Suz12    <- readRDS(paste0(data_path, "ESC_BRD_Suz12.RData"))
+ESC_BRD.H3K27me3 <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
 # -----------------------------------------------------------------------------.
 # layout(matrix(1:9, 3, 3, byrow = T))
 par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
@@ -143,48 +198,76 @@ for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- wks$CNT[[roi]]
-  chk <- FiniteValues(log2(cnt))
-  cnt <- cnt[chk, ]
+  cnt <- CleanCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
+  
+  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- CPSES(ses, dither = 5)
+  # ses <- log2(t(t(2^ldc) * ses))
+  
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
+  crx <-  log2(mean(crx) / crx)
+  crx <- t(t(ldc) + crx)
   
   brd <- t(t(ldc) + wks$BRD$normfactors)
 
+  PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
   PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
+  # PlotParallelDensity(ses, k = 100, ylab = "log2(counts)", main = "CPSES")
+  # empty.plot(axes = F)
 }
 ```
 
-### Lu_et_al
+### E14_EPZ
 
-H3WT versus K36M experiments from Lu et al., 2016.
+EZH2 inhibitor washout experiments in mouse ESCs.
 
-```{r, eval=FALSE, include=FALSE}
+```{r, echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE}
 # =============================================================================.
-#
+data_path <- paste0(base_path, "NextSeq_E14EPZ/_RDATA_/")
 # -----------------------------------------------------------------------------.
-data_path <- "/Volumes/USB16GB/LT_WORKS/GSE63195_Lu_et_al_2016/_RDATA_/"
 ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
-
-Lu_et_al <- readRDS(paste0(data_path, "Lu_et_al_H3K36me3.RData"))
 # -----------------------------------------------------------------------------.
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
+E14_EPZ.me3 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me3.RData"))
+E14_EPZ.me2 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me2.RData"))
+E14_EPZ.me1 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me1.RData"))
+# =============================================================================.
 # layout(matrix(1:9, 3, 3, byrow = T))
-par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+# -----------------------------------------------------------------------------.
+roi <- "CGI_UCSC"
+roi <- "TSS_ENS"
+for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+  
+  message(wks_name)
+  wks <- get(wks_name)
 
-wks <- Lu_et_al
-xps <- with(wks, match(experiments, ann$lt_id))
+  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  ldc <- log2(DitherCounts(cnt))
 
-ovl <- with(ROI.LST, countOverlaps(WHOLE_GENOME, GN, type = "within"))
-ovl <- which(ovl > 0)
-ovl <- sample(ovl, size = 50000)
+  ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  ses <- CPSES(ses, dither = 5)
+  ses <- log2(t(t(2^ldc) * ses))
+  
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
+  # crx <- wks$ann$mapped.nbr.dm3
+  crx <-  log2(mean(crx) / crx)
+  crx <- t(t(ldc) + crx)
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
 
-cnt <- wks$CNT$WHOLE_GENOME[ovl, ]
-chk <- FiniteValues(log2(cnt))
-cnt <- log2(DitherCounts(cnt[chk, ]))
-
-brd <- t(t(cnt) + wks$BRD$scaling)
-
-PlotParallelDensity(brd[grepl()], k = 100, ylab = "log2(counts)", main = "BRD")
+  PlotParallelDensityFast(crx, k = 300, ylab = "log2(counts)", main = "spike-in")
+  PlotParallelDensityFast(brd, k = 300, ylab = "log2(counts)", main = "BRD")
+  PlotParallelDensityFast(ses, k = 300, ylab = "log2(counts)", main = "CPSES")
+  empty.plot(axes = F)
+}
 ```
+
+
 
 
 

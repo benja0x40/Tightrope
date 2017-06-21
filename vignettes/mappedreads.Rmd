@@ -1,0 +1,60 @@
+---
+title: "BRD normalization"
+author: "Benjamin Leblanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteIndexEntry{Analysis template}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+suppressPackageStartupMessages(library(Tightrope))
+```
+
+
+```{r}
+base_path   <- "/media/SSD512GB/LT_WORKS/"
+mapped_path <- "_MAPPEDREADS_/bowtie2/genomic_dm6/rdata/"
+rdata_path  <- "_RDATA_/"
+
+wks_lst <- c(
+  "NextSeq_ESC_BRD_R1",
+  "NextSeq_ESC_BRD_R2",
+  "NextSeq_K27M_spike_in",
+  "NextSeq_E14EPZ",
+  "GSE63195_Lu_et_al_2016"
+)
+
+for(wks_name in wks_lst) {
+  eval(parse(text = paste0(wks_name, " <- new.env()")))
+  wks <- get(wks_name)
+  wks$ann <- read.delim(
+    paste0(base_path, wks_name, "/_LittleThumb_/datasets/bowtie2_dm6.txt"),
+    comment.char = "#", stringsAsFactors = F
+  )
+  if("mapped_dm6" %in% colnames(wks$ann)) stop("annotation column conflict")
+  wks$ann$mapped_dm6 <- 0
+  for(i in 1:nrow(wks$ann)) {
+    fname <- wks$ann$rdata_file[i]
+    fpath <- paste0(base_path, wks_name, "/", mapped_path, fname)
+    message(fpath)
+    mr <- readRDS(fpath)
+    wks$ann$mapped_dm6[i] <- length(mr) 
+  }
+}
+```
+
+
+```{r}
+for(wks_name in wks_lst) {
+  wks <- get(wks_name)
+  fpath <- paste0(base_path, wks_name, "/", rdata_path, "mapped_spikein.RData")
+  message(fpath)
+  saveRDS(wks$ann, fpath)
+}
+```
+
+
+
