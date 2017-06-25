@@ -38,38 +38,60 @@ bg_ranking <- function(x, by, controls) {
 #' @seealso
 #'   \link{CPSES},
 #'   \link{QuickShiftClustering},
-#'   \link{cdadadr}
+#'   \link{CDaDaDR}
 # -----------------------------------------------------------------------------.
-#' @inheritParams cdadadr
+#' @inheritParams CDaDaDR
 #'
 #' @param controls
 #' columns corresponding to control measurements (Input, IgG, etc.).
 #'
-#' @param cst
-#' core subset density threshold.
+#' @param bdt
+#' numeric vector of length 2 defining background density thresholds both
+#' expressed as proportions between 0 and 1.
+#' (\code{bdt[1]}) specifies the global threshold used to discard observations
+#' with low density prior to clustering.
+#' (\code{bdt[2]}) determines the maximum density loss allowed
+#' when selecting core observations relatively to the local maximum density
+#' in each cluster, and thus defining the candidate background populations.
+#' By default the value of \code{bdt} is \code{c(0.5, 0.1)} meaning that,
+#' in terms of density values and relative to the total population of
+#' observations, the bottom 50% will be filtered out before clustering
+#' and only the top 10% can be selected as background candidates within each
+#' cluster.
 #'
 #' @param ncl
-#' number of clusters used to partition the core subset.
+#' number of clusters for partitioning observations.
 #'
 #' @param mincs
 #' minimum size of each cluster, as number of observations.
 #'
 #' @return
 #' \code{BRD} returns a \code{list} with the following elements:
-#' \item{parameters}{call parameters of the function}
-#' \item{status}{execution status}
-#' \item{nonzero}{indices of initial observations with count > 0}
-#' \item{dred}{result of \link{cdadadr} applied to non-zero observations}
-#' \item{coreset}{indices of non-zero observations selected as core subset}
-#' \item{clusters}{result of \link{QuickShiftClustering} applied to the core subset}
-#' \item{theta}{distribution parameters for each cluster in the core subset}
-#' \item{log2counts}{dithered and log2 transformed counts}
+#' \item{parameters}{call parameters of the function.}
+#' \item{status}{execution status.}
+#' \item{nonzero}{indices of initial observations with count > 0.}
+#' \item{dred}{
+#'   dimensionality-reduced non-zero observations
+#'   (result from the \link{CDaDaDR} function).
+#' }
+#' \item{subsets}{
+#'   partition of non-zero observations into background candidate subsets.
+#' }
+#' \item{populations}{
+#'   summary of core populations.
+#' }
+#' \item{theta}{
+#'   fitted distribution parameters for each core candidate populations.
+#' }
+#' \item{log2counts}{
+#'   dithered and log2 transformed counts.
+#' }
 # -----------------------------------------------------------------------------.
 #' @export
 BRD <- function(
   cnt, controls = NULL,
   dither = 3, smobs = T, cvt = 0.5, npc = NA, zscore = T,
-  knn = 200, cst = 0.5, ncl = 3, mincs = 300, progress = F
+  knn = 200, bdt = c(0.5, 0.1), ncl = 3, mincs = 300, progress = F
 ) {
 
   if(is.null(colnames(cnt))) stop("missing column names in the count matrix")
@@ -80,7 +102,7 @@ BRD <- function(
   parameters <- list(
     experiments = xps, controls = xps[inp],
     dither = dither, smobs = smobs, cvt = cvt, npc = npc, zscore = zscore,
-    knn = knn, cst = cst, ncl = ncl, mincs = mincs
+    knn = knn, bdt = bdt, ncl = ncl, mincs = mincs
   )
 
   # Cleanup of missing values
@@ -90,35 +112,52 @@ BRD <- function(
   cnt <- cnt[cleanup, ] # Raw counts
 
   # Count density after dithering and dimensionality reduction
-  dred <- cdadadr(
+  dred <- CDaDaDR(
     cnt, dither = dither, smobs = smobs, cvt = cvt, npc = npc,
     zscore = zscore, knn = knn
   )
 
-  # Select the core subset using density threshold
-  core <- which(rankstat(dred$density) > cst)
-  core <- with(dred, list(i = core, d = density[core], x = projection[core, ]))
+  # Filter out low density observations
+  rd <- rankstat(dred$density)
+  sbs <- which(rd > bdt[1])
+  sbs <- with(dred, list(i = sbs, d = density[sbs], x = projection[sbs, ]))
 
-  # Clustering by density gradient ascent in the dred space
-  qsc <- with(core, QuickShiftClustering(x, d, n = ncl, progress = progress))
+  # Find clusters by density gradient ascent in the dred space
+  qsc <- with(sbs, QuickShiftClustering(x, d, n = ncl, progress = progress))
+  sbs$cluster <- qsc$membership
 
-  # Background cluster
+  # Select top density (core) observations in each cluster and count members
+  pop <- data.frame(cluster = rep(0, ncl), core = rep(0, ncl))
+  pop$max_density <- rd[sbs$i[qsc$center]]
+  md <- pmax(0, pop$max_density - bdt[2])
+  sbs$core  <- F
+  for(grp in 1:ncl) {
+    k <- with(sbs, cluster == grp)
+    sbs$core[k] <- rd[sbs$i[k]] > md[grp]
+    pop$cluster[grp] <- sum(k)
+    pop$core[grp]    <- sum(sbs$core[k])
+  }
+
+  # Rank cluster cores by background levels (enrichment in control samples)
   if(! is.null(controls)) {
     if(ncl > 1) {
-      bg_rnk <- bg_ranking(ldc[core$i, ], by = qsc$membership, controls = inp)
+      bg_rnk <- with(
+        sbs, bg_ranking(ldc[i[core], ], by = cluster[core], controls = inp)
+      )
     } else {
       bg_rnk <- 1
     }
     bg_clu <- bg_rnk[1]
-    bg_idx <- core$i[qsc$membership == bg_clu]
+    bg_idx <- with(sbs, i[core & cluster == bg_clu])
+    pop$background <- 1:ncl == bg_clu
   }
 
-  # Fit multivariate gaussian model to each cluster of minimum size
+  # Fit a multivariate gaussian model to each cluster core of minimum size
   theta <- list()
   for(grp in 1:ncl) {
-    idx <- core$i[qsc$membership == grp] # select cluster
+    idx <- with(sbs, i[core & cluster == grp]) # select cluster core
     if(length(idx) > mincs) {
-      mm <- mv_gmm(ldc[idx, ], ns = 1)   # EM fitting
+      mm <- mv_gmm(ldc[idx, ], ns = 1)          # EM fitting
       theta[[grp]] <- mm$theta[[1]]
     } else {
       theta[[grp]] <- NA
@@ -126,14 +165,14 @@ BRD <- function(
   }
 
   res <- list(
-    parameters = parameters,
-    status     = "clustering",
-    nonzero    = which(cleanup), # observation with count > 0
-    dred       = dred,           # cdadadr results
-    coreset    = core,           # core subset of observations
-    clusters   = qsc,            # QuickShiftClustering results
-    theta      = theta,          # distribution parameters for each cluster
-    log2counts = ldc             # dithered and log2 transformed counts
+    parameters  = parameters,
+    status      = "clustering",
+    nonzero     = which(cleanup), # observation with count > 0
+    dred        = dred,           # CDaDaDR results
+    subsets     = sbs,            # clustering of non-zero observations
+    populations = pop,            # summary of cluster/core populations
+    theta       = theta,          # distribution parameters for each cluster
+    log2counts  = ldc             # dithered and log2 transformed counts
   )
 
   # Background cluster

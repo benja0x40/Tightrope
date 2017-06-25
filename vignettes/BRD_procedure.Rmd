@@ -4,7 +4,7 @@ author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_document
 vignette: >
-  %\VignetteIndexEntry{Analysis template}
+  %\VignetteIndexEntry{BRD normalization}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,7 @@ vignette: >
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-ExperimentalAnnotations <- function(wks_name, xps = T) {
+ExperimentAnnotations <- function(wks_name, xps = T) {
   tbl <- get(wks_name)$ann[xps, ]
   if(any(grepl("^geo\\.", colnames(tbl)))) {
     skip <- c(
@@ -43,6 +43,80 @@ InsertAntibody <- function(viz, abd) {
   }
   viz
 }
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+PlotBRD <- function(brd, core_only = F, legend = T) {
+  
+  clr.prm <- AutoColorParameters("ry")
+  clr.prm$thresholds <- round(clr.prm$thresholds, 2)
+
+  ncl <- brd$parameters$ncl
+  grp.clr <- rgb(1, 0.9, 0)
+  if(ncl > 1) {
+    grp.clr <- c(
+      grp.clr, transformColors(SuperRainbow(3), delta.H = 30)[2:ncl]
+    )
+  }
+  if(core_only) {
+    grp.prm <- defineGroups(ids = brd$bg_clurank, colors = grp.clr)
+  } else {
+    grp.clr <- as.vector(
+      rbind(transformColors(grp.clr, S.range = 0.5), grp.clr)
+    )
+    grp.prm <- defineGroups(
+      ids = 2 * rep(brd$bg_clurank, each = 2) - c(1, 0), colors = grp.clr
+    )
+  }
+  
+  spc <- 0
+  if(legend) spc <- c(0, -0.15)
+  lim <- xylim(brd$dred$projection[, 1:2], spacing = spc, margin = 0.1)
+  
+  o <- order(brd$dred$density)
+  
+  # Plot Count Density after Dithering and Dimensionality Reduction
+  with(
+    brd$dred, plot_samples(
+      projection[o, ], xlim = lim$x, ylim = lim$y,
+      col = colorize(density[o], mode = "rank", colors = "ry"),
+      main = "density"
+    )
+  )
+  if(legend) {
+    colorLegend(
+      "b", horiz = T, size = c(70, 3), parameters = clr.prm,
+      ticks = 0:4/4, tick.pos = -1, cex = 0.75
+    )
+  }
+  # Plot CDaDaDR and overlay subsets
+  with(
+    brd$dred, plot_samples(
+      projection[o, ], xlim = lim$x, ylim = lim$y,
+      col = colorize(density[o], mode = "rank"),
+      main = "clustering"
+    )
+  )
+  if(core_only) {
+    with(
+      brd$subsets, plot_samples(
+        x[core], grp = cluster[core], grp.prm = grp.prm, alpha = 0.1, add = T
+      )
+    )
+  } else {
+    with(
+      brd$subsets, plot_samples(
+        x, grp = 2 * cluster + core - 1, grp.prm = grp.prm, alpha = 0.1, add = T
+      )
+    )
+  }
+  if(legend) {
+    legend(
+      "bottomleft", legend = "best candidate",
+      fill = grp.prm$colors[1 + core_only], cex = 0.75, bty = 'n'
+    )
+  }
+}
 ```
 
 ### Initializations
@@ -54,12 +128,25 @@ suppressPackageStartupMessages(library(Tightrope))
 #
 # -----------------------------------------------------------------------------.
 CFG_DTS <- list()
-# -----------------------------------------------------------------------------.
+```
+
+#### Dataset selection
+
+```{r}
 # ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
 load_dataset   <- "E14_EPZ"
 target_dataset <- "E14_EPZ"
+
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
-antibody <- "H3K27me3"
+antibody <- "H3K27me1"
+```
+
+#### Glopal settings
+
+```{r}
+dither  <- 5
+zscore  <- T
+mincs   <- 300
 ```
 
 ### Collection of spike-in datasets
@@ -194,20 +281,21 @@ if(exists(wks_name)) {
       c("ESC_X---X_100_R2", "ESC_X---X_10_R2"),
       c("ESC_Input_0_R1",      "ESC_Input_0_R2")
     ),
-    layout = matrix(1:9, 3, 3, byrow = T),
-    nxp  = 0,
-    rex  = "Input",
-    cvt  = c(H3K27me3 = 0.5, Suz12 = 0.5),
-    npc  = NA,
-    knn  = c(H3K27me3 = 200, Suz12 = 300),
-    cst  = c(H3K27me3 = 0.5, Suz12 = .90),
-    ncl  = c(H3K27me3 =   2, Suz12 =   1)
+    layout  = matrix(1:9, 3, 3, byrow = T),
+    nxp     = 0,
+    rex     = "Input",
+    ref_roi = c(H3K27me3 = "GN_ENS", Suz12 = "CGI_UCSC"),
+    smobs   = c(H3K27me3 = T,   Suz12 = F),
+    cvt     = NA,
+    npc     = 2,
+    knn     = 300,
+    bdt     = c(0.5, 0.05), # c(H3K27me3 = 0.8, Suz12 = .95),
+    ncl     = c(H3K27me3 =   2, Suz12 =   1)
   )
-  CFG_DTS[[wks_name]]$cvt  <- CFG_DTS[[wks_name]]$cvt[antibody]
-  CFG_DTS[[wks_name]]$knn  <- CFG_DTS[[wks_name]]$knn[antibody]
-  CFG_DTS[[wks_name]]$cst  <- CFG_DTS[[wks_name]]$cst[antibody]
-  CFG_DTS[[wks_name]]$ncl  <- CFG_DTS[[wks_name]]$ncl[antibody]
-  
+  for(opt in c("ref_roi", "smobs", "ncl")) {
+    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
+  }
+
   CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
   CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
   # ---------------------------------------------------------------------------.
@@ -217,7 +305,7 @@ if(exists(wks_name)) {
 
 ```{r, echo=FALSE, results='asis'}
 if(exists(wks_name)) {
-  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
   rm(wks_name)
 }
 ```
@@ -236,24 +324,27 @@ if(exists(wks_name)) {
       wks$ann, antibody %in% c("H3K27me3", "Input") & replicate %in% c("R1", "R2")
     ),
     viz = list(
-      c("H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1"),
-      c("H3WT_DMSO_Input_R1",    "H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1"),
+      c("H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1", "H3WT_EPZ_H3K27me3_R1"),
+      c("H3WT_DMSO_Input_R1",    "H3WT_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R1", "H3WT_EPZ_H3K27me3_R1"),
       
-      c("H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2"),
-      c("H3WT_DMSO_Input_R2",    "H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2"),
-      
+      c("H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2", "H3WT_EPZ_H3K27me3_R2"),
+      c("H3WT_DMSO_Input_R2",    "H3WT_DMSO_H3K27me3_R2", "K27M_DMSO_H3K27me3_R2", "H3WT_EPZ_H3K27me3_R2"),
+
       c("H3WT_DMSO_H3K27me3_R1", "H3WT_DMSO_H3K27me3_R2"),
       c("K27M_DMSO_H3K27me3_R1", "K27M_DMSO_H3K27me3_R2"),
+      c("H3WT_EPZ_H3K27me3_R1",  "H3WT_EPZ_H3K27me3_R2"),
       c("H3WT_DMSO_Input_R1",    "H3WT_DMSO_Input_R2")
     ),
-    layout = matrix(1:9, 3, 3, byrow = T),
-    nxp  = 0,
-    rex  = "Input",
-    cvt  = 0.5,
-    npc  = NA,
-    knn  = 300,
-    cst  = 0.9,
-    ncl  = 1
+    layout  = matrix(1:9, 3, 3, byrow = T),
+    nxp     = 0,
+    rex     = "Input",
+    ref_roi = "GN_ENS",
+    smobs   = T,
+    cvt     = NA,
+    npc     = 2,
+    knn     = 300,
+    bdt     = c(0.5, 0.05),
+    ncl     = 1
   )
   CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
   # ---------------------------------------------------------------------------.
@@ -263,7 +354,7 @@ if(exists(wks_name)) {
 
 ```{r, echo=FALSE, results='asis'}
 if(exists(wks_name)) {
-  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
 }
 rm(wks_name)
 ```
@@ -282,19 +373,22 @@ if(exists(wks_name)) {
     viz = list(
       c("X---X_E14", "X---X_7d", "X---X_8h", "X---X_24h")
     ),
-    layout = matrix(1:9, 3, 3, byrow = T),
-    nxp  = 0,
-    rex  = c(H3K27me3 = "_7d$", H3K27me2 = "_7d$", H3K27me1 = "_7d$"),
-    cvt  = 0.5,
-    npc  = NA,
-    knn  = 300,
-    cst  = c(H3K27me3 = .95, H3K27me2 = .95, H3K27me1 = .95),
-    ncl  = c(H3K27me3 =   1, H3K27me2 =   1, H3K27me1 =   1)
+    layout  = matrix(1:9, 3, 3, byrow = T),
+    nxp     = 0,
+    rex     = "_7d$",
+    ref_roi = c(H3K27me3 = "GN_ENS", H3K27me2 = "CGI_UCSC", H3K27me1 = "CGI_UCSC", Suz12 = "CGI_UCSC"),
+    smobs   = c(H3K27me3 = F, H3K27me2 = F, H3K27me1 = F, Suz12 = F),
+    cvt     = NA,
+    npc     = 2,
+    knn     = 300,
+    bdt     = c(0.5, 0.05),
+    # bdt     = c(H3K27me3 = .98, H3K27me2 = .90, H3K27me1 = .90, Suz12 = .95),
+    ncl     = c(H3K27me3 =   1, H3K27me2 =   2, H3K27me1 =   2, Suz12 =   1)
   )
-  CFG_DTS[[wks_name]]$rex  <- CFG_DTS[[wks_name]]$rex[antibody]
-  CFG_DTS[[wks_name]]$cst  <- CFG_DTS[[wks_name]]$cst[antibody]
-  CFG_DTS[[wks_name]]$ncl  <- CFG_DTS[[wks_name]]$ncl[antibody]
-  
+  for(opt in c("ref_roi", "smobs", "ncl")) {
+    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
+  }
+
   CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
   CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
   # ---------------------------------------------------------------------------.
@@ -304,7 +398,7 @@ if(exists(wks_name)) {
 
 ```{r, echo=FALSE, results='asis'}
 if(exists(wks_name)) {
-  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
 }
 rm(wks_name)
 ```
@@ -324,15 +418,22 @@ if(exists(wks_name)) {
       c("H3WT_X---X", "K36M_X---X"),
       c("H3WT_Input", "H3WT_X---X", "K36M_X---X")
     ),
-    layout = matrix(1:9, 3, 3, byrow = T),
-    nxp  = 0,
-    rex  = "Input",
-    cvt  = 0,
-    npc  = 3, # Force to conserve 3 dimensions of variation: H3WT, K36M, Input
-    knn  = 300,
-    cst  = 0.7,
-    ncl  = 2
+    layout  = matrix(1:9, 3, 3, byrow = T),
+    nxp     = 0,
+    rex     = "Input",
+    ref_roi = "GN",
+    smobs   = T,
+    cvt     = NA,
+    npc     = 2, 
+    knn     = 300,
+    bdt     = c(0.5, 0.05),
+    # bdt     = c(H3K36me3 = .95, H3K27me3 = .95),
+    ncl     = c(H3K36me3 =   1, H3K27me3 =   1)
   )
+  for(opt in c("ncl")) {
+    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
+  }
+  
   CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
   CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
   # ---------------------------------------------------------------------------.
@@ -342,22 +443,12 @@ if(exists(wks_name)) {
 
 ```{r, echo=FALSE, results='asis'}
 if(exists(wks_name)) {
-  knitr::kable(ExperimentalAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
+  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
 }
 rm(wks_name)
 ```
 
 ### BRD procedure
-
-#### Glopal settings
-
-```{r}
-ref_roi <- "GN_ENS"
-dither  <- 3
-smobs   <- T
-zscore  <- T
-mincs   <- 300
-```
 
 #### Dataset dependent settings
 
@@ -375,7 +466,7 @@ cfg  <- CFG_DTS[[target_dataset]]
 
 # Raw counts
 wks <- get(target_dataset)
-cnt <- with(wks, CNT[[ref_roi]][, cfg$xps])
+cnt <- with(cfg, wks$CNT[[ref_roi]][, xps])
 
 # Name of all experiments and controls
 experiments <- colnames(cnt)
@@ -389,7 +480,7 @@ brd <- with(
   cfg, BRD(
     cnt, controls = controls, dither = dither,
     smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
-    knn = knn, cst = cst, ncl = ncl, mincs = mincs
+    knn = knn, bdt = bdt, ncl = ncl, mincs = mincs
   ) 
 )
 message("status: ", brd$status)
@@ -408,28 +499,28 @@ rownames(wks$ann) <- NULL
 
 # Include BRD results
 wks$BRD <- c(
-  list(ref_roi = ref_roi), # regions used for BRD estimation
+  list(ref_roi = cfg$ref_roi), # regions used for BRD estimation
   brd
 )
 
 # Save RData
 saveRDS(
   wks, paste0(
-    wks$data_path, ref_roi, "_", target_dataset, "_", antibody, ".RData"
+    wks$data_path, cfg$ref_roi, "_", target_dataset, "_", antibody, ".RData"
   )
 )
 ```
 
 ### Controls
 
-#### CDADADR
+#### Dimensionality reduction
 
 ```{r, echo=FALSE, results='asis'}
 tbl <- as.data.frame(brd$dred$status[1:4])
 knitr::kable(data.frame(tbl))
 ```
 
-```{r, echo=FALSE, fig.height=3.5, fig.width=5}
+```{r, echo=FALSE, fig.height=3.5, fig.width=5, dpi=300}
 par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 clr <- with(brd$dred$status, 1:original <= reduced)
 clr <- ifelse(clr, grey(0.5), rgb(0.5, 0, 0))
@@ -442,74 +533,29 @@ with(
 #### Clustering statistics
 
 ```{r, echo=FALSE, results='asis'}
-tbl <- data.frame(
-  cluster_size = brd$clusters$csize,
-  background   = 1:cfg$ncl == brd$bg_cluster
-)
-knitr::kable(tbl)
-rm(tbl)
+knitr::kable(brd$populations)
 ```
 
 ### Figures
 
 ```{r, include=FALSE}
-grp.clr <- transformColors(SuperRainbow(3), delta.H = 30)[2:cfg$ncl]
-if(cfg$ncl > 1) {
-  grp.clr <- c(rgb(1, 1, 0), grp.clr)
-} else {
-  grp.clr <- rgb(1, 1, 0)
-}
-grp.prm <- defineGroups(ids = brd$bg_clurank, colors = grp.clr)
-
-clr.prm <- AutoColorParameters("ry")
-clr.prm$thresholds <- round(clr.prm$thresholds, 2)
 ```
 
+#### Density analysis
 
-```{r, echo=FALSE, fig.width=6, fig.height=3.5}
+```{r, echo=FALSE, fig.width=3, fig.height=3.5, dpi=300}
 # layout 1 x 2 => 5.28 x 2.97
 # layout 2 x 2 => 5.28 x 5.94
 # layout 6 x 2 => 5.28 x 8.91
 
-layout(matrix(1:2, 1, 2, byrow = T))
+# layout(matrix(1:2, 1, 2, byrow = T))
 par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
-
-lim <- xylim(
-  brd$dred$projection[, 1:2], spacing = c(0, -0.1), margin = 0.1
-)
-with(
-  brd$dred, plot_samples(
-    projection, xlim = lim$x, ylim = lim$y,
-    col = colorize(density, mode = "rank", colors = "ry"),
-    main = "density"
-  )
-)
-colorLegend(
-  "b", horiz = T, size = c(70, 3), parameters = clr.prm,
-  ticks = 0:4/4, tick.pos = -1, cex = 0.75
-)
-with(
-  brd$dred, plot_samples(
-    projection, xlim = lim$x, ylim = lim$y,
-    col = colorize(density, mode = "rank"),
-    main = "clustering"
-  )
-)
-with(
-  brd, plot_samples(
-    coreset$x, grp = clusters$membership,
-    grp.prm = grp.prm, alpha = 0.1, add = T
-  )
-)
-legend(
-  "bottomleft", legend = "best candidate", fill = grp.prm$colors[1], cex = 0.75,
-  bty = 'n'
-)
+PlotBRD(brd, core_only = F, legend = T)
 ```
 
 #### Scaling factors
 
-```{r, echo=FALSE, fig.height=3.5, fig.width=3}
+```{r, echo=FALSE, fig.height=3.5, fig.width=3, dpi=300}
 # layout 1 x 1 => 2.64 x 2.97
 # layout 1 x 2 => 5.28 x 2.97
 # layout 2 x 2 => 5.28 x 5.94
@@ -524,12 +570,13 @@ for(cmp in cfg$viz) {
     
     idx <- match(c(cmp[1], lbl), experiments)
     d <- knn_density(brd$log2counts[, idx], k = cfg$knn)
+    o <- order(d)
     plot_samples(
-      log2(cnt), idx, col = colorize(d, mode = "rank")
+      log2(cnt)[o, ], idx, col = colorize(d[o], mode = "rank")
     )
     plot_samples(
       log2(cnt)[brd$bg_members, ], idx,
-      col = rgb(1, 1, 0), alpha = 0.05, add = T
+      col = rgb(1, 0.9, 0), alpha = 0.1, add = T
     )
     plot_sources_2D(
       list(brd$bg_theta), components = idx,

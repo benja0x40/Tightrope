@@ -19,7 +19,8 @@ makeReadCountMatrix matrix of read counts
 Count reads overlapping with genomic intervals
 }
 \seealso{
-\link{DitherCounts},
+\link{CleanCounts},
+  \link{DitherCounts},
   \link{JoinColumns},
   \link{ExtractColumns},
   \link{makeReadCountsInROI}

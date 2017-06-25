@@ -2,20 +2,21 @@
 % Please edit documentation in R/counts.R
 \name{FiniteValues}
 \alias{FiniteValues}
-\title{Detect computable values (i.e. not NA nor Inf)}
+\title{Localise safe numeric values (i.e. not NA nor Inf)}
 \usage{
 FiniteValues(x)
 }
 \arguments{
-\item{x}{numeric vector or matrix}
+\item{x}{numeric vector or matrix.}
 }
 \value{
 FiniteValues returns a \code{logical} vector
 }
 \description{
-Detect computable values (i.e. not NA nor Inf)
+Localise safe numeric values (i.e. not NA nor Inf)
 }
 \seealso{
-\link{DetectCounts}
+\link{CleanCounts}
+  \link{DetectCounts}
 }
 \keyword{internal}

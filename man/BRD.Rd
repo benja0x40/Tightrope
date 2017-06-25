@@ -5,7 +5,7 @@
 \title{Background Read Density}
 \usage{
 BRD(cnt, controls = NULL, dither = 3, smobs = T, cvt = 0.5, npc = NA,
-  zscore = T, knn = 200, cst = 0.5, ncl = 3, mincs = 300,
+  zscore = T, knn = 200, bdt = c(0.5, 0.1), ncl = 3, mincs = 300,
   progress = F)
 }
 \arguments{
@@ -41,9 +41,20 @@ When \code{npc} is specified, the \code{cvt} parameter is ignored.}
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
 of estimated densities (larger values = smoother).}
 
-\item{cst}{core subset density threshold.}
+\item{bdt}{numeric vector of length 2 defining background density thresholds both
+expressed as proportions between 0 and 1.
+(\code{bdt[1]}) specifies the global threshold used to discard observations
+with low density prior to clustering.
+(\code{bdt[2]}) determines the maximum density loss allowed
+when selecting core observations relatively to the local maximum density
+in each cluster, and thus defining the candidate background populations.
+By default the value of \code{bdt} is \code{c(0.5, 0.1)} meaning that,
+in terms of density values and relative to the total population of
+observations, the bottom 50% will be filtered out before clustering
+and only the top 10% can be selected as background candidates within each
+cluster.}
 
-\item{ncl}{number of clusters used to partition the core subset.}
+\item{ncl}{number of clusters for partitioning observations.}
 
 \item{mincs}{minimum size of each cluster, as number of observations.}
 
@@ -51,14 +62,25 @@ of estimated densities (larger values = smoother).}
 }
 \value{
 \code{BRD} returns a \code{list} with the following elements:
-\item{parameters}{call parameters of the function}
-\item{status}{execution status}
-\item{nonzero}{indices of initial observations with count > 0}
-\item{dred}{result of \link{cdadadr} applied to non-zero observations}
-\item{coreset}{indices of non-zero observations selected as core subset}
-\item{clusters}{result of \link{QuickShiftClustering} applied to the core subset}
-\item{theta}{distribution parameters for each cluster in the core subset}
-\item{log2counts}{dithered and log2 transformed counts}
+\item{parameters}{call parameters of the function.}
+\item{status}{execution status.}
+\item{nonzero}{indices of initial observations with count > 0.}
+\item{dred}{
+  dimensionality-reduced non-zero observations
+  (result from the \link{CDaDaDR} function).
+}
+\item{subsets}{
+  partition of non-zero observations into background candidate subsets.
+}
+\item{populations}{
+  summary of core populations.
+}
+\item{theta}{
+  fitted distribution parameters for each core candidate populations.
+}
+\item{log2counts}{
+  dithered and log2 transformed counts.
+}
 }
 \description{
 Background Read Density
@@ -66,5 +88,5 @@ Background Read Density
 \seealso{
 \link{CPSES},
   \link{QuickShiftClustering},
-  \link{cdadadr}
+  \link{CDaDaDR}
 }

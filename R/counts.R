@@ -1,13 +1,14 @@
 # FUNCTIONS | READ COUNTS ######################################################
 
 # =============================================================================.
-#' Detect computable values (i.e. not NA nor Inf)
+#' Localise safe numeric values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @seealso
+#'   \link{CleanCounts}
 #'   \link{DetectCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
-#' numeric vector or matrix
+#' numeric vector or matrix.
 #'
 #' @return
 #' FiniteValues returns a \code{logical} vector
@@ -26,10 +27,37 @@ FiniteValues <- function(x) {
 }
 
 # =============================================================================.
-#' Read count matrix summary
+#' Remove observations with missing values
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{FiniteValues}
+#'   \link{DetectCounts}
 # -----------------------------------------------------------------------------.
 #' @param cnt
-#' matrix of read counts (rows = observations, columns = samples or conditions).
+#' matrix of read counts
+#' (rows = observations, columns = measurement conditions).
+#'
+#' @return
+#' matrix
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+CleanCounts <- function(cnt) {
+  chk <- FiniteValues(log2(cnt))
+  cnt <- cnt[chk, ]
+  cnt
+}
+
+# =============================================================================.
+#' DetectCounts
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{FiniteValues}
+#'   \link{CleanCounts}
+# -----------------------------------------------------------------------------.
+#' @param cnt
+#' matrix of read counts
+#' (rows = observations, columns = measurement conditions).
 #'
 #' @param detailed
 #' logical, if TRUE return min and max read counts in each interval
@@ -105,7 +133,7 @@ DitherCounts <- function(x) {
 # -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
-#' (rows = observations, columns = samples or conditions).
+#' (rows = observations, columns = measurement conditions).
 #'
 #' @param y
 #' list of read count matrices.
@@ -130,7 +158,7 @@ JoinColumns <- function(x, y) {
 # -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
-#' (rows = observations, columns = samples or conditions).
+#' (rows = observations, columns = measurement conditions).
 #'
 #' @param lst
 #' column names or indices to be extracted
@@ -153,6 +181,7 @@ ExtractColumns <- function(x, lst) {
 # TODO: check if this can be faster and as/more flexible using summerizeOverlaps
 # -----------------------------------------------------------------------------.
 #' @seealso
+#'   \link{CleanCounts},
 #'   \link{DitherCounts},
 #'   \link{JoinColumns},
 #'   \link{ExtractColumns},

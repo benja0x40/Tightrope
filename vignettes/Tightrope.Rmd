@@ -49,7 +49,7 @@ x <- log2(DitherCounts(y))
 Density estimation with dithered counts and dimensionality reduction.
 
 ```{r}
-r <- cdadadr(y, k = 100, smobs = F, zscore = T)
+r <- CDaDaDR(y, k = 100, smobs = F, zscore = T)
 r <- list(x = r$projection$x, d = r$density)
 ```
 
@@ -121,7 +121,7 @@ Apply BRD.
 
 ```{r}
 # Count Density After Dithering And Dimensionality Reduction
-r <- cdadadr(y, k = 100, smobs = F, zscore = T)
+r <- CDaDaDR(y, k = 100, smobs = F, zscore = T)
 r <- list(x = r$projection$x, d = r$density)
 
 # Moderate density threshold to increase clustering robustness

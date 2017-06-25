@@ -1,19 +1,37 @@
 # FUNCTIONS | 2D PLOTS #########################################################
 
 # =============================================================================.
-#' empty.plot
+#' plot_samples
 # -----------------------------------------------------------------------------.
-#' @param axes logical
-#' @param xlab character
-#' @param ylab character
+#' @param x matrix
+#' @param idx vector
+#' @param symetric logical
+#' @param cex numeric
 #' @param ...
 #'
 #' @return NULL
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-empty.plot <- function(axes = T, xlab = '', ylab = '', ...) {
-  plot(0, type = 'n', axes = axes, xlab = xlab, ylab = ylab, ...)
+plot_samples <- function(
+  x, idx = 1:2, symetric = T, cex = 0.5, xlim = NULL, ylim = NULL, ...
+) {
+
+  rng = matrix(range(x), 2, 2)
+  x <- x[, idx]
+  xlab <- colnames(x)[1]
+  ylab <- colnames(x)[2]
+  if(! symetric) rng <- apply(x, 2, range)
+
+  if(! is.null(xlim)) rng[, 1] <- xlim
+  if(! is.null(ylim)) rng[, 2] <- ylim
+
+  ScatterPlot(
+    x, xlim = rng[, 1], ylim = rng[, 2], cex = cex,
+    xlab = xlab, ylab = ylab, ...
+  )
+
+  # for(g in grp_order) points(x[grp == g, ], col = grp_clr[g], cex = cex)
 }
 
 # =============================================================================.
@@ -92,40 +110,6 @@ plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...)
   chk <- h.y$counts > 0
   points(h.y$mids[chk], h.y$counts[chk], type = 'l', col = rgb(1, 0, 0, 0.75), lwd = 2)
   points(h.x$mids[chk], h.x$counts[chk], type = 'h', lwd = 2, col = grey(0.3))
-}
-
-# =============================================================================.
-#' plot_samples
-# -----------------------------------------------------------------------------.
-#' @param x matrix
-#' @param idx vector
-#' @param symetric logical
-#' @param cex numeric
-#' @param ...
-#'
-#' @return NULL
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-plot_samples <- function(
-  x, idx = 1:2, symetric = T, cex = 0.5, xlim = NULL, ylim = NULL, ...
-) {
-
-  rng = matrix(range(x), 2, 2)
-  x <- x[, idx]
-  xlab <- colnames(x)[1]
-  ylab <- colnames(x)[2]
-  if(! symetric) rng <- apply(x, 2, range)
-
-  if(! is.null(xlim)) rng[, 1] <- xlim
-  if(! is.null(ylim)) rng[, 2] <- ylim
-
-  ScatterPlot(
-    x, xlim = rng[, 1], ylim = rng[, 2], cex = cex,
-    xlab = xlab, ylab = ylab, ...
-  )
-
-  # for(g in grp_order) points(x[grp == g, ], col = grp_clr[g], cex = cex)
 }
 
 # =============================================================================.

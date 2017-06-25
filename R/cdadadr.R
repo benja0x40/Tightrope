@@ -1,5 +1,5 @@
 # =============================================================================.
-#' Count Density After Dithering And Dimensionality Reduction
+#' Count Density after Dithering and Dimensionality Reduction
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{BRD},
@@ -47,15 +47,15 @@
 #' show progress bar (logical, default = F).
 #'
 #' @return
-#' cdadadr returns a \code{list} with the following elements:
-#' \item{parameters}{list with the value of each cdadadr argument}
+#' CDaDaDR returns a \code{list} with the following elements:
+#' \item{parameters}{list with the value of each CDaDaDR argument}
 #' \item{status}{list with informations on the dimensionality reduction}
 #' \item{density}{knn density}
 #' \item{projection}{transformed count matrix}
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-cdadadr <- function(
+CDaDaDR <- function(
   cnt, knn, smobs = F, cvt = 0.5, npc = NA, zscore = T, dither = 1, progress = F
 ) {
 
@@ -73,6 +73,9 @@ cdadadr <- function(
 
   if(progress) pb <- txtProgressBar(min = 0, max = dither, char = "|", style = 3)
 
+  # precompute the mean of each observation (independently from dithering)
+  m <- rowMeans(log2(cnt))
+
   p <- 0
 
   for(i in 1:dither) {
@@ -81,7 +84,7 @@ cdadadr <- function(
     x <- log2(DitherCounts(cnt))
 
     # Subtract mean of each observation
-    if(smobs) x <- x - rowMeans(x)
+    if(smobs) x <- x - m
 
     # Dimensionality reduction
     if(cvt > 0 | ! is.na(npc)) {

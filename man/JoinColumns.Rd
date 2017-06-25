@@ -8,7 +8,7 @@ JoinColumns(x, y)
 }
 \arguments{
 \item{x}{list of read count matrices
-(rows = observations, columns = samples or conditions).}
+(rows = observations, columns = measurement conditions).}
 
 \item{y}{list of read count matrices.}
 }

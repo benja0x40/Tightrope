@@ -15,14 +15,6 @@ vignette: >
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-CleanCounts <- function(cnt) {
-  chk <- FiniteValues(log2(cnt))
-  cnt <- cnt[chk, ]
-  cnt
-}
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
 ParallelDensity <- function(data, k = 100, spacing = 0.2, jitter = "unif") {
   nc <- ncol(data)
   nr <- nrow(data)
@@ -58,49 +50,24 @@ PlotParallelDensity <- function(x, k, clr = "ry", spacing = 0.2, grid = T, ...) 
   points(m, cex = 0.5, col = clr)
 }
 # =============================================================================.
-#
+# veeeryyy slooow
 # -----------------------------------------------------------------------------.
-ParallelDensityFast <- function(
-  data, nx, ny, spacing = 0.2, jitter = "unif", method = "bin"
+Boxplot <- function(
+  x, whiskers = c(0.05,0.25, 0.5,0.75,0.95), medpch = 21, medcex=1.3,
+  ...
 ) {
-  nc <- ncol(data)
-  nr <- nrow(data)
-  if(jitter == "triangle") {
-    j <- rtriangle(nc * nr, a = -1, b = 1, c = 0)
-  } else {
-    j <- runif(nc * nr, -1, 1)
-  }
-  j <- j * (1 - spacing) / 2
-  x <- rep(1:nc, each = nr)
-  h <- cbind(x + j, as.vector(data))
-  h <- histogram2D(h, nx = nx, ny = ny, method = method)
-  h
-}
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-PlotParallelDensityFast <- function(x, k, clr = "ry", spacing = 0.2, grid = T, method = "bin", ...) {
-
-  nc <- ncol(x)
-  nx <- k
-  ny <- k
-  h <- ParallelDensityFast(x, nx = nx, ny = ny, spacing = spacing, method = method)
-  
-  lim <- xylim(h$x, rep(h$y, length.out = length(h$x)), spacing = c(0, 0))
-  empty.plot(xlim = lim$x, ylim = lim$y, axes = F, ...)
-  if(grid) grid(nx = 0, ny = NULL)
-  axis(2)
-  axis(1, at = 1:nc, labels = colnames(x), las = 2, tick = F)
-
-  cm <- rep(NA, nx * ny)
-  chk <- h$z > 0
-  cm[chk] <- colorize(h$z[chk], mode = "rank", col = clr)
-  cm <- transformColors(cm, S.range = 0.9)
-  cm <- matrix(cm, nx, ny)
-  image(
-    x = h$x, y = h$y, z = matrix(1:length(cm), nrow(cm), ncol(cm)),
-    col = cm, add = T
+  bp <- boxplot(x, plot = F)
+  bp$stats <- sapply(x, FUN = quantile, probs = whiskers, na.rm = T)
+  bxp(
+    bp, outline = F, show.names = T, axes = F, xaxs = 'i',
+    pars = list(
+      medlty = 1, boxlty = 1, whisklty = 1, medlwd = 1,
+      medpch = medpch, medcex = medcex
+    ),
+    ...
   )
+  axis(2)
+  grid(nx = NA, ny = NULL)
 }
 ```
 
@@ -115,61 +82,23 @@ suppressPackageStartupMessages(library(Tightrope))
 ### Global settings
 
 ```{r, include=FALSE}
-base_path <- "/Volumes/USB16GB/LT_WORKS/"        # iMac
 base_path <- "/media/benjamin/USB16GB/LT_WORKS/" # mistral
-```
-
-### Lu_et_al
-
-H3WT versus K36M experiments from Lu et al., 2016.
-
-
-```{r, eval=FALSE, fig.height=5, fig.width=2.5, message=FALSE, warning=FALSE, include=FALSE}
-# =============================================================================.
-data_path <- paste0(base_path, "GSE63195_Lu_et_al_2016/_RDATA_/")
-# -----------------------------------------------------------------------------.
-ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
-# -----------------------------------------------------------------------------.
-mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
-# -----------------------------------------------------------------------------.
-Lu_et_al.H3K36me3 <- readRDS(paste0(data_path, "Lu_et_al_H3K36me3.RData"))
-Lu_et_al.H3K27me3 <- readRDS(paste0(data_path, "Lu_et_al_H3K27me3.RData"))
-# =============================================================================.
-# layout(matrix(1:9, 3, 3, byrow = T))
-par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
-# -----------------------------------------------------------------------------.
+base_path <- "/Volumes/USB16GB/LT_WORKS/"        # iMac
+clr_map <- function(k) colorize(k , mode = "rank")
+clr_map <- function(k) colorize(k , mode = "01", col = "ry")
+jit  <- "unif"
+smx  <- 9
+# "TSS_ENS", "GN_ENS", "CGI_UCSC"
 roi <- "TSS_ENS"
-for(wks_name in c("Lu_et_al.H3K36me3", "Lu_et_al.H3K27me3")) {
-  
-  message(wks_name)
-  wks <- get(wks_name)
-
-  cnt <- CleanCounts(wks$CNT[[roi]]) 
-  ldc <- log2(DitherCounts(cnt))
-  
-  ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
-  ses <- CPSES(ses, dither = 5)
-  ses <- log2(t(t(2^ldc) * ses))
-  
-  crx <- match(colnames(cnt), mapped_spikein$lt_id)
-  crx <- mapped_spikein$mapped_dm6[crx]
-  crx <-  log2(mean(crx) / crx)
-  crx <- t(t(ldc) + crx)
-  
-  brd <- t(t(ldc) + wks$BRD$normfactors)
-
-  PlotParallelDensityFast(crx, k = 300, ylab = "log2(counts)", main = "spike-in")
-  PlotParallelDensityFast(brd, k = 300, ylab = "log2(counts)", main = "BRD")
-  PlotParallelDensityFast(ses, k = 300, ylab = "log2(counts)", main = "CPSES")
-  # empty.plot(axes = F)
-}
 ```
 
 ### ESC_BRD
 
 SUZ12 WT + KO cell mix experiments in mouse ESCs.
 
-```{r, eval=FALSE, include=FALSE}
+```{r, echo=FALSE, fig.height=5, fig.width=6.5, message=FALSE}
+# =============================================================================.
+fs <- (2 / 9) * (5 + 24) # ~6.5
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
@@ -185,13 +114,11 @@ data_path <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/")
 # -----------------------------------------------------------------------------.
 mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
 # -----------------------------------------------------------------------------.
-ESC_BRD.Suz12    <- readRDS(paste0(data_path, "ESC_BRD_Suz12.RData"))
-ESC_BRD.H3K27me3 <- readRDS(paste0(data_path, "ESC_BRD_H3K27me3.RData"))
+ESC_BRD.Suz12    <- readRDS(paste0(data_path, "CGI_UCSC_ESC_BRD_Suz12.RData"))
+ESC_BRD.H3K27me3 <- readRDS(paste0(data_path, "GN_ENS_ESC_BRD_H3K27me3.RData"))
 # -----------------------------------------------------------------------------.
 # layout(matrix(1:9, 3, 3, byrow = T))
-par(mar = c(6, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
-
-roi <- "CGI_UCSC"
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
 for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
   
@@ -212,9 +139,88 @@ for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
   
   brd <- t(t(ldc) + wks$BRD$normfactors)
 
-  PlotParallelDensity(crx, k = 100, ylab = "log2(counts)", main = "spike-in")
-  PlotParallelDensity(brd, k = 100, ylab = "log2(counts)", main = "BRD")
-  # PlotParallelDensity(ses, k = 100, ylab = "log2(counts)", main = "CPSES")
+  # Boxplot(crx, las = 2, ylab = "log2(counts)", main = "spike-in")
+  # Boxplot(brd, las = 2, ylab = "log2(counts)", main = "BRD")
+  # Boxplot(ses, las = 2, ylab = "log2(counts)", main = "CPSES")
+  
+  h <- ParallelHist2D(
+    crx, nx = 400, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "spike-in"
+  )
+  h <- ParallelHist2D(
+    brd, nx = 400, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "BRD"
+  )
+  # h <- ParallelHist2D(
+  #   ses, nx = 300, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+  #   las = 2, ylab = "log2(counts)", main = "CPSES"
+  # )
+  # empty.plot(axes = F)
+}
+```
+
+### NSC_K27M
+
+H3WT versus K27M experiments in mouse NSCs.
+
+```{r, echo=FALSE, fig.height=5, fig.width=6.5, message=FALSE}
+# =============================================================================.
+fs <- (2 / 9) * (5 + 24) # ~6.5
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R1_TEST/_RDATA_/mapped_spikein.RData")
+# r1 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R2_TEST/_RDATA_/mapped_spikein.RData")
+# r2 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/mapped_spikein.rdata")
+# saveRDS(rbind(r1, r2), fpath)
+# rm(r1, r2)
+# =============================================================================.
+data_path <- paste0(base_path, "NextSeq_K27M_spike_in/_RDATA_/")
+# -----------------------------------------------------------------------------.
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
+NSC_K27M.H3K27me3 <- readRDS(paste0(data_path, "GN_ENS_NSC_K27M_H3K27me3.RData"))
+# -----------------------------------------------------------------------------.
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+for(wks_name in c("NSC_K27M.H3K27me3")) {
+  
+  message(wks_name)
+  wks <- get(wks_name)
+
+  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  ldc <- log2(DitherCounts(cnt))
+  
+  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- CPSES(ses, dither = 5)
+  # ses <- log2(t(t(2^ldc) * ses))
+  
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
+  crx <-  log2(mean(crx) / crx)
+  crx <- t(t(ldc) + crx)
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
+
+  # Boxplot(crx, las = 2, ylab = "log2(counts)", main = "spike-in")
+  # Boxplot(brd, las = 2, ylab = "log2(counts)", main = "BRD")
+  # Boxplot(ses, las = 2, ylab = "log2(counts)", main = "CPSES")
+  
+  h <- ParallelHist2D(
+    crx, nx = 400, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "spike-in"
+  )
+  h <- ParallelHist2D(
+    brd, nx = 400, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "BRD"
+  )
+  # h <- ParallelHist2D(
+  #   ses, nx = 300, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+  #   las = 2, ylab = "log2(counts)", main = "CPSES"
+  # )
   # empty.plot(axes = F)
 }
 ```
@@ -223,7 +229,9 @@ for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
 
 EZH2 inhibitor washout experiments in mouse ESCs.
 
-```{r, echo=FALSE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, fig.height=5, fig.width=3, message=FALSE}
+# =============================================================================.
+fs <- (2 / 9) * (5 + 8) # ~3
 # =============================================================================.
 data_path <- paste0(base_path, "NextSeq_E14EPZ/_RDATA_/")
 # -----------------------------------------------------------------------------.
@@ -231,16 +239,15 @@ ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
 # -----------------------------------------------------------------------------.
 mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
 # -----------------------------------------------------------------------------.
-E14_EPZ.me3 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me3.RData"))
-E14_EPZ.me2 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me2.RData"))
-E14_EPZ.me1 <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me1.RData"))
+E14_EPZ.me3   <- readRDS(paste0(data_path, "GN_ENS_E14_EPZ_H3K27me3.RData"))
+E14_EPZ.me2   <- readRDS(paste0(data_path, "CGI_UCSC_E14_EPZ_H3K27me2.RData"))
+E14_EPZ.me1   <- readRDS(paste0(data_path, "CGI_UCSC_E14_EPZ_H3K27me1.RData"))
+E14_EPZ.Suz12 <- readRDS(paste0(data_path, "CGI_UCSC_E14_EPZ_Suz12.RData"))
 # =============================================================================.
 # layout(matrix(1:9, 3, 3, byrow = T))
 par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 # -----------------------------------------------------------------------------.
-roi <- "CGI_UCSC"
-roi <- "TSS_ENS"
-for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
+for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1", "E14_EPZ.Suz12")) {
   
   message(wks_name)
   wks <- get(wks_name)
@@ -248,9 +255,9 @@ for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
   cnt <- CleanCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
 
-  ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
-  ses <- CPSES(ses, dither = 5)
-  ses <- log2(t(t(2^ldc) * ses))
+  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- CPSES(ses, dither = 5)
+  # ses <- log2(t(t(2^ldc) * ses))
   
   crx <- match(colnames(cnt), mapped_spikein$lt_id)
   crx <- mapped_spikein$mapped_dm6[crx]
@@ -260,10 +267,87 @@ for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1")) {
   
   brd <- t(t(ldc) + wks$BRD$normfactors)
 
-  PlotParallelDensityFast(crx, k = 300, ylab = "log2(counts)", main = "spike-in")
-  PlotParallelDensityFast(brd, k = 300, ylab = "log2(counts)", main = "BRD")
-  PlotParallelDensityFast(ses, k = 300, ylab = "log2(counts)", main = "CPSES")
-  empty.plot(axes = F)
+  # Boxplot(crx, las = 2, ylab = "log2(counts)", main = "spike-in")
+  # Boxplot(brd, las = 2, ylab = "log2(counts)", main = "BRD")
+  # Boxplot(ses, las = 2, ylab = "log2(counts)", main = "CPSES")
+  
+  h <- ParallelHist2D(
+    crx, nx = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "spike-in"
+  )
+  h <- ParallelHist2D(
+    brd, nx = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "BRD"
+  )
+  # h <- ParallelHist2D(
+  #   ses, nx = 300, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+  #   las = 2, ylab = "log2(counts)", main = "CPSES"
+  # )
+  # empty.plot(axes = F)
+}
+```
+
+### Lu_et_al
+
+H3WT versus K36M experiments from Lu et al., 2016.
+
+
+<!-- s = b (4 + 1 + a nc) -->
+<!-- b = 2 / (4 + 1 + 4) -->
+<!-- a = (2 - 10 / 9) * 9 / 8 -->
+
+```{r, echo=FALSE, fig.height=5, fig.width=2, message=FALSE}
+# =============================================================================.
+fs <- (2 / 9) * (5 + 4)
+# =============================================================================.
+data_path <- paste0(base_path, "GSE63195_Lu_et_al_2016/_RDATA_/")
+# -----------------------------------------------------------------------------.
+ROI.LST <- readRDS(paste0(data_path, "ROI.LST.rdata"))
+# -----------------------------------------------------------------------------.
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
+Lu_et_al.H3K36me3 <- readRDS(paste0(data_path, "GN_Lu_et_al_H3K36me3.RData"))
+Lu_et_al.H3K27me3 <- readRDS(paste0(data_path, "GN_Lu_et_al_H3K27me3.RData"))
+# =============================================================================.
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+# -----------------------------------------------------------------------------.
+for(wks_name in c("Lu_et_al.H3K36me3", "Lu_et_al.H3K27me3")) {
+  
+  message(wks_name)
+  wks <- get(wks_name)
+
+  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  ldc <- log2(DitherCounts(cnt))
+  
+  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- CPSES(ses, dither = 5)
+  # ses <- log2(t(t(2^ldc) * ses))
+  
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
+  crx <-  log2(mean(crx) / crx)
+  crx <- t(t(ldc) + crx)
+  
+  brd <- t(t(ldc) + wks$BRD$normfactors)
+
+  # Boxplot(crx, las = 2, ylab = "log2(counts)", main = "spike-in")
+  # Boxplot(brd, las = 2, ylab = "log2(counts)", main = "BRD")
+  # Boxplot(ses, las = 2, ylab = "log2(counts)", main = "CPSES")
+  
+  h <- ParallelHist2D(
+    crx, nx = 100, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "spike-in"
+  )
+  h <- ParallelHist2D(
+    brd, nx = 100, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "BRD"
+  )
+  # h <- ParallelHist2D(
+  #   ses, nx = 100, ny = 200, plot = T, clrmap = clr_map, jitter = jit, smoothx = smx, 
+  #   las = 2, ylab = "log2(counts)", main = "CPSES"
+  # )
+  # empty.plot(axes = F)
 }
 ```
 

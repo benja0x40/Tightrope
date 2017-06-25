@@ -2,12 +2,13 @@
 % Please edit documentation in R/counts.R
 \name{DetectCounts}
 \alias{DetectCounts}
-\title{Read count matrix summary}
+\title{DetectCounts}
 \usage{
 DetectCounts(cnt, detailed = F)
 }
 \arguments{
-\item{cnt}{matrix of read counts (rows = observations, columns = samples or conditions).}
+\item{cnt}{matrix of read counts
+(rows = observations, columns = measurement conditions).}
 
 \item{detailed}{logical, if TRUE return min and max read counts in each interval}
 }
@@ -21,6 +22,10 @@ If \code{detailed} is equal to \code{TRUE}, the returned \code{data.frame} also 
 \item{max}{integer vector representing the minimum count value for each row of the \code{cnt} matrix}
 }
 \description{
-Read count matrix summary
+DetectCounts
+}
+\seealso{
+\link{FiniteValues}
+  \link{CleanCounts}
 }
 \keyword{internal}
