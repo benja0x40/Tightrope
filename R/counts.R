@@ -169,7 +169,7 @@ JoinColumns <- function(x, y) {
 #' @export
 ExtractColumns <- function(x, lst) {
   for(lbl in names(x)) {
-    x[[lbl]] <- x[[lbl]][, lst]
+    x[[lbl]] <- x[[lbl]][, lst, drop = F]
   }
   x
 }

@@ -29,5 +29,6 @@ sphere of radius equal to the distance between \eqn{Xi} and its k-nearest
 neighbor.
 }
 \seealso{
-\link{knn_musigma2}
+\link{knn_musigma2},
+  \link{knn_mean}
 }

@@ -6,18 +6,22 @@ Date: 2015-07-29
 Author: Benjamin Leblanc
 Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
 Imports:
-    igraph,
-    FNN,
     triangle,
+    caTools,
+    ica,
+    FNN,
+    igraph,
     mixtools,
     GenomicAlignments,
     GenomicRanges,
     Barbouille
 Depends:
     R (>= 3.2.0),
-    igraph,
-    FNN,
     triangle,
+    caTools,
+    ica,
+    FNN,
+    igraph,
     mixtools,
     GenomicAlignments,
     GenomicRanges,

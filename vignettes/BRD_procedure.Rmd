@@ -46,113 +46,76 @@ InsertAntibody <- function(viz, abd) {
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-PlotBRD <- function(brd, core_only = F, legend = T) {
-  
-  clr.prm <- AutoColorParameters("ry")
-  clr.prm$thresholds <- round(clr.prm$thresholds, 2)
-
-  ncl <- brd$parameters$ncl
-  grp.clr <- rgb(1, 0.9, 0)
-  if(ncl > 1) {
-    grp.clr <- c(
-      grp.clr, transformColors(SuperRainbow(3), delta.H = 30)[2:ncl]
-    )
+MakeSettingsForAntibody <- function(cfg, lst, antibody) {
+  for(opt in lst) {
+    if(is.list(cfg[[opt]])) {
+      cfg[[opt]] <- cfg[[opt]][[antibody]]
+    } else {
+      cfg[[opt]] <- cfg[[opt]][antibody]
+    }
   }
-  if(core_only) {
-    grp.prm <- defineGroups(ids = brd$bg_clurank, colors = grp.clr)
-  } else {
-    grp.clr <- as.vector(
-      rbind(transformColors(grp.clr, S.range = 0.5), grp.clr)
-    )
-    grp.prm <- defineGroups(
-      ids = 2 * rep(brd$bg_clurank, each = 2) - c(1, 0), colors = grp.clr
-    )
+  cfg$viz <- InsertAntibody(cfg$viz, antibody)
+  cfg$nxp <- sum(cfg$xps)
+  cfg
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+ShowDataset <- function(wks_name) {
+  if(exists(wks_name)) {
+    knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
   }
-  
-  spc <- 0
-  if(legend) spc <- c(0, -0.15)
-  lim <- xylim(brd$dred$projection[, 1:2], spacing = spc, margin = 0.1)
-  
-  o <- order(brd$dred$density)
-  
-  # Plot Count Density after Dithering and Dimensionality Reduction
-  with(
-    brd$dred, plot_samples(
-      projection[o, ], xlim = lim$x, ylim = lim$y,
-      col = colorize(density[o], mode = "rank", colors = "ry"),
-      main = "density"
-    )
-  )
-  if(legend) {
-    colorLegend(
-      "b", horiz = T, size = c(70, 3), parameters = clr.prm,
-      ticks = 0:4/4, tick.pos = -1, cex = 0.75
-    )
-  }
-  # Plot CDaDaDR and overlay subsets
-  with(
-    brd$dred, plot_samples(
-      projection[o, ], xlim = lim$x, ylim = lim$y,
-      col = colorize(density[o], mode = "rank"),
-      main = "clustering"
-    )
-  )
-  if(core_only) {
-    with(
-      brd$subsets, plot_samples(
-        x[core], grp = cluster[core], grp.prm = grp.prm, alpha = 0.1, add = T
-      )
-    )
-  } else {
-    with(
-      brd$subsets, plot_samples(
-        x, grp = 2 * cluster + core - 1, grp.prm = grp.prm, alpha = 0.1, add = T
-      )
-    )
-  }
-  if(legend) {
-    legend(
-      "bottomleft", legend = "best candidate",
-      fill = grp.prm$colors[1 + core_only], cex = 0.75, bty = 'n'
-    )
-  }
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+ShowSettings <- function(cfg) {
+  cfg <- cfg[-(1:3)]
+  cfg$bdt <- paste(cfg$bdt, collapse = " >< ", sep = "")
+  tbl <- matrix(unlist(cfg), 1, dimnames = list(NULL, names(cfg)))
+  knitr::kable(tbl)
 }
 ```
 
 ### Initializations
 
 ```{r, include=FALSE}
-# #############################################################################.
 suppressPackageStartupMessages(library(Tightrope))
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-CFG_DTS <- list()
 ```
 
-#### Dataset selection
+#### Dataset
 
 ```{r}
+# =============================================================================.
+# Dataset
+# -----------------------------------------------------------------------------.
 # ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
-load_dataset   <- "E14_EPZ"
-target_dataset <- "E14_EPZ"
-
+load_dataset   <- "ESC_BRD"
+target_dataset <- "ESC_BRD"
+# -----------------------------------------------------------------------------.
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
-antibody <- "H3K27me1"
+antibody <- "H3K27me3"
+# -----------------------------------------------------------------------------.
 ```
 
 #### Glopal settings
 
 ```{r}
+# =============================================================================.
+# Glopal settings
 dither  <- 5
 zscore  <- T
 mincs   <- 300
+# -----------------------------------------------------------------------------.
+CFG_DTS <- list()
 ```
 
 ### Collection of spike-in datasets
 
 ```{r, include=FALSE}
 # =============================================================================.
+# ESC_BRD
+# -----------------------------------------------------------------------------.
 if(any(c("ESC_BRD", "ALL") %in% load_dataset)) {
   ESC_BRD <- list()
   
@@ -196,6 +159,8 @@ if(any(c("ESC_BRD", "ALL") %in% load_dataset)) {
 }
 
 # =============================================================================.
+# NSC_K27M
+# -----------------------------------------------------------------------------.
 if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
   data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_K27M_spike_in/"
   NSC_K27M <- list(
@@ -218,6 +183,8 @@ if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
 }
 
 # =============================================================================.
+# E14_EPZ
+# -----------------------------------------------------------------------------.
 if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
   data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/"
   E14_EPZ <- list(
@@ -240,6 +207,8 @@ if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
 }
 
 # =============================================================================.
+# Lu_et_al
+# -----------------------------------------------------------------------------.
 if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
   data_path <- "/Volumes/USB16GB/LT_WORKS/GSE63195_Lu_et_al_2016/"
   Lu_et_al <- list(
@@ -267,8 +236,10 @@ if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
 SUZ12 WT + KO cell mix experiments in mouse ESCs.
 
 ```{r, include=FALSE}
-wks_name <- "ESC_BRD"
 # =============================================================================.
+# ESC_BRD
+# -----------------------------------------------------------------------------.
+wks_name <- "ESC_BRD"
 if(exists(wks_name)) {
   wks <- get(wks_name)
   CFG_DTS[[wks_name]] <- list(
@@ -279,6 +250,9 @@ if(exists(wks_name)) {
       
       c("ESC_X---X_100_R1", "ESC_X---X_10_R1"),
       c("ESC_X---X_100_R2", "ESC_X---X_10_R2"),
+      
+      c("ESC_X---X_100_R1",      "ESC_X---X_100_R2"),
+      c("ESC_X---X_10_R1",      "ESC_X---X_10_R2"),
       c("ESC_Input_0_R1",      "ESC_Input_0_R2")
     ),
     layout  = matrix(1:9, 3, 3, byrow = T),
@@ -289,34 +263,25 @@ if(exists(wks_name)) {
     cvt     = NA,
     npc     = 2,
     knn     = 300,
-    bdt     = c(0.5, 0.05), # c(H3K27me3 = 0.8, Suz12 = .95),
-    ncl     = c(H3K27me3 =   2, Suz12 =   1)
+    bdt     = list(H3K27me3 = c(0.30, 0.10), Suz12 = c(0.5, 0.05)),
+    ncl     = c(H3K27me3 = 2, Suz12 = 1)
   )
-  for(opt in c("ref_roi", "smobs", "ncl")) {
-    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
-  }
-
-  CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
-  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  CFG_DTS[[wks_name]] <- MakeSettingsForAntibody(
+    CFG_DTS[[wks_name]], c("ref_roi", "smobs", "bdt", "ncl"), antibody
+  )
   # ---------------------------------------------------------------------------.
   rm(wks)
 }
 ```
-
-```{r, echo=FALSE, results='asis'}
-if(exists(wks_name)) {
-  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
-  rm(wks_name)
-}
-```
-
 #### 2. NSC_K27M
 
 H3WT versus K27M experiments in mouse NSCs.
 
 ```{r, include=FALSE}
-wks_name <- "NSC_K27M"
 # =============================================================================.
+# NSC_K27M
+# -----------------------------------------------------------------------------.
+wks_name <- "NSC_K27M"
 if(exists(wks_name)) {
   wks <- get(wks_name)
   CFG_DTS[[wks_name]] <- list(
@@ -352,20 +317,15 @@ if(exists(wks_name)) {
 }
 ```
 
-```{r, echo=FALSE, results='asis'}
-if(exists(wks_name)) {
-  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
-}
-rm(wks_name)
-```
-
 #### 3. E14_EPZ
 
 EZH2 inhibitor washout experiments in mouse ESCs.
 
 ```{r, include=FALSE}
-wks_name <- "E14_EPZ"
 # =============================================================================.
+# E14_EPZ
+# -----------------------------------------------------------------------------.
+wks_name <- "E14_EPZ"
 if(exists(wks_name)) {
   wks <- get(wks_name)
   CFG_DTS[[wks_name]] <- list(
@@ -377,30 +337,19 @@ if(exists(wks_name)) {
     nxp     = 0,
     rex     = "_7d$",
     ref_roi = c(H3K27me3 = "GN_ENS", H3K27me2 = "CGI_UCSC", H3K27me1 = "CGI_UCSC", Suz12 = "CGI_UCSC"),
-    smobs   = c(H3K27me3 = F, H3K27me2 = F, H3K27me1 = F, Suz12 = F),
+    smobs   = c(H3K27me3 = T, H3K27me2 = F, H3K27me1 = F, Suz12 = F),
     cvt     = NA,
     npc     = 2,
     knn     = 300,
-    bdt     = c(0.5, 0.05),
-    # bdt     = c(H3K27me3 = .98, H3K27me2 = .90, H3K27me1 = .90, Suz12 = .95),
-    ncl     = c(H3K27me3 =   1, H3K27me2 =   2, H3K27me1 =   2, Suz12 =   1)
+    bdt     = list(H3K27me3 = c(0.7, 0.05), H3K27me2 = c(0.5, 0.05), H3K27me1 = c(0.5, 0.05), Suz12 = c(0.5, 0.05)),
+    ncl     = c(H3K27me3 = 2, H3K27me2 = 2, H3K27me1 = 2, Suz12 = 1)
   )
-  for(opt in c("ref_roi", "smobs", "ncl")) {
-    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
-  }
-
-  CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
-  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  CFG_DTS[[wks_name]] <- MakeSettingsForAntibody(
+    CFG_DTS[[wks_name]], c("ref_roi", "smobs", "bdt", "ncl"), antibody
+  )
   # ---------------------------------------------------------------------------.
   rm(wks)
 }
-```
-
-```{r, echo=FALSE, results='asis'}
-if(exists(wks_name)) {
-  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
-}
-rm(wks_name)
 ```
 
 #### 4. Lu_et_al
@@ -408,8 +357,10 @@ rm(wks_name)
 H3WT versus K36M experiments from Lu et al., 2016.
 
 ```{r, include=FALSE}
-wks_name <- "Lu_et_al"
 # =============================================================================.
+# Lu_et_al
+# -----------------------------------------------------------------------------.
+wks_name <- "Lu_et_al"
 if(exists(wks_name)) {
   wks <- get(wks_name)
   CFG_DTS[[wks_name]] <- list(
@@ -424,46 +375,42 @@ if(exists(wks_name)) {
     ref_roi = "GN",
     smobs   = T,
     cvt     = NA,
-    npc     = 2, 
+    npc     = 2,
     knn     = 300,
-    bdt     = c(0.5, 0.05),
-    # bdt     = c(H3K36me3 = .95, H3K27me3 = .95),
-    ncl     = c(H3K36me3 =   1, H3K27me3 =   1)
+    bdt     = c(0.3, 0.05),
+    ncl     = 2
   )
-  for(opt in c("ncl")) {
-    CFG_DTS[[wks_name]][[opt]] <- CFG_DTS[[wks_name]][[opt]][antibody]
-  }
-  
-  CFG_DTS[[wks_name]]$viz <- InsertAntibody(CFG_DTS[[wks_name]]$viz, antibody)
-  CFG_DTS[[wks_name]]$nxp <- sum(CFG_DTS[[wks_name]]$xps)
+  CFG_DTS[[wks_name]] <- MakeSettingsForAntibody(
+    CFG_DTS[[wks_name]], c(), antibody
+  )
   # ---------------------------------------------------------------------------.
   rm(wks)
 }
 ```
 
-```{r, echo=FALSE, results='asis'}
-if(exists(wks_name)) {
-  knitr::kable(ExperimentAnnotations(wks_name, xps = CFG_DTS[[wks_name]]$xps))
-}
-rm(wks_name)
-```
-
 ### BRD procedure
-
-#### Dataset dependent settings
-
-```{r, echo=FALSE, results='asis'}
-tbl <- t(sapply(CFG_DTS, "[", -(1:3)))
-knitr::kable(tbl)
-rm(tbl)
-```
-
-#### Extraction of count data
 
 ```{r, include=FALSE}
 # Select dataset to be analysed
 cfg  <- CFG_DTS[[target_dataset]]
+```
 
+#### Dataset
+
+```{r, echo=FALSE, results='asis'}
+ShowDataset(wks_name)
+rm(wks_name)
+```
+
+#### Configuration
+
+```{r, echo=FALSE, results='asis'}
+ShowSettings(cfg)
+```
+
+#### Count data
+
+```{r, include=FALSE}
 # Raw counts
 wks <- get(target_dataset)
 cnt <- with(cfg, wks$CNT[[ref_roi]][, xps])
@@ -481,12 +428,12 @@ brd <- with(
     cnt, controls = controls, dither = dither,
     smobs = smobs, cvt  = cvt , npc = npc, zscore = zscore,
     knn = knn, bdt = bdt, ncl = ncl, mincs = mincs
-  ) 
+  )
 )
 message("status: ", brd$status)
 ```
 
-#### Saved results
+#### Save results
 
 ```{r, include=FALSE}
 # Reshape dataset to match target experiments
@@ -538,19 +485,16 @@ knitr::kable(brd$populations)
 
 ### Figures
 
-```{r, include=FALSE}
-```
-
-#### Density analysis
+#### CDaDaDR, clustering, background ranking
 
 ```{r, echo=FALSE, fig.width=3, fig.height=3.5, dpi=300}
 # layout 1 x 2 => 5.28 x 2.97
 # layout 2 x 2 => 5.28 x 5.94
 # layout 6 x 2 => 5.28 x 8.91
 
-# layout(matrix(1:2, 1, 2, byrow = T))
+# layout(matrix(1:4, 2, 2, byrow = T))
 par(mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
-PlotBRD(brd, core_only = F, legend = T)
+PlotBRD(brd, core.only = T, with.legend = F)
 ```
 
 #### Scaling factors

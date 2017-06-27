@@ -1,49 +1,19 @@
 # =============================================================================.
-#' Average ranking for control measurements
-# -----------------------------------------------------------------------------.
-#' @seealso
-#'   \link{BRD}
-# -----------------------------------------------------------------------------.
-#' @param x
-#' matrix of read counts
-#' (rows = observations, columns = measurement conditions).
-#'
-#' @param by
-#' grouping index.
-#'
-#' @param controls
-#' columns corresponding to control measurements (Input, IgG, etc.)
-#'
-#' @return
-#' group identifiers ordered by decreasing average difference
-#' between controls and other measurement conditions.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-bg_ranking <- function(x, by, controls) {
-
-  bg <- split(as.data.frame(as.matrix(x)), f = by)
-  ng <- length(bg)
-  z <- t(sapply(bg, colMeans))
-  a <- rowMeans(as.matrix(z[, - controls]))
-  b <- rowMeans(as.matrix(z[, controls]))
-  bg <- (1:ng)[order(b - a, decreasing = T)]
-
-  bg
-}
-
-# =============================================================================.
 #' Background Read Density
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{CPSES},
 #'   \link{QuickShiftClustering},
-#'   \link{CDaDaDR}
+#'   \link{CDaDaDR.prototype}
 # -----------------------------------------------------------------------------.
-#' @inheritParams CDaDaDR
+#' @inheritParams CDaDaDR.prototype
 #'
 #' @param controls
 #' columns corresponding to control measurements (Input, IgG, etc.).
+#'
+#' @param ignore
+#' logical vector indicating observations (rows) to be ignored
+#' (default = F, none).
 #'
 #' @param bdt
 #' numeric vector of length 2 defining background density thresholds both
@@ -71,7 +41,7 @@ bg_ranking <- function(x, by, controls) {
 #' \item{nonzero}{indices of initial observations with count > 0.}
 #' \item{dred}{
 #'   dimensionality-reduced non-zero observations
-#'   (result from the \link{CDaDaDR} function).
+#'   (result from the \link{CDaDaDR.prototype} function).
 #' }
 #' \item{subsets}{
 #'   partition of non-zero observations into background candidate subsets.
@@ -86,41 +56,53 @@ bg_ranking <- function(x, by, controls) {
 #'   dithered and log2 transformed counts.
 #' }
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
-BRD <- function(
-  cnt, controls, smobs = F, dither = 3,
-  npc = 2, zscore = T, knn = 200, rare = 0.01, method = "pca",
+BRD.prototype <- function(
+  cnt, controls = NULL, widths = 1, ignore = F,
+  dither = 3, smobs = F, cvt = 0, npc = 2, zscore = T, knn = 200, rare = 0.01,
   bdt = c(0.4, 0.1), ncl = 2, mincs = 100, progress = F
 ) {
 
   if(is.null(colnames(cnt))) stop("missing column names in the count matrix")
-  if(length(controls) < 2) stop("BRD requires at least 2 controls")
+
+  if(length(ignore) == 1) ignore <- rep(ignore, nrow(cnt))
+  if(length(widths) == 1) widths <- rep(widths, nrow(cnt))
+
+  if(length(ignore) != nrow(cnt)) {
+    stop("inconsistent count matrix and ignore vector")
+  }
+  if(length(widths) != nrow(cnt)) {
+    stop("inconsistent count matrix and widths vector")
+  }
 
   xps <- colnames(cnt)
   inp <- match(controls, xps)
 
   parameters <- list(
-    experiments = xps, controls = xps[inp], smobs = smobs, dither = dither,
-    npc = npc, zscore = zscore, knn = knn, rare = rare, method = method,
-    bdt = bdt, ncl = ncl, mincs = mincs
+    experiments = xps, controls = xps[inp],
+    dither = dither, smobs = smobs, cvt = cvt, npc = npc, zscore = zscore,
+    knn = knn, bdt = bdt, ncl = ncl, mincs = mincs
   )
 
-  # Cleanup of missing values
-  cleanup <- FiniteValues(log2(cnt))
+  # Cleanup of missing values and ignored if provided
+  cleanup <- FiniteValues(log2(cnt)) & ! ignore
   ldc <- log2(DitherCounts(cnt))
   ldc <- ldc[cleanup, ]     # Dithered and log2 transformed counts
   cnt <- cnt[cleanup, ]     # Raw counts
+  widths <- widths[cleanup] # Region sizes
 
-  # Precompute the mean of each observation in controls
+  # Precompute the mean of each observation for controls and experiments
   movs <- rowMeans(as.matrix(log2(cnt[,   inp])))
 
-  # Compute count density after dithering and dimensionality reduction
-  dred <- CDaDaDR(
-    cnt, knn = knn, smobs = smobs, movs = movs, dither = dither,
-    npc = npc, rare = rare, method = method
+  # Count density after dithering and dimensionality reduction
+  dred <- CDaDaDR.prototype(
+    cnt, knn = knn,
+    widths = widths, smobs = smobs, movs = movs,
+    dither = dither, cvt = cvt, npc = npc, zscore = zscore, rare = rare
   )
 
-  # Filter out observations with lower density than specified
+  # Filter out low density observations
   rd <- rankstat(dred$density)
   sbs <- which(rd > bdt[1])
   sbs <- with(
@@ -143,16 +125,18 @@ BRD <- function(
   }
 
   # Rank cluster cores by background levels (enrichment in control samples)
-  if(ncl > 1) {
-    bg_rnk <- with(
-      sbs, bg_ranking(ldc[i[core], ], by = cluster[core], controls = inp)
-    )
-  } else {
-    bg_rnk <- 1
+  if(! is.null(controls)) {
+    if(ncl > 1) {
+      bg_rnk <- with(
+        sbs, bg_ranking(ldc[i[core], ], by = cluster[core], controls = inp)
+      )
+    } else {
+      bg_rnk <- 1
+    }
+    bg_clu <- bg_rnk[1]
+    bg_idx <- with(sbs, i[core & cluster == bg_clu])
+    pop$background <- 1:ncl == bg_clu
   }
-  bg_clu <- bg_rnk[1]
-  bg_idx <- with(sbs, i[core & cluster == bg_clu])
-  pop$background <- 1:ncl == bg_clu
 
   # Fit a multivariate gaussian model to each cluster core of minimum size
   theta <- list()
@@ -178,21 +162,23 @@ BRD <- function(
   )
 
   # Background cluster
-  res$status <- "BRD candidate cluster selected"
-  bg_theta <- theta[[bg_clu]]
-  if(length(bg_theta) > 1) {
-    res <- c(
-      res, list(
-        normfactors = mean(bg_theta$mu) - bg_theta$mu,
-        bg_clurank  = bg_rnk,
-        bg_cluster  = bg_clu,
-        bg_theta    = bg_theta,
-        bg_members  = bg_idx
+  if(! is.null(controls)) {
+    res$status <- "BRD candidate cluster selected"
+    bg_theta <- theta[[bg_clu]]
+    if(length(bg_theta) > 1) {
+      res <- c(
+        res, list(
+          normfactors = mean(bg_theta$mu) - bg_theta$mu,
+          bg_clurank  = bg_rnk,
+          bg_cluster  = bg_clu,
+          bg_theta    = bg_theta,
+          bg_members  = bg_idx
+        )
       )
-    )
-  } else {
-    res$status <- "Background candidate population is below the expected minimum size"
-    warning(res$status)
+    } else {
+      res$status <- "Background candidate population is below the expected minimum size"
+      warning(res$status)
+    }
   }
 
   res
