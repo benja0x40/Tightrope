@@ -194,6 +194,7 @@ knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
 #' \item{mu}{knn centroids}
 #' \item{sigma2}{knn variances (squared standard deviations)}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 
@@ -252,6 +253,7 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' @return
 #' knn_mean returns a \code{matrix} of knn centroids.
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 knn_mean <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 

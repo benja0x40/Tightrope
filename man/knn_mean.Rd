@@ -26,3 +26,4 @@ compute k-nearest neighbor (knn) centroids (i.e. mean vectors).
 \link{knn_musigma2},
   \link{knn_density}
 }
+\keyword{internal}

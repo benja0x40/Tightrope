@@ -120,8 +120,8 @@ FindOutliers <- function(
 # Dataset
 # -----------------------------------------------------------------------------.
 # ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
-load_dataset   <- "E14_EPZ" # "ALL"
-target_dataset <- "E14_EPZ" # c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
+load_dataset   <- "ALL" # "ALL"
+target_dataset <- c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
 # -----------------------------------------------------------------------------.
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
 antibody <- "H3K27me2"
@@ -131,8 +131,8 @@ base_path <- "/media/benjamin/USB16GB/LT_WORKS/" # mistral
 base_path <- "/Volumes/USB16GB/LT_WORKS/"        # iMac
 # -----------------------------------------------------------------------------.
 save.results <- F
-core.only    <- T
 with.legend  <- T
+with.axes    <- T
 # -----------------------------------------------------------------------------.
 smobs   <- T
 dither  <- 5
@@ -287,7 +287,7 @@ if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
 wks_name <- "ESC_BRD"
 CFG_DTS[[wks_name]] <- list(
   abd.lst = c("H3K27me3", "Suz12"),
-  abd.prm = c("ref_roi", "bdt", "ncl"),
+  abd.prm = c("ref_roi", "ncl"),
   abd.chk = c("Input"),
   viz = list(
     c("ESC_Input_0_R1", "ESC_X---X_100_R1", "ESC_X---X_10_R1", "ESC_X---X_0_R1"),
@@ -302,7 +302,7 @@ CFG_DTS[[wks_name]] <- list(
   nxp     = 0,
   rex     = "Input",
   ref_roi = c(H3K27me3 = "GN_ENS", Suz12 = "CGI_UCSC"),
-  bdt     = list(H3K27me3 = c(0.5, 0.10), Suz12 = c(0.5, 0.05)),
+  bdt     = c(0.5, 0.05),
   ncl     = c(H3K27me3 = 2, Suz12 = 1)
 )
 
@@ -359,7 +359,7 @@ CFG_DTS[[wks_name]] <- list(
 wks_name <- "Lu_et_al"
 CFG_DTS[[wks_name]] <- list(
   abd.lst = c("H3K36me3", "H3K27me3"),
-  abd.prm = c("bdt"),
+  abd.prm = c(),
   abd.chk = c("Input"),
   viz = list(
     c("H3WT_X---X", "K36M_X---X"),
@@ -369,8 +369,8 @@ CFG_DTS[[wks_name]] <- list(
   nxp     = 0,
   rex     = "Input",
   ref_roi = "GN",
-  bdt     = list(H3K36me3 = c(0.5, 0.05), H3K27me3 = c(0.5, 0.05)),
-  ncl     = 2
+  bdt     = c(0.5, 0.05),
+  ncl     = 1
 )
 
 # PROCESSING ###################################################################
@@ -381,7 +381,7 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
   wks <- get(dts)
   cfg <- CFG_DTS[[dts]]
 
-  cfg$abd.lst <- antibody
+  # cfg$abd.lst <- antibody
 
   for(antibody in cfg$abd.lst) { # /////////////////////////////////////////////
 
@@ -391,7 +391,7 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     cfg <- CFG_DTS[[dts]]
     cfg <- MakeSettingsForAntibody(cfg, antibody, wks$ann)
 
-    cfg$ref_roi <- "CGI_UCSC"
+    cfg$ref_roi <- "GN_ENS"
 
     # Raw counts
     cnt <- with(cfg, wks$CNT[[ref_roi]][, xps])
@@ -452,12 +452,12 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
       paste0(fname, "_CDaDaDR.png"),
       width = 2 * 3, height = 2 * 3.45, units = "in", res = 300
     )
-    layout(matrix(1:4, 2, 2, byrow = T))
-    par(
-      mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8
-    )
+    layout(matrix(1:4, 2, 2, byrow = F))
+    margins <- c(5, 4, 3, 1)
+    if(! with.axes) margins <- margins / 10
+    par(mar = margins, pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
-    PlotBRD(brd, core.only = core.only, with.legend = with.legend)
+    PlotBRD(brd, with.axes = with.axes, with.legend = with.legend)
 
     dev.off()
 
@@ -506,3 +506,50 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
   }
 }
 
+
+#
+# layout(matrix(1:4, 2, 2, byrow = T))
+# par(
+#   mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8
+# )
+# lim <- with(
+#   brd$dred, xylim(projection[! rare, 1:2], spacing = 0, margin = 0.1)
+# )
+#
+#
+# k <- with(brd$parameters, match(controls, experiments))
+# x <- with(brd, rowMeans(as.matrix(log2counts[, - k])))
+# y <- with(brd, rowMeans(as.matrix(log2counts[,   k])))
+# am <- cbind(
+#   `average log2(counts)` = (x + y) / 2,
+#   `average log2ratio`    = (y - x)
+# )
+#
+# gamma <- brd$dred$density
+# delta <- am[, 2]
+# omega <- DensityCorrectedByIntensity(brd$dred$density, am[, 2])
+#
+# plot(delta, gamma, pch = 20, cex = 0.5, col = grey(0, 0.1))
+# abline(omega$ab, col = "red")
+# plot(delta, omega$d, pch = 20, cex = 0.5, col = grey(0, 0.1))
+#
+# o <- order(brd$dred$density)
+# with(
+#   brd$dred, plot_samples(
+#     projection[o, ], xlim = lim$x, ylim = lim$y,
+#     col = colorize(density[o], mode = "rank", colors = "ry"),
+#     alpha = ! rare[o], main = "CDaDaDR"
+#   )
+# )
+#
+#
+#
+# with(
+#   brd$dred, plot_samples(
+#     projection[o, ], xlim = lim$x, ylim = lim$y,
+#     col = colorize(omega$d[o], mode = "rank", colors = "ry"),
+#     alpha = ! rare[o], main = "alpha boost"
+#   )
+# )
+#
+#

@@ -100,17 +100,19 @@ CDaDaDR <- function(
       if(method == "pca") {
         x <- prcomp(x, retx = T, center = T, scale. = T)
         status$sdpc <- x$sdev
+        names(status$sdpc) <- paste0("C", 1:ncol(cnt))
         x <- x$x[, idx]
       }
       # Independent components
       if(method == "ica") {
         x <- icafast(x, nc = npc, center = T)
         status$sdpc <- x$vafs
+        names(status$sdpc) <- paste0("C", 1:npc)
         x <- x$Y[, idx]
       }
+      colnames(x) <- names(status$sdpc)[1:npc]
 
       status$cvpc <- with(status, 1 - cumsum(sdpc / sum(sdpc)))
-      names(status$sdpc) <- paste0("C", 1:npc)
       names(status$cvpc) <- names(status$sdpc)
 
       status$reduced <- length(idx)

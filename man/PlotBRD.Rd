@@ -4,12 +4,10 @@
 \alias{PlotBRD}
 \title{PlotBRD}
 \usage{
-PlotBRD(brd, core.only = F, with.legend = T)
+PlotBRD(brd, with.axes = T, with.legend = T)
 }
 \arguments{
 \item{brd}{result from \link{BRD}}
-
-\item{core.only}{logical (default = F)}
 
 \item{with.legend}{logical (default = T)}
 }

@@ -33,6 +33,40 @@ bg_ranking <- function(x, by, controls) {
 }
 
 # =============================================================================.
+#' DensityCorrectedByIntensity
+# -----------------------------------------------------------------------------.
+#' @param d density vector
+#' @param i intensity vector
+#'
+#' @return list
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+DensityCorrectedByIntensity <- function(d, i, k) {
+  ab <- function(rx, ry) {
+    f  <- diff(ry) / diff(rx)
+    f <- c(a = ry[1] - f * rx[1], b = f)
+    f
+  }
+  yabx <- function(x, f) {
+    f[1] + x * f[2]
+  }
+  n <- length(d)
+  o <- order(i)
+  k <- round(0.1 * n)
+  s <- caTools::runmean(d[o], k = k)
+  ri <- range(i)
+  rd <- s[c(1, n)]
+  if(rd[1] > rd[2]) {
+    rd <- c(rd[2] / rd[1], 1)
+    d <- d * yabx(i, ab(ri, rd))
+  } else {
+    rd <- c(1, rd[1] / rd[2])
+  }
+  d
+}
+
+# =============================================================================.
 #' Background Read Density
 # -----------------------------------------------------------------------------.
 #' @seealso
@@ -111,8 +145,10 @@ BRD <- function(
   ldc <- ldc[cleanup, ]     # Dithered and log2 transformed counts
   cnt <- cnt[cleanup, ]     # Raw counts
 
-  # Precompute the mean of each observation in controls
+  # Precompute the mean of each observation in control and enrichment conditions
   movs <- rowMeans(as.matrix(log2(cnt[,   inp])))
+  menr <- rowMeans(as.matrix(log2(cnt[, - inp])))
+  intensity <- lc2ma(menr, movs)$m
 
   # Compute count density after dithering and dimensionality reduction
   dred <- CDaDaDR(
@@ -120,11 +156,20 @@ BRD <- function(
     npc = npc, rare = rare, method = method
   )
 
+  # Correct density
+  ds <- DensityCorrectedByIntensity(dred$density, intensity, k = knn)
+  dred <- c(dred, list(ctl = movs, enr = menr, intensity = intensity))
+  dred$knn_density <- dred$density
+  dred$density <- ds
+
   # Filter out observations with lower density than specified
   rd <- rankstat(dred$density)
   sbs <- which(rd > bdt[1])
   sbs <- with(
-    dred, list(i = sbs, d = density[sbs], r = rd[sbs], x = projection[sbs, ])
+    dred, list(
+      i = sbs,
+      b = intensity[sbs], d = density[sbs], r = rd[sbs], x = projection[sbs, ]
+    )
   )
 
   # Find clusters by density gradient ascent in the dred space
