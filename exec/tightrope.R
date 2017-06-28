@@ -120,11 +120,11 @@ FindOutliers <- function(
 # Dataset
 # -----------------------------------------------------------------------------.
 # ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
-load_dataset   <- "ALL" # "ALL"
-target_dataset <- c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
+load_dataset   <- "E14_EPZ" # "ALL"
+target_dataset <- "E14_EPZ" # c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
 # -----------------------------------------------------------------------------.
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
-antibody <- "H3K27me2"
+# antibody <- "H3K27me2"
 # =============================================================================.
 # Glopal settings
 base_path <- "/media/benjamin/USB16GB/LT_WORKS/" # mistral
@@ -140,8 +140,8 @@ npc     <- 2
 zscore  <- T
 knn     <- 300
 rare    <- 0.01
-method  <- "pca"
-mincs   <- 50
+method  <- "ica"
+mincs   <- 10
 # -----------------------------------------------------------------------------.
 
 CFG_DTS <- list()
@@ -236,11 +236,7 @@ if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
   )
   rm(data_path)
 
-  k <- c(
-    # "ESC_Input_0_R1", "ESC_Input_0_R2", "ESC_Input_100_R1", "ESC_Input_100_R2"
-    # "ESC_Input_0_R1", "ESC_Input_0_R2"
-    "ESC_Input_0_R1"
-  )
+  k <- c("ESC_Input_0_R1") # "ESC_Input_0_R1", "ESC_Input_0_R2"
   E14_EPZ$CNT <- JoinColumns(E14_EPZ$CNT, ExtractColumns(ESC_BRD$CNT, k))
 
   k <- match(k, ESC_BRD$ann$lt_id)
@@ -248,6 +244,8 @@ if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
 
   E14_EPZ$ann_orignal <- E14_EPZ$ann
   E14_EPZ$ann <- rbind(E14_EPZ$ann_orignal[, lst], ESC_BRD$ann[k, lst])
+
+  rm(k, lst)
 
   if(! with(E14_EPZ, all(ann$lt_id == colnames(CNT$GN)))) {
     stop("Inconsistent annotation of samples in E14_EPZ")
@@ -302,7 +300,7 @@ CFG_DTS[[wks_name]] <- list(
   nxp     = 0,
   rex     = "Input",
   ref_roi = c(H3K27me3 = "GN_ENS", Suz12 = "CGI_UCSC"),
-  bdt     = c(0.5, 0.05),
+  bdt     = c(0.6, 0.05),
   ncl     = c(H3K27me3 = 2, Suz12 = 1)
 )
 
@@ -369,8 +367,8 @@ CFG_DTS[[wks_name]] <- list(
   nxp     = 0,
   rex     = "Input",
   ref_roi = "GN",
-  bdt     = c(0.5, 0.05),
-  ncl     = 1
+  bdt     = c(0.6, 0.05),
+  ncl     = 2
 )
 
 # PROCESSING ###################################################################
@@ -381,17 +379,14 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
   wks <- get(dts)
   cfg <- CFG_DTS[[dts]]
 
-  # cfg$abd.lst <- antibody
-
   for(antibody in cfg$abd.lst) { # /////////////////////////////////////////////
-
-    message(dts, " | ", antibody)
 
     # Analysis settings
     cfg <- CFG_DTS[[dts]]
     cfg <- MakeSettingsForAntibody(cfg, antibody, wks$ann)
 
-    cfg$ref_roi <- "GN_ENS"
+    # cfg$ref_roi <- "GN_ENS"
+    message(dts, " | ", antibody, " | ", cfg$ref_roi)
 
     # Raw counts
     cnt <- with(cfg, wks$CNT[[ref_roi]][, xps])
@@ -417,23 +412,23 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     fname <- paste0(fname, ifelse(smobs, "_smobs", ""))
     if(save.results) {
       # Reshape dataset to match target experiments
-      wks$antibody    <- antibody
-      wks$experiments <- experiments
-      wks$controls    <- controls
-      wks$ignored     <- ignore
-      wks$CFG         <- cfg
-      wks$CNT         <- ExtractColumns(wks$CNT, experiments)
-      wks$ann         <- with(wks, ann[match(experiments, ann$lt_id), ])
-      rownames(wks$ann) <- NULL
-
-      # Include BRD results
-      wks$BRD <- c(
-        list(ref_roi = cfg$ref_roi), # regions used for BRD estimation
-        brd
+      res <- with(
+        wks, list(
+          name        = name,
+          antibody    = antibody,
+          experiments = experiments,
+          controls    = controls,
+          CFG         = cfg,
+          CNT         = ExtractColumns(CNT, experiments),
+          ann         = ann[match(experiments, ann$lt_id), ],
+          BRD         = c(list(ref_roi = cfg$ref_roi), brd)
+        )
       )
-
+      rownames(res$ann) <- NULL
       # Save RData
-      saveRDS(wks, paste0(fname, ".rdata"))
+      res <- list2env(res)
+      saveRDS(res, paste0(fname, ".rdata"))
+      rm(res)
     }
 
     # Controls #################################################################
@@ -457,7 +452,7 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     if(! with.axes) margins <- margins / 10
     par(mar = margins, pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
 
-    PlotBRD(brd, with.axes = with.axes, with.legend = with.legend)
+    PlotBRD(brd, with.axes = with.axes, with.legend = with.legend, res = 300)
 
     dev.off()
 
@@ -469,7 +464,7 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     png(
       paste0(fname, "_Scaling.png"),
       width = dim(cfg$layout)[2] * 3, height = dim(cfg$layout)[1] * 3.45,
-      units = "in", res = 300
+      units = "in", res = 200
     )
 
     layout(cfg$layout)
@@ -504,52 +499,5 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     }
     dev.off()
   }
+  rm(cmp, lbl, idx, d, o)
 }
-
-
-#
-# layout(matrix(1:4, 2, 2, byrow = T))
-# par(
-#   mar = c(5, 4, 3, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8
-# )
-# lim <- with(
-#   brd$dred, xylim(projection[! rare, 1:2], spacing = 0, margin = 0.1)
-# )
-#
-#
-# k <- with(brd$parameters, match(controls, experiments))
-# x <- with(brd, rowMeans(as.matrix(log2counts[, - k])))
-# y <- with(brd, rowMeans(as.matrix(log2counts[,   k])))
-# am <- cbind(
-#   `average log2(counts)` = (x + y) / 2,
-#   `average log2ratio`    = (y - x)
-# )
-#
-# gamma <- brd$dred$density
-# delta <- am[, 2]
-# omega <- DensityCorrectedByIntensity(brd$dred$density, am[, 2])
-#
-# plot(delta, gamma, pch = 20, cex = 0.5, col = grey(0, 0.1))
-# abline(omega$ab, col = "red")
-# plot(delta, omega$d, pch = 20, cex = 0.5, col = grey(0, 0.1))
-#
-# o <- order(brd$dred$density)
-# with(
-#   brd$dred, plot_samples(
-#     projection[o, ], xlim = lim$x, ylim = lim$y,
-#     col = colorize(density[o], mode = "rank", colors = "ry"),
-#     alpha = ! rare[o], main = "CDaDaDR"
-#   )
-# )
-#
-#
-#
-# with(
-#   brd$dred, plot_samples(
-#     projection[o, ], xlim = lim$x, ylim = lim$y,
-#     col = colorize(omega$d[o], mode = "rank", colors = "ry"),
-#     alpha = ! rare[o], main = "alpha boost"
-#   )
-# )
-#
-#

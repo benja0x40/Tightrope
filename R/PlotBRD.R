@@ -2,12 +2,14 @@
 #' PlotBRD
 # -----------------------------------------------------------------------------.
 #' @param brd result from \link{BRD}
+#' @param with.axes logical (default = T)
 #' @param with.legend logical (default = T)
+#' @param res integer
 #' @return NULL
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-PlotBRD <- function(brd, with.axes = T, with.legend = T) {
+PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 200) {
 
   clr.prm <- AutoColorParameters("ry")
   clr.prm$thresholds <- round(clr.prm$thresholds, 2)
@@ -80,21 +82,10 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T) {
     }
   }
   # Plot intensity versus density //////////////////////////////////////////////
-  # with(
-  #   brd$dred, plot(
-  #     intensity, knn_density, pch = 20, cex = 0.5, col = grey(0, 0.1),
-  #     xlab = "background intensity"
-  #   )
-  # )
-  d <- with(brd$dred, knn_density(cbind(S01(intensity), S01(density)), k = 25))
-  clr <- colorize(d, mode = "rank")
-  clr <- transformColors(clr, V.range = c(0, 0.5))
-  clr <- ReplaceAlpha(clr, 0.2)
-  o <- order(d)
+  clrmap <- function(k) colorize(k, mode = "rank")
   with(
-    brd$dred, plot(
-      intensity[o], density[o],
-      pch = 20, cex = 0.5, axes = with.axes, col = clr[o],
+    brd$dred, Histogram2D(
+      intensity, density, nx = res, plot = T, clrmap = clrmap, axes = with.axes,
       xlab = "background intensity", ylab = "density", main = "thresholds"
     )
   )
@@ -105,6 +96,3 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T) {
   )
   abline(h = min(brd$subsets$d), col = "red", lwd = 1)
 }
-
-
-

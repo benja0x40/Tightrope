@@ -146,8 +146,8 @@ BRD <- function(
   cnt <- cnt[cleanup, ]     # Raw counts
 
   # Precompute the mean of each observation in control and enrichment conditions
-  movs <- rowMeans(as.matrix(log2(cnt[,   inp])))
-  menr <- rowMeans(as.matrix(log2(cnt[, - inp])))
+  movs <- rowMeans(as.matrix(log2(cnt[,   inp]))) # , drop = F
+  menr <- rowMeans(as.matrix(log2(cnt[, - inp]))) # , drop = F
   intensity <- lc2ma(menr, movs)$m
 
   # Compute count density after dithering and dimensionality reduction

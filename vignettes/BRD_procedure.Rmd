@@ -560,33 +560,5 @@ for(cmp in cfg$viz) {
 # par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
 # empty.plot(xlim = c(1, nrow(m)), ylim = range(m))
 # for(i in 1:n) points(m[, i], type = "l", col = clr[i])
-
-
-
-# me3 <- ldc[, grepl("H3K27me3", colnames(ldc))]
-# me2 <- ldc[, grepl("H3K27me2", colnames(ldc))]
-# me1 <- ldc[, grepl("H3K27me1", colnames(ldc))]
-# 
-# x <- me1
-# x <- x - rowMeans(x)
-# 
-# layout(matrix(1:4, 2, 2, byrow = T))
-# par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.9, cex.axis = 0.9)
-# 
-# pcp <- prcomp(x, retx = T, center = T, scale. = T)
-# pcp <- pcp$x[, 1:2]
-# src <- icafast(x, nc = 2, alg = "def")
-# icp <- src$Y[, 1:2]
-# src <- src$S[, 1:2]
-# 
-# pcd <- knn_density(pcp, k = 200)
-# icd <- knn_density(icp, k = 200)
-# scd <- knn_density(src, k = 200)
-# 
-# plot_samples(pcp, col = colorize(pcd, mode = "rank", colors = "ry"))
-# plot_samples(icp, col = colorize(icd, mode = "rank", colors = "ry"))
-# plot_samples(src, col = colorize(scd, mode = "rank", colors = "ry"))
-
-
 ```
 

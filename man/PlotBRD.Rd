@@ -4,12 +4,16 @@
 \alias{PlotBRD}
 \title{PlotBRD}
 \usage{
-PlotBRD(brd, with.axes = T, with.legend = T)
+PlotBRD(brd, with.axes = T, with.legend = T, res = 200)
 }
 \arguments{
 \item{brd}{result from \link{BRD}}
 
+\item{with.axes}{logical (default = T)}
+
 \item{with.legend}{logical (default = T)}
+
+\item{res}{integer}
 }
 \description{
 PlotBRD
