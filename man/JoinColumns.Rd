@@ -13,14 +13,14 @@ JoinColumns(x, y)
 \item{y}{list of read count matrices.}
 }
 \value{
-JoinColumns returns a \code{list}
+\code{JoinColumns} returns a list.
 }
 \description{
 Merge count data
 }
 \seealso{
 \link{ExtractColumns},
-  \link{makeReadCountMatrix},
-  \link{makeReadCountsInROI}
+\link{MakeReadCountMatrix},
+\link{makeReadCountsInROI}
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 #' Average ranking for control measurements
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD}
+#' \link{BRD}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts
@@ -15,8 +15,9 @@
 #' columns corresponding to control measurements (Input, IgG, etc.)
 #'
 #' @return
-#' group identifiers ordered by decreasing average difference
-#' between controls and other measurement conditions.
+#' \code{bg_ranking} returns group identifiers ordered by decreasing background
+#' intensity, meaning the average difference between control enrichment
+#' conditions.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -35,10 +36,15 @@ bg_ranking <- function(x, by, controls) {
 # =============================================================================.
 #' DensityCorrectedByIntensity
 # -----------------------------------------------------------------------------.
-#' @param d density vector
-#' @param i intensity vector
+#' @param d
+#' density vector
 #'
-#' @return list
+#' @param i
+#' intensity vector
+#'
+#' @return
+#' \code{codeDensityCorrectedByIntensity} returns the vector of corrected
+#' densities.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -67,39 +73,41 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 }
 
 # =============================================================================.
-#' Background Read Density
+#' background read density estimation
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CPSES},
-#'   \link{QuickShiftClustering},
-#'   \link{CDaDaDR}
+#' \link{PlotBRD},
+#' \link{CDaDaDR},
+#' \link{QuickShiftClustering},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inheritParams CDaDaDR
 #'
 #' @param controls
-#' columns corresponding to control measurements (Input, IgG, etc.).
+#' count columns corresponding to control measurements (Input, IgG, etc.).
 #'
 #' @param bdt
 #' numeric vector of length 2 defining background density thresholds both
 #' expressed as proportions between 0 and 1.
-#' (\code{bdt[1]}) specifies the global threshold used to discard observations
+#' \code{bdt[1]} specifies the global threshold used to discard observations
 #' with low density prior to clustering.
-#' (\code{bdt[2]}) determines the maximum density loss allowed
+#' \code{bdt[2]} determines the maximum density loss allowed
 #' when selecting core observations relatively to the local maximum density
 #' in each cluster, and thus defining the candidate background populations.
-#' By default the value of \code{bdt} is \code{c(0.3, 0.1)} meaning that,
-#' in terms of density percentiles, the bottom 30% will be filtered out before
-#' clustering and only the top 10% can be selected as background candidates
-#' among each cluster.
+#' By default the value of \code{bdt} is \code{c(0.5, 0.05)} meaning that,
+#' in terms of density percentiles, the bottom 30 percents will be filtered out
+#' before clustering and only the top 10 percents can be selected as background
+#' candidates among each cluster.
 #'
 #' @param ncl
-#' number of clusters for partitioning observations.
+#' number of clusters partitioning the population of observations with density
+#' above \code{bdt[1]} percents.
 #'
 #' @param mincs
-#' minimum size of each cluster, as number of observations.
+#' minimum size of cluster cores, as number of observations.
 #'
 #' @return
-#' \code{BRD} returns a \code{list} with the following elements:
+#' \code{BRD} returns a list with the following elements:
 #' \item{parameters}{call parameters of the function.}
 #' \item{status}{execution status.}
 #' \item{nonzero}{indices of initial observations with count > 0.}
@@ -111,10 +119,10 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 #'   partition of non-zero observations into background candidate subsets.
 #' }
 #' \item{populations}{
-#'   summary of core populations.
+#'   summary of the core population in each subset.
 #' }
 #' \item{theta}{
-#'   fitted distribution parameters for each core candidate populations.
+#'   fitted distribution parameters for each core population.
 #' }
 #' \item{log2counts}{
 #'   dithered and log2 transformed counts.
@@ -124,7 +132,7 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 BRD <- function(
   cnt, controls, smobs = F, dither = 3,
   npc = 2, zscore = T, knn = 200, rare = 0.01, method = "pca",
-  bdt = c(0.4, 0.1), ncl = 2, mincs = 100, progress = F
+  bdt = c(0.5, 0.05), ncl = 2, mincs = 100, progress = F
 ) {
 
   if(is.null(colnames(cnt))) stop("missing column names in the count matrix")
@@ -148,7 +156,7 @@ BRD <- function(
   # Precompute the mean of each observation in control and enrichment conditions
   movs <- rowMeans(as.matrix(log2(cnt[,   inp]))) # , drop = F
   menr <- rowMeans(as.matrix(log2(cnt[, - inp]))) # , drop = F
-  intensity <- lc2ma(menr, movs)$m
+  intensity <- xy2md(menr, movs)$m
 
   # Compute count density after dithering and dimensionality reduction
   dred <- CDaDaDR(

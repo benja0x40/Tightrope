@@ -125,10 +125,10 @@ for(wks_name in c("ESC_BRD.Suz12", "ESC_BRD.H3K27me3")) {
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  cnt <- NonZeroCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
   
-  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- NonZeroCounts(wks$CNT[["TSS_ENS"]])
   # ses <- CPSES(ses, dither = 5)
   # ses <- log2(t(t(2^ldc) * ses))
   
@@ -191,10 +191,10 @@ for(wks_name in c("NSC_K27M.H3K27me3")) {
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  cnt <- NonZeroCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
   
-  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- NonZeroCounts(wks$CNT[["TSS_ENS"]])
   # ses <- CPSES(ses, dither = 5)
   # ses <- log2(t(t(2^ldc) * ses))
   
@@ -252,10 +252,10 @@ for(wks_name in c("E14_EPZ.me3", "E14_EPZ.me2", "E14_EPZ.me1", "E14_EPZ.Suz12"))
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  cnt <- NonZeroCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
 
-  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- NonZeroCounts(wks$CNT[["TSS_ENS"]])
   # ses <- CPSES(ses, dither = 5)
   # ses <- log2(t(t(2^ldc) * ses))
   
@@ -317,10 +317,10 @@ for(wks_name in c("Lu_et_al.H3K36me3", "Lu_et_al.H3K27me3")) {
   message(wks_name)
   wks <- get(wks_name)
 
-  cnt <- CleanCounts(wks$CNT[[roi]]) 
+  cnt <- NonZeroCounts(wks$CNT[[roi]]) 
   ldc <- log2(DitherCounts(cnt))
   
-  # ses <- CleanCounts(wks$CNT[["TSS_ENS"]])
+  # ses <- NonZeroCounts(wks$CNT[["TSS_ENS"]])
   # ses <- CPSES(ses, dither = 5)
   # ses <- log2(t(t(2^ldc) * ses))
   

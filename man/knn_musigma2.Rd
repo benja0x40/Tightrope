@@ -10,16 +10,19 @@ knn_musigma2(x, k, i = NULL, d = NULL, smoothing = F)
 \item{x}{numeric matrix representing multivariate data where rows = observations
 and columns = measurement conditions.}
 
-\item{k}{number of nearest neighbors (i.e. smoothing factor).}
+\item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
+of estimated densities (larger k values = smoother).}
 
 \item{i}{precomputed matrix of nearest neighbor indices (optional).}
 
 \item{d}{precomputed matrix of nearest neighbor distances (optional).}
 
-\item{smoothing}{perfom a knn average smoothing of the standard deviations (default = F).}
+\item{smoothing}{perfom a local average smoothing of
+the estimated density for \link{knn_density} (default = T, recommended)
+or the estimated variance for \link{knn_musigma2} (default = F).}
 }
 \value{
-knn_musigma2 returns a \code{list} with the following elements:
+\code{knn_musigma2} returns a list with the following elements:
 \item{mu}{knn centroids}
 \item{sigma2}{knn variances (squared standard deviations)}
 }
@@ -28,6 +31,6 @@ k-nearest neighbor (knn) centroid and corresponding standard deviation.
 }
 \seealso{
 \link{knn_density},
-  \link{knn_mean}
+\link{knn_mean}
 }
 \keyword{internal}

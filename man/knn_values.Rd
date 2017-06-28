@@ -12,7 +12,7 @@ knn_values(v, i)
 \item{i}{precomputed matrix of nearest neighbor indices.}
 }
 \value{
-knn_values returns a matrix.
+\code{knn_values} returns a matrix.
 }
 \description{
 Extract local values from knn index matrix

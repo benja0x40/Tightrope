@@ -1,18 +1,21 @@
 # =============================================================================.
-#' Count Density after Dithering and Dimensionality Reduction
+#' smooth density estimation in reduced dimensions
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD},
-#'   \link{DitherCounts},
-#'   \link{knn_density}
+#' \link{BRD},
+#' \link{DitherCounts},
+#' \link{knn_density}
 # -----------------------------------------------------------------------------.
+#' @description
+#' Count Density after Dithering and Dimensionality Reduction (CDaDaDR).
+#'
 #' @param cnt
 #' matrix of read counts
 #' (rows = observations, columns = measurement conditions).
 #'
 #' @param knn
 #' number of nearest neighbors, which corresponds to the smoothing parameter
-#' of estimated densities (larger values = smoother).
+#' of densities estimated by \link{knn_density} (larger knn values = smoother).
 #'
 #' @param smobs
 #' subtract the mean count value of each observation (logical, default = F).
@@ -22,27 +25,29 @@
 #' (default = NULL, zero).
 #'
 #' @param dither
-#' number of replicates for count dithering:
+#' number of replicates of the count dithering performed by \link{DitherCounts}:
 #' 1 = single (default), 2 = duplicate, 3 = triplicate, etc.
 #'
 #' @param npc
-#' number of dimensions retained after projection on principal components.
-#' When \code{npc} is specified, the \code{cvt} parameter is ignored.
+#' number of dimensions retained after projection on principal or independent
+#' components.
 #'
 #' @param zscore
-#' transform counts into z-scores (logical, default = T).
+#' transform read count projections into z-scores (logical, default = T).
 #'
 #' @param rare
-#' defines exceptionally low density values (default = 0.01).
+#' mark rare observations corresponding to exceptionally low density values
+#' (default = 0.01).
 #'
 #' @param method
-#' projection method, either "pca" (default) or "ica".
+#' projection method, either "pca" (default) performed by \link{prcomp},
+#' or "ica" performed by \link{icafast}.
 #'
 #' @param progress
 #' show progress bar (logical, default = F).
 #'
 #' @return
-#' CDaDaDR returns a \code{list} with the following elements:
+#' \code{CDaDaDR} returns a list with the following elements:
 #' \item{parameters}{list with the value of each CDaDaDR argument}
 #' \item{status}{list with informations on the dimensionality reduction}
 #' \item{density}{knn density}
@@ -74,7 +79,7 @@ CDaDaDR <- function(
   method <- method[1]
 
   if(smobs & is.null(movs)) {
-    movs <- knn_mean(log2(cnt), k = 5) # ???
+    movs <- knn_mean(log2(cnt), k = 5) # ??? TODO: remove this
     movs <- rowMeans(movs)
   }
 

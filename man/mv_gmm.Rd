@@ -17,10 +17,11 @@ and columns = samples or conditions.}
 \item{max_iter}{maximum number of iterations (default = 100)}
 }
 \value{
-mv_gmm returns a \code{list} with the following elements
+\code{mv_gmm} returns a list with the following elements:
 \item{theta}{list of multivariate distribution parameters}
 \item{p}{vector of probabilities}
 }
 \description{
 Gaussian mixture model fitting
 }
+\keyword{internal}

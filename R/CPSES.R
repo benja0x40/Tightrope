@@ -2,7 +2,7 @@
 #' Signal Extraction Scaling (Diaz et al., 2012)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CPSES}
+#' \link{CPSES}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' vector of read counts in the control condition (Input, IgG, etc.)
@@ -14,7 +14,7 @@
 #' precomputed ordering of \code{y} (default = NULL).
 #'
 #' @return
-#' scaling factor
+#' \code{Diaz.SES} returns a scaling factor.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -39,8 +39,8 @@ Diaz.SES <- function(x, y, o = NULL) {
 # TODO:
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD},
-#'   \link{Diaz.SES}
+#' \link{BRD},
+#' \link{Diaz.SES}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts
@@ -51,8 +51,9 @@ Diaz.SES <- function(x, y, o = NULL) {
 #' 1 = single (default), 2 = duplicate, 3 = triplicate, etc.
 #'
 #' @return
-#' scaling factors
+#' \code{CPSES} returns a vector of scaling factors.
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 CPSES <- function(cnt, dither = 1) {
 

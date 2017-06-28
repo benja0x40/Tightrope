@@ -4,26 +4,27 @@
 \alias{knn_mean}
 \title{Local mean}
 \usage{
-knn_mean(x, k, i = NULL, d = NULL, smoothing = F)
+knn_mean(x, k, i = NULL, d = NULL)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
 and columns = measurement conditions.}
 
-\item{k}{number of nearest neighbors (i.e. smoothing factor).}
+\item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
+of estimated densities (larger k values = smoother).}
 
 \item{i}{precomputed matrix of nearest neighbor indices (optional).}
 
 \item{d}{precomputed matrix of nearest neighbor distances (optional).}
 }
 \value{
-knn_mean returns a \code{matrix} of knn centroids.
+\code{knn_mean} returns a matrix of knn centroids.
 }
 \description{
 compute k-nearest neighbor (knn) centroids (i.e. mean vectors).
 }
 \seealso{
 \link{knn_musigma2},
-  \link{knn_density}
+\link{knn_density}
 }
 \keyword{internal}

@@ -14,13 +14,13 @@ knn_smoothing(v, i, f = mean)
 \item{f}{smoothing function (default = mean).}
 }
 \value{
-knn_smoothing returns a numeric vector.
+\code{knn_smoothing} returns a numeric vector.
 }
 \description{
 Apply smoothing function to local values
 }
 \seealso{
 \link{knn_density},
-  \link{knn_musigma2}
+\link{knn_musigma2}
 }
 \keyword{internal}

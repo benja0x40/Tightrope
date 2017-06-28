@@ -4,19 +4,21 @@
 #' QuickShift algorithm (Vedaldi & Soatto, 2008)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{QuickShiftClustering}
+#' \link{QuickShiftCutClusters},
+#' \link{QuickShiftClustering}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
-#' and columns = samples or conditions.
+#' and columns = measurement conditions.
 #'
 #' @param d
 #' numeric vector representing the density estimation at each observation.
 #'
 #' @param progress
-#' progress bar (logical, default = F)
+#' progress bar (logical, default = F).
 #'
-#' @return QuickShift returns a graph object (igraph package)
+#' @return
+#' \code{QuickShift} returns a graph object (igraph package).
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -48,24 +50,26 @@ QuickShift <- function (x, d, progress = F) {
 }
 
 # =============================================================================.
-#' QuickShiftCutClusters
-# -----------------------------------------------------------------------------.
-# TODO: fix bug with ordering cluster sizes and memberships
+#' Split a QuickShift tree into clusters
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{QuickShiftClustering}
+#' \link{QuickShift},
+#' \link{QuickShiftClustering}
 # -----------------------------------------------------------------------------.
 #' @param g
-#' QuickShift graph resulting from the \link{QuickShift} function
+#' QuickShift graph resulting from the \link{QuickShift} function.
 #'
 #' @param n
-#' expected number of clusters
+#' expected number of clusters.
 #'
 #' @param ecut
-#' maximum branch length
+#' maximum branch length.
 #'
 #' @return
-#' QuickShiftCutClusters returnd a \code{list} with the following elements
+#' \code{QuickShiftCutClusters} returnd a list with the following elements:
+#' \item{membership}{vector of cluster memberships}
+#' \item{csize}{cluster sizes}
+#' \item{center}{indice of the maximum density value in each cluster}
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -96,27 +100,26 @@ QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
 }
 
 # =============================================================================.
-#' QuickShiftClustering
+#' hierarchical clustering algorithm based on density gradient ascent
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD},
-#'   \link{QuickShift},
-#'   \link{QuickShiftCutClusters}
+#' \link{QuickShift},
+#' \link{QuickShiftCutClusters}
 # -----------------------------------------------------------------------------.
-#' @param x
+#' @inheritParams QuickShift
 #' numeric matrix representing multivariate data where rows = observations
-#' and columns = samples or conditions.
-#'
-#' @param d
-#' numeric vector representing the density estimation at each observation.
+#' and columns = measurement conditions.
 #'
 #' @param n
-#' number of clusters
+#' number of clusters.
 #'
 #' @param ...
 #'
 #' @return
-#' QuickShiftClustering returns a \code{list} with the following elements
+#' \code{QuickShiftClustering} returns a list with the following elements:
+#' \item{membership}{vector of cluster memberships}
+#' \item{csize}{cluster sizes}
+#' \item{center}{indice of the maximum density value in each cluster}
 # -----------------------------------------------------------------------------.
 #' @export
 QuickShiftClustering <- function (x, d, n, ...) {

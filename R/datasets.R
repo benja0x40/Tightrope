@@ -22,7 +22,7 @@
 #' default = F
 #'
 #' @return
-#' SkewedProbabilities returns a vector of probabilities
+#' \code{SkewedProbabilities} returns a vector of probabilities.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 SkewedProbabilities <- function(
@@ -66,7 +66,7 @@ SkewedProbabilities <- function(
 #' base of the logarithm (default = 2)
 #'
 #' @return
-#' MatchLogSpace returns a numeric vector
+#' \code{MatchLogSpace} returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 MatchLogSpace <- function(p, x, b = 2) {
@@ -285,7 +285,7 @@ make_ring_unif_2D <- function(n, normalized = T) {
 #' waveform vector
 #'
 #' @return
-#' Wave2D returns a vector
+#' \code{Wave2D} returns a vector.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -490,7 +490,7 @@ ClonalUniform <- function(n, mu, delta) {
 #' logical (default = F)
 #'
 #' @return
-#' RandomCounts returns a \code{list}
+#' \code{RandomCounts} returns a list.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -582,7 +582,7 @@ RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
 #' return counts (default = T, yes)
 #'
 #' @return
-#' SimulatedCounts returns a list
+#' \code{SimulatedCounts} returns a list.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export

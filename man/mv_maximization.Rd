@@ -17,13 +17,14 @@ and columns = samples or conditions.}
 \item{mle_fun}{maximum likelyhood estimator function (default = \link{mv_mle})}
 }
 \value{
-mv_maximization returns a list of multivariate distribution parameters
+\code{mv_maximization} returns a list of multivariate distribution
+parameters.
 }
 \description{
 Multivariate maximization
 }
 \seealso{
 \link{mv_expectation},
-  \link{mv_emloop}
+\link{mv_emloop}
 }
 \keyword{internal}

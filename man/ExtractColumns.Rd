@@ -13,14 +13,14 @@ ExtractColumns(x, lst)
 \item{lst}{column names or indices to be extracted}
 }
 \value{
-ExtractColumns returns a \code{list}
+\code{ExtractColumns} returns a list.
 }
 \description{
 Extract count data
 }
 \seealso{
 \link{JoinColumns},
-  \link{makeReadCountMatrix},
-  \link{makeReadCountsInROI}
+\link{MakeReadCountMatrix},
+\link{makeReadCountsInROI}
 }
 \keyword{internal}

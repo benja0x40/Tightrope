@@ -2,9 +2,9 @@
 #' Background Read Density
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CPSES},
-#'   \link{QuickShiftClustering},
-#'   \link{CDaDaDR.prototype}
+#' \link{CPSES},
+#' \link{QuickShiftClustering},
+#' \link{CDaDaDR.prototype}
 # -----------------------------------------------------------------------------.
 #' @inheritParams CDaDaDR.prototype
 #'

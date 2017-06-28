@@ -2,7 +2,7 @@
 % Please edit documentation in R/internals.R
 \name{rankstat}
 \alias{rankstat}
-\title{rankstat}
+\title{rank statistics}
 \usage{
 rankstat(x)
 }
@@ -10,9 +10,10 @@ rankstat(x)
 \item{x}{numeric vector}
 }
 \value{
-\eqn{(rank(x) - 0.5) / N} where N = length(x)
+\code{rankstat} returns the rank statistics of x.
 }
 \description{
-rank statistics
+compute the following rank statistics
+\deqn{(rank(x) - 0.5) / N} where N = length(x).
 }
 \keyword{internal}

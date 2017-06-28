@@ -12,7 +12,7 @@ mv_rsg(n, theta)
 \item{theta}{list of normal distribution parameters}
 }
 \value{
-mv_rsg returns a numeric matrix representing pseudo random data
+\code{mv_rsg} returns a numeric matrix representing pseudo random data
 where rows = observations and columns = samples or conditions.
 }
 \description{
@@ -20,7 +20,7 @@ Multivariate normal distribution: random sample generator
 }
 \seealso{
 \link{mv_pdf},
-  \link{mv_mle},
-  \link{mv_gmm}
+\link{mv_mle},
+\link{mv_gmm}
 }
 \keyword{internal}

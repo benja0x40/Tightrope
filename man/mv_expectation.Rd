@@ -15,13 +15,13 @@ and columns = samples or conditions.}
 \item{p_fun}{probability density function (default = \link{mv_pdf})}
 }
 \value{
-mv_expectation returns a vector of probabilities
+\code{mv_expectation} returns a vector of probabilities.
 }
 \description{
 Multivariate expectation
 }
 \seealso{
 \link{mv_maximization},
-  \link{mv_emloop}
+\link{mv_emloop}
 }
 \keyword{internal}

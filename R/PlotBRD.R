@@ -1,15 +1,27 @@
 # =============================================================================.
-#' PlotBRD
+#' control plots for BRD results
 # -----------------------------------------------------------------------------.
-#' @param brd result from \link{BRD}
-#' @param with.axes logical (default = T)
-#' @param with.legend logical (default = T)
-#' @param res integer
+#' @seealso
+#' \link{BRD},
+#' \link{CDaDaDR}
+# -----------------------------------------------------------------------------.
+#' @param brd
+#' result from the \link{BRD} function.
+#'
+#' @param with.axes
+#' logical, include plot axes (default = T).
+#'
+#' @param with.legend
+#' logical, include legends (default = T).
+#'
+#' @param res
+#' number of bins used to make the intensity-density scatterplot
+#' (default = 300).
+#'
 #' @return NULL
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
-PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 200) {
+PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
 
   clr.prm <- AutoColorParameters("ry")
   clr.prm$thresholds <- round(clr.prm$thresholds, 2)

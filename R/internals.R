@@ -1,14 +1,15 @@
 # =============================================================================.
-#' rankstat
+#' rank statistics
 # -----------------------------------------------------------------------------.
 #' @description
-#' rank statistics
+#' compute the following rank statistics
+#' \deqn{(rank(x) - 0.5) / N} where N = length(x).
 #'
 #' @param x
 #' numeric vector
 #'
 #' @return
-#' \eqn{(rank(x) - 0.5) / N} where N = length(x)
+#' \code{rankstat} returns the rank statistics of x.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -18,16 +19,16 @@ rankstat <- function(x) { (rank(x) - 0.5) / length(x) }
 #' S01
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{SX2Y}
+#' \link{SX2Y}
 # -----------------------------------------------------------------------------.
 #' @description
-#' rescale x into [0, 1]
+#' rescale x values into [0, 1].
 #'
 #' @param x
 #' numeric vector
 #'
 #' @return
-#' S01 returns x rescaled such that range(x) = [0, 1]
+#' \code{S01} returns x rescaled such that range(x) = [0, 1].
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -37,10 +38,10 @@ S01 <- function(x) { (x - min(x)) / diff(range(x)) }
 #' SX2Y
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{S01}
+#' \link{S01}
 # -----------------------------------------------------------------------------.
 #' @description
-#' rescale x into range(y)
+#' rescale x values into range(y)
 #'
 #' @param x
 #' numeric vector
@@ -49,28 +50,34 @@ S01 <- function(x) { (x - min(x)) / diff(range(x)) }
 #' numeric vector
 #'
 #' @return
-#' SX2Y returns x rescaled such that range(x) = range(y)
+#' \code{SX2Y} returns x rescaled such that range(x) = range(y).
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
 SX2Y <- function(x, y) { S01(x) * diff(range(y)) + min(y) }
 
 # =============================================================================.
-#' Converts log2(counts) to AM values
+#' Convert (x, y) to (a = mean, m = difference) coordinates
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{ma2lc}
+#' \link{md2xy}
 # -----------------------------------------------------------------------------.
 #' @description
-#' a = (y + x)/2, m = (y - x)
-#' @param x numeric vector, or matrix or list
-#' @param y numeric vector
+#' compute \eqn{a = (y + x)/2}, and \eqn{m = (y - x)}
+#' The inverse transformation of \code{xy2md} is \link{md2xy}.
 #'
-#' @return \code{list} with a and m values
+#' @param x
+#' numeric vector, or a matrix with 2 columns or a list containing two vectors.
+#'
+#' @param y
+#' numeric vector.
+#'
+#' @return
+#' \code{xy2md} returns a list or matrix with (a = mean, m = difference) values.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-lc2ma <- function(x, y = NULL) {
+xy2md <- function(x, y = NULL) {
 
   chk  <- 0
 
@@ -94,21 +101,27 @@ lc2ma <- function(x, y = NULL) {
 }
 
 # =============================================================================.
-#' Converts AM values to log2(counts)
+#' Convert (a = mean, m = difference) to (x, y) coordinates
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{lc2ma}
+#' \link{xy2md}
 # -----------------------------------------------------------------------------.
 #' @description
-#' x = a + m/2, y = a - m/2
-#' @param a numeric vector, or matrix or list
-#' @param m numeric vector
+#' compute \eqn{x = a + m/2}, and \eqn{y = a - m/2}.
+#' The inverse transformation of \code{md2xy} is \link{xy2md}.
 #'
-#' @return \code{list} with x and y values
+#' @param a
+#' numeric vector, or a matrix with 2 columns or a list containing two vectors.
+#'
+#' @param m
+#' numeric vector
+#'
+#' @return
+#' \code{md2xy} returns a list or matrix with (x, y) values.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-ma2lc <- function(a, m = NULL) {
+md2xy <- function(a, m = NULL) {
 
   chk  <- 0
 

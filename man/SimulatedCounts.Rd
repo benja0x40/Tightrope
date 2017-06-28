@@ -26,7 +26,7 @@ counts}
 \item{as.counts}{return counts (default = T, yes)}
 }
 \value{
-SimulatedCounts returns a list
+\code{SimulatedCounts} returns a list.
 }
 \description{
 Random counts representing 3 populations

@@ -2,7 +2,7 @@
 % Please edit documentation in R/counts.R
 \name{DitherCounts}
 \alias{DitherCounts}
-\title{Dither read count values}
+\title{dithering of read counts}
 \usage{
 DitherCounts(x)
 }
@@ -10,11 +10,12 @@ DitherCounts(x)
 \item{x}{matrix of read counts (rows = observations, columns = samples or conditions).}
 }
 \value{
-DitherCounts returns a \code{matrix} of dithered counts
+\code{DitherCounts} returns a matrix of dithered counts.
 }
 \description{
-Dither read count values
+dithering of read counts
 }
 \seealso{
-\link{makeReadCountMatrix}
+\link{NonZeroCounts},
+\link{MakeReadCountMatrix}
 }

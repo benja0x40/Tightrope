@@ -14,12 +14,13 @@ CPSES(cnt, dither = 1)
 (rows = observations, columns = measurement conditions).}
 }
 \value{
-scaling factors
+\code{CPSES} returns a vector of scaling factors.
 }
 \description{
 Combined Pairwise Signal Extraction Scaling (SES)
 }
 \seealso{
 \link{BRD},
-  \link{Diaz.SES}
+\link{Diaz.SES}
 }
+\keyword{internal}

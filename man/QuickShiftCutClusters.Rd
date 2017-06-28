@@ -2,24 +2,28 @@
 % Please edit documentation in R/quickshift.R
 \name{QuickShiftCutClusters}
 \alias{QuickShiftCutClusters}
-\title{QuickShiftCutClusters}
+\title{Split a QuickShift tree into clusters}
 \usage{
 QuickShiftCutClusters(g, n = NULL, ecut = NULL)
 }
 \arguments{
-\item{g}{QuickShift graph resulting from the \link{QuickShift} function}
+\item{g}{QuickShift graph resulting from the \link{QuickShift} function.}
 
-\item{n}{expected number of clusters}
+\item{n}{expected number of clusters.}
 
-\item{ecut}{maximum branch length}
+\item{ecut}{maximum branch length.}
 }
 \value{
-QuickShiftCutClusters returnd a \code{list} with the following elements
+\code{QuickShiftCutClusters} returnd a list with the following elements:
+\item{membership}{vector of cluster memberships}
+\item{csize}{cluster sizes}
+\item{center}{indice of the maximum density value in each cluster}
 }
 \description{
-QuickShiftCutClusters
+Split a QuickShift tree into clusters
 }
 \seealso{
+\link{QuickShift},
 \link{QuickShiftClustering}
 }
 \keyword{internal}

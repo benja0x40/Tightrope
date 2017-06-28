@@ -2,7 +2,7 @@
 % Please edit documentation in R/cdadadr.R
 \name{CDaDaDR}
 \alias{CDaDaDR}
-\title{Count Density after Dithering and Dimensionality Reduction}
+\title{smooth density estimation in reduced dimensions}
 \usage{
 CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
   zscore = T, rare = 0.01, method = c("pca", "ica"), progress = F)
@@ -12,40 +12,42 @@ CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
 (rows = observations, columns = measurement conditions).}
 
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
-of estimated densities (larger values = smoother).}
+of densities estimated by \link{knn_density} (larger knn values = smoother).}
 
 \item{smobs}{subtract the mean count value of each observation (logical, default = F).}
 
 \item{movs}{precomputed mean count values to be subtracted to each observation
 (default = NULL, zero).}
 
-\item{dither}{number of replicates for count dithering:
+\item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
-\item{npc}{number of dimensions retained after projection on principal components.
-When \code{npc} is specified, the \code{cvt} parameter is ignored.}
+\item{npc}{number of dimensions retained after projection on principal or independent
+components.}
 
-\item{zscore}{transform counts into z-scores (logical, default = T).}
+\item{zscore}{transform read count projections into z-scores (logical, default = T).}
 
-\item{rare}{defines exceptionally low density values (default = 0.01).}
+\item{rare}{mark rare observations corresponding to exceptionally low density values
+(default = 0.01).}
 
-\item{method}{projection method, either "pca" (default) or "ica".}
+\item{method}{projection method, either "pca" (default) performed by \link{prcomp},
+or "ica" performed by \link{icafast}.}
 
 \item{progress}{show progress bar (logical, default = F).}
 }
 \value{
-CDaDaDR returns a \code{list} with the following elements:
+\code{CDaDaDR} returns a list with the following elements:
 \item{parameters}{list with the value of each CDaDaDR argument}
 \item{status}{list with informations on the dimensionality reduction}
 \item{density}{knn density}
 \item{projection}{transformed count matrix}
 }
 \description{
-Count Density after Dithering and Dimensionality Reduction
+Count Density after Dithering and Dimensionality Reduction (CDaDaDR).
 }
 \seealso{
 \link{BRD},
-  \link{DitherCounts},
-  \link{knn_density}
+\link{DitherCounts},
+\link{knn_density}
 }
 \keyword{internal}

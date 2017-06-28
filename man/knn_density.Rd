@@ -11,16 +11,18 @@ knn_density(x, k, i = NULL, d = NULL, smoothing = T)
 and columns = measurement conditions.}
 
 \item{k}{number of nearest neighbors, which corresponds to the smoothing parameter
-of estimated densities (larger values = smoother).}
+of estimated densities (larger k values = smoother).}
 
 \item{i}{precomputed matrix of nearest neighbor indices (optional).}
 
 \item{d}{precomputed matrix of nearest neighbor distances (optional).}
 
-\item{smoothing}{perfom a knn average smoothing of the density (default = T, recommended).}
+\item{smoothing}{perfom a local average smoothing of
+the estimated density for \link{knn_density} (default = T, recommended)
+or the estimated variance for \link{knn_musigma2} (default = F).}
 }
 \value{
-knn_density returns a numeric vector.
+\code{knn_density} returns a numeric vector.
 }
 \description{
 k-nearest neighbor (knn) estimator of the density \deqn{P(Xi) ~ k / N Vi}
@@ -30,5 +32,5 @@ neighbor.
 }
 \seealso{
 \link{knn_musigma2},
-  \link{knn_mean}
+\link{knn_mean}
 }

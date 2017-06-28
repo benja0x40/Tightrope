@@ -13,13 +13,13 @@ and columns = samples or conditions.}
 \item{ns}{number of normal distributions to be initialised}
 }
 \value{
-mv_init_param returns a \code{list} of normal distribution parameters
+\code{mv_init_param} returns a list of normal distribution parameters.
 }
 \description{
 Multivariate normal distribution: parameter initialization
 }
 \seealso{
 \link{mv_gmm},
-  \link{mv_emloop}
+\link{mv_emloop}
 }
 \keyword{internal}

@@ -21,7 +21,7 @@ SkewedProbabilities(k, beta = -1/8, gamma = 0.5, sx = -1, sy = 1,
 \item{plot}{default = F}
 }
 \value{
-SkewedProbabilities returns a vector of probabilities
+\code{SkewedProbabilities} returns a vector of probabilities.
 }
 \description{
 SkewedProbabilities

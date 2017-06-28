@@ -13,14 +13,14 @@ and columns = samples or conditions.}
 \item{theta}{list of normal distribution parameters}
 }
 \value{
-mv_pdf returns a vector of probabilities
+\code{mv_pdf} returns a vector of probabilities.
 }
 \description{
 Multivariate normal distribution: probability density function
 }
 \seealso{
 \link{mv_mle},
-  \link{mv_rsg},
-  \link{mv_gmm}
+\link{mv_rsg},
+\link{mv_gmm}
 }
 \keyword{internal}

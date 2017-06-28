@@ -2,55 +2,58 @@
 % Please edit documentation in R/BRD.R
 \name{BRD}
 \alias{BRD}
-\title{Background Read Density}
+\title{background read density estimation}
 \usage{
 BRD(cnt, controls, smobs = F, dither = 3, npc = 2, zscore = T,
-  knn = 200, rare = 0.01, method = "pca", bdt = c(0.4, 0.1), ncl = 2,
+  knn = 200, rare = 0.01, method = "pca", bdt = c(0.5, 0.05), ncl = 2,
   mincs = 100, progress = F)
 }
 \arguments{
 \item{cnt}{matrix of read counts
 (rows = observations, columns = measurement conditions).}
 
-\item{controls}{columns corresponding to control measurements (Input, IgG, etc.).}
+\item{controls}{count columns corresponding to control measurements (Input, IgG, etc.).}
 
 \item{smobs}{subtract the mean count value of each observation (logical, default = F).}
 
-\item{dither}{number of replicates for count dithering:
+\item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
-\item{npc}{number of dimensions retained after projection on principal components.
-When \code{npc} is specified, the \code{cvt} parameter is ignored.}
+\item{npc}{number of dimensions retained after projection on principal or independent
+components.}
 
-\item{zscore}{transform counts into z-scores (logical, default = T).}
+\item{zscore}{transform read count projections into z-scores (logical, default = T).}
 
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
-of estimated densities (larger values = smoother).}
+of densities estimated by \link{knn_density} (larger knn values = smoother).}
 
-\item{rare}{defines exceptionally low density values (default = 0.01).}
+\item{rare}{mark rare observations corresponding to exceptionally low density values
+(default = 0.01).}
 
-\item{method}{projection method, either "pca" (default) or "ica".}
+\item{method}{projection method, either "pca" (default) performed by \link{prcomp},
+or "ica" performed by \link{icafast}.}
 
 \item{bdt}{numeric vector of length 2 defining background density thresholds both
 expressed as proportions between 0 and 1.
-(\code{bdt[1]}) specifies the global threshold used to discard observations
+\code{bdt[1]} specifies the global threshold used to discard observations
 with low density prior to clustering.
-(\code{bdt[2]}) determines the maximum density loss allowed
+\code{bdt[2]} determines the maximum density loss allowed
 when selecting core observations relatively to the local maximum density
 in each cluster, and thus defining the candidate background populations.
-By default the value of \code{bdt} is \code{c(0.3, 0.1)} meaning that,
-in terms of density percentiles, the bottom 30% will be filtered out before
-clustering and only the top 10% can be selected as background candidates
-among each cluster.}
+By default the value of \code{bdt} is \code{c(0.5, 0.05)} meaning that,
+in terms of density percentiles, the bottom 30 percents will be filtered out
+before clustering and only the top 10 percents can be selected as background
+candidates among each cluster.}
 
-\item{ncl}{number of clusters for partitioning observations.}
+\item{ncl}{number of clusters partitioning the population of observations with density
+above \code{bdt[1]} percents.}
 
-\item{mincs}{minimum size of each cluster, as number of observations.}
+\item{mincs}{minimum size of cluster cores, as number of observations.}
 
 \item{progress}{show progress bar (logical, default = F).}
 }
 \value{
-\code{BRD} returns a \code{list} with the following elements:
+\code{BRD} returns a list with the following elements:
 \item{parameters}{call parameters of the function.}
 \item{status}{execution status.}
 \item{nonzero}{indices of initial observations with count > 0.}
@@ -62,20 +65,21 @@ among each cluster.}
   partition of non-zero observations into background candidate subsets.
 }
 \item{populations}{
-  summary of core populations.
+  summary of the core population in each subset.
 }
 \item{theta}{
-  fitted distribution parameters for each core candidate populations.
+  fitted distribution parameters for each core population.
 }
 \item{log2counts}{
   dithered and log2 transformed counts.
 }
 }
 \description{
-Background Read Density
+background read density estimation
 }
 \seealso{
-\link{CPSES},
-  \link{QuickShiftClustering},
-  \link{CDaDaDR}
+\link{PlotBRD},
+\link{CDaDaDR},
+\link{QuickShiftClustering},
+\link{MakeReadCountMatrix}
 }

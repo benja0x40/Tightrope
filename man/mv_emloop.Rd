@@ -19,7 +19,7 @@ and columns = samples or conditions.}
 \item{max_iter}{maximum number of iterations (default = 100)}
 }
 \value{
-mv_emloop returns a \code{list} with the following elements
+\code{mv_emloop} returns a list with the following elements:
 \item{theta}{list of multivariate distribution parameters}
 \item{p}{vector of probabilities}
 }
@@ -28,7 +28,7 @@ Multivariate expectation-maximization
 }
 \seealso{
 \link{mv_maximization},
-  \link{mv_expectation},
-  \link{mv_gmm}
+\link{mv_expectation},
+\link{mv_gmm}
 }
 \keyword{internal}

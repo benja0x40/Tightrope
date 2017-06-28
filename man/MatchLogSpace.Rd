@@ -14,7 +14,7 @@ MatchLogSpace(p, x, b = 2)
 \item{b}{base of the logarithm (default = 2)}
 }
 \value{
-MatchLogSpace returns a numeric vector
+\code{MatchLogSpace} returns a numeric vector.
 }
 \description{
 MatchLogSpace

@@ -21,7 +21,7 @@ This argument is ignored when arguments \code{p} or \code{v} are provided.}
 \item{extended}{logical (default = F)}
 }
 \value{
-RandomCounts returns a \code{list}
+\code{RandomCounts} returns a list.
 }
 \description{
 Generate pseudo random count values

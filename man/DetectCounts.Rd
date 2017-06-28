@@ -13,7 +13,7 @@ DetectCounts(cnt, detailed = F)
 \item{detailed}{logical, if TRUE return min and max read counts in each interval}
 }
 \value{
-DetectCounts returns a \code{data.frame} with the following columns:
+\code{DetectCounts} returns a data.frame with the following columns:
 \item{all}{logical vector indicating rows of the \code{cnt} matrix with at least one count in all columns}
 \item{none}{logical vector indicating rows of the \code{cnt} matrix with no counts in all columns}
 \item{nbr}{integer vector representing the number of columns with at least one counts for each row of the \code{cnt} matrix}
@@ -25,7 +25,8 @@ If \code{detailed} is equal to \code{TRUE}, the returned \code{data.frame} also 
 DetectCounts
 }
 \seealso{
-\link{FiniteValues}
-  \link{CleanCounts}
+\link{FiniteValues},
+\link{NonZeroCounts},
+\link{MakeReadCountMatrix}
 }
 \keyword{internal}

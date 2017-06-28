@@ -12,7 +12,8 @@ DensityCorrectedByIntensity(d, i, k)
 \item{i}{intensity vector}
 }
 \value{
-list
+\code{codeDensityCorrectedByIntensity} returns the vector of corrected
+densities.
 }
 \description{
 DensityCorrectedByIntensity

@@ -2,28 +2,25 @@
 % Please edit documentation in R/quickshift.R
 \name{QuickShiftClustering}
 \alias{QuickShiftClustering}
-\title{QuickShiftClustering}
+\title{hierarchical clustering algorithm based on density gradient ascent}
 \usage{
 QuickShiftClustering(x, d, n, ...)
 }
 \arguments{
-\item{x}{numeric matrix representing multivariate data where rows = observations
-and columns = samples or conditions.}
-
-\item{d}{numeric vector representing the density estimation at each observation.}
-
-\item{n}{number of clusters}
+\item{n}{number of clusters.}
 
 \item{...}{}
 }
 \value{
-QuickShiftClustering returns a \code{list} with the following elements
+\code{QuickShiftClustering} returns a list with the following elements:
+\item{membership}{vector of cluster memberships}
+\item{csize}{cluster sizes}
+\item{center}{indice of the maximum density value in each cluster}
 }
 \description{
-QuickShiftClustering
+hierarchical clustering algorithm based on density gradient ascent
 }
 \seealso{
-\link{BRD},
-  \link{QuickShift},
-  \link{QuickShiftCutClusters}
+\link{QuickShift},
+\link{QuickShiftCutClusters}
 }

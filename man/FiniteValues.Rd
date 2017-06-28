@@ -10,13 +10,14 @@ FiniteValues(x)
 \item{x}{numeric vector or matrix.}
 }
 \value{
-FiniteValues returns a \code{logical} vector
+\code{FiniteValues} returns a logical vector.
 }
 \description{
 Localise safe numeric values (i.e. not NA nor Inf)
 }
 \seealso{
-\link{CleanCounts}
-  \link{DetectCounts}
+\link{NonZeroCounts},
+\link{DetectCounts},
+\link{MakeReadCountMatrix}
 }
 \keyword{internal}

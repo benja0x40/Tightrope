@@ -15,8 +15,9 @@ bg_ranking(x, by, controls)
 \item{controls}{columns corresponding to control measurements (Input, IgG, etc.)}
 }
 \value{
-group identifiers ordered by decreasing average difference
-between controls and other measurement conditions.
+\code{bg_ranking} returns group identifiers ordered by decreasing background
+intensity, meaning the average difference between control enrichment
+conditions.
 }
 \description{
 Average ranking for control measurements

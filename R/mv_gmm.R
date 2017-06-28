@@ -4,9 +4,9 @@
 #' Multivariate normal distribution: maximum likelihood estimation
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_pdf},
-#'   \link{mv_rsg},
-#'   \link{mv_gmm}
+#' \link{mv_pdf},
+#' \link{mv_rsg},
+#' \link{mv_gmm}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -19,7 +19,7 @@
 #' logical (reserved, default = T)
 #'
 #' @return
-#' mv_mle returns a \code{list} with the following elements:
+#' \code{mv_mle} returns a list with the following elements:
 #' \item{mu}{mean vector}
 #' \item{sigma}{covariance matrix}
 # -----------------------------------------------------------------------------.
@@ -51,9 +51,9 @@ mv_mle <- function(x, w = NULL, ML = T) {
 #' Multivariate normal distribution: probability density function
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_mle},
-#'   \link{mv_rsg},
-#'   \link{mv_gmm}
+#' \link{mv_mle},
+#' \link{mv_rsg},
+#' \link{mv_gmm}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -62,7 +62,8 @@ mv_mle <- function(x, w = NULL, ML = T) {
 #' @param theta
 #' list of normal distribution parameters
 #'
-#' @return mv_pdf returns a vector of probabilities
+#' @return
+#' \code{mv_pdf} returns a vector of probabilities.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -74,9 +75,9 @@ mv_pdf <- function(x, theta) {
 #' Multivariate normal distribution: random sample generator
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_pdf},
-#'   \link{mv_mle},
-#'   \link{mv_gmm}
+#' \link{mv_pdf},
+#' \link{mv_mle},
+#' \link{mv_gmm}
 # -----------------------------------------------------------------------------.
 #' @param n
 #' number of observations
@@ -85,7 +86,7 @@ mv_pdf <- function(x, theta) {
 #' list of normal distribution parameters
 #'
 #' @return
-#' mv_rsg returns a numeric matrix representing pseudo random data
+#' \code{mv_rsg} returns a numeric matrix representing pseudo random data
 #' where rows = observations and columns = samples or conditions.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
@@ -111,8 +112,8 @@ mv_rsg <- function(n, theta) {
 #' Multivariate normal distribution: parameter initialization
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_gmm},
-#'   \link{mv_emloop}
+#' \link{mv_gmm},
+#' \link{mv_emloop}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -122,7 +123,7 @@ mv_rsg <- function(n, theta) {
 #' number of normal distributions to be initialised
 #'
 #' @return
-#' mv_init_param returns a \code{list} of normal distribution parameters
+#' \code{mv_init_param} returns a list of normal distribution parameters.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -145,8 +146,8 @@ mv_init_param <- function(x, ns) {
 #' Multivariate expectation
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_maximization},
-#'   \link{mv_emloop}
+#' \link{mv_maximization},
+#' \link{mv_emloop}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -158,7 +159,8 @@ mv_init_param <- function(x, ns) {
 #' @param p_fun
 #' probability density function (default = \link{mv_pdf})
 #'
-#' @return mv_expectation returns a vector of probabilities
+#' @return
+#' \code{mv_expectation} returns a vector of probabilities.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -179,8 +181,8 @@ mv_expectation <- function(x, theta, p_fun = mv_pdf) {
 #' Multivariate maximization
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_expectation},
-#'   \link{mv_emloop}
+#' \link{mv_expectation},
+#' \link{mv_emloop}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -196,7 +198,8 @@ mv_expectation <- function(x, theta, p_fun = mv_pdf) {
 #' maximum likelyhood estimator function (default = \link{mv_mle})
 #'
 #' @return
-#' mv_maximization returns a list of multivariate distribution parameters
+#' \code{mv_maximization} returns a list of multivariate distribution
+#' parameters.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -217,9 +220,9 @@ mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
 #' Multivariate expectation-maximization
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{mv_maximization},
-#'   \link{mv_expectation},
-#'   \link{mv_gmm}
+#' \link{mv_maximization},
+#' \link{mv_expectation},
+#' \link{mv_gmm}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -238,7 +241,7 @@ mv_maximization <- function(x, theta, p, mle_fun = mv_mle) {
 #' maximum number of iterations (default = 100)
 #'
 #' @return
-#' mv_emloop returns a \code{list} with the following elements
+#' \code{mv_emloop} returns a list with the following elements:
 #' \item{theta}{list of multivariate distribution parameters}
 #' \item{p}{vector of probabilities}
 # -----------------------------------------------------------------------------.
@@ -274,15 +277,14 @@ mv_emloop <- function(
 #' maximum number of iterations (default = 100)
 #'
 #' @return
-#' mv_gmm returns a \code{list} with the following elements
+#' \code{mv_gmm} returns a list with the following elements:
 #' \item{theta}{list of multivariate distribution parameters}
 #' \item{p}{vector of probabilities}
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 mv_gmm <- function(x, ns, epsilon = 1E-3, max_iter = 100) {
 
   theta <- mv_init_param(x, ns)
   mv_emloop(x, theta, p_fun = mv_pdf, mle_fun = mv_mle, max_iter = max_iter)
 }
-
-

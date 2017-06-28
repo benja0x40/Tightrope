@@ -15,7 +15,7 @@ and columns = samples or conditions.}
 \item{ML}{logical (reserved, default = T)}
 }
 \value{
-mv_mle returns a \code{list} with the following elements:
+\code{mv_mle} returns a list with the following elements:
 \item{mu}{mean vector}
 \item{sigma}{covariance matrix}
 }
@@ -24,7 +24,7 @@ Multivariate normal distribution: maximum likelihood estimation
 }
 \seealso{
 \link{mv_pdf},
-  \link{mv_rsg},
-  \link{mv_gmm}
+\link{mv_rsg},
+\link{mv_gmm}
 }
 \keyword{internal}

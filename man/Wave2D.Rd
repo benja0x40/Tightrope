@@ -25,7 +25,7 @@ Wave2D(x, mu = NULL, r = NULL, f = 1, p = 0, e = 1, a = -1,
 \item{w}{waveform vector}
 }
 \value{
-Wave2D returns a vector
+\code{Wave2D} returns a vector.
 }
 \description{
 generator of 2D waves \deqn{(u + e)^a * cos(p + 2 * pi * u * f)}

@@ -4,14 +4,15 @@
 #' Localise safe numeric values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CleanCounts}
-#'   \link{DetectCounts}
+#' \link{NonZeroCounts},
+#' \link{DetectCounts},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric vector or matrix.
 #'
 #' @return
-#' FiniteValues returns a \code{logical} vector
+#' \code{FiniteValues} returns a logical vector.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -27,22 +28,22 @@ FiniteValues <- function(x) {
 }
 
 # =============================================================================.
-#' Remove observations with missing values
+#' remove observations with missing values
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{FiniteValues}
-#'   \link{DetectCounts}
+#' \link{FiniteValues},
+#' \link{DetectCounts},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
 #' (rows = observations, columns = measurement conditions).
 #'
 #' @return
-#' matrix
+#' \code{NonZeroCounts} returns a matrix.
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
-CleanCounts <- function(cnt) {
+NonZeroCounts <- function(cnt) {
   chk <- FiniteValues(log2(cnt))
   cnt <- cnt[chk, ]
   cnt
@@ -52,8 +53,9 @@ CleanCounts <- function(cnt) {
 #' DetectCounts
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{FiniteValues}
-#'   \link{CleanCounts}
+#' \link{FiniteValues},
+#' \link{NonZeroCounts},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -63,7 +65,7 @@ CleanCounts <- function(cnt) {
 #' logical, if TRUE return min and max read counts in each interval
 #'
 #' @return
-#' DetectCounts returns a \code{data.frame} with the following columns:
+#' \code{DetectCounts} returns a data.frame with the following columns:
 #' \item{all}{logical vector indicating rows of the \code{cnt} matrix with at least one count in all columns}
 #' \item{none}{logical vector indicating rows of the \code{cnt} matrix with no counts in all columns}
 #' \item{nbr}{integer vector representing the number of columns with at least one counts for each row of the \code{cnt} matrix}
@@ -92,15 +94,17 @@ DetectCounts <- function(cnt, detailed = F) {
 }
 
 # =============================================================================.
-#' Dither read count values
+#' dithering of read counts
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{makeReadCountMatrix}
+#' \link{NonZeroCounts},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
-#' @return DitherCounts returns a \code{matrix} of dithered counts
+#' @return
+#' \code{DitherCounts} returns a matrix of dithered counts.
 # -----------------------------------------------------------------------------.
 #' @export
 DitherCounts <- function(x) {
@@ -127,9 +131,9 @@ DitherCounts <- function(x) {
 #' Merge count data
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{ExtractColumns},
-#'   \link{makeReadCountMatrix},
-#'   \link{makeReadCountsInROI}
+#' \link{ExtractColumns},
+#' \link{MakeReadCountMatrix},
+#' \link{makeReadCountsInROI}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
@@ -138,7 +142,8 @@ DitherCounts <- function(x) {
 #' @param y
 #' list of read count matrices.
 #'
-#' @return JoinColumns returns a \code{list}
+#' @return
+#' \code{JoinColumns} returns a list.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -152,9 +157,9 @@ JoinColumns <- function(x, y) {
 #' Extract count data
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{JoinColumns},
-#'   \link{makeReadCountMatrix},
-#'   \link{makeReadCountsInROI}
+#' \link{JoinColumns},
+#' \link{MakeReadCountMatrix},
+#' \link{makeReadCountsInROI}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' list of read count matrices
@@ -163,7 +168,8 @@ JoinColumns <- function(x, y) {
 #' @param lst
 #' column names or indices to be extracted
 #'
-#' @return ExtractColumns returns a \code{list}
+#' @return
+#' \code{ExtractColumns} returns a list.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -175,17 +181,17 @@ ExtractColumns <- function(x, lst) {
 }
 
 # =============================================================================.
-#' Count reads overlapping with genomic intervals
+#' count reads overlapping with genomic intervals
 # -----------------------------------------------------------------------------.
 # TODO: implement skipping existing count columns with provided counts
 # TODO: check if this can be faster and as/more flexible using summerizeOverlaps
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{CleanCounts},
-#'   \link{DitherCounts},
-#'   \link{JoinColumns},
-#'   \link{ExtractColumns},
-#'   \link{makeReadCountsInROI}
+#' \link{NonZeroCounts},
+#' \link{DitherCounts},
+#' \link{JoinColumns},
+#' \link{ExtractColumns},
+#' \link{makeReadCountsInROI}
 # -----------------------------------------------------------------------------.
 #' @param aln
 #' list of \link{GAlignments} objects with mapped reads from different samples
@@ -194,11 +200,11 @@ ExtractColumns <- function(x, lst) {
 #' \link{GRanges} object defining the considered genomic intervals
 #'
 #' @return
-#' makeReadCountMatrix matrix of read counts
-#' (rows = observations, columns = samples or conditions).
+#' \code{MakeReadCountMatrix} returns a matrix of read counts with
+#' rows = observations and columns = measurement conditions.
 # -----------------------------------------------------------------------------.
 #' @export
-makeReadCountMatrix <- function(aln, grg, ...) {
+MakeReadCountMatrix <- function(aln, grg, ...) {
   cnt <- matrix(0, length(grg), length(aln))
   for(i in 1:length(aln)) {
     message("Read counts for sample ", i)
@@ -216,9 +222,9 @@ makeReadCountMatrix <- function(aln, grg, ...) {
 # TODO: implement different inputs (bam files, GenomicAlignment)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{JoinColumns},
-#'   \link{ExtractColumns},
-#'   \link{makeReadCountMatrix}
+#' \link{JoinColumns},
+#' \link{ExtractColumns},
+#' \link{MakeReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param ALN
 #' mapped reads
@@ -240,7 +246,8 @@ makeReadCountMatrix <- function(aln, grg, ...) {
 #'
 #' @param ...
 #'
-#' @return makeReadCountsInROI returns a \code{list} of read count matrixes
+#' @return
+#' \code{makeReadCountsInROI} returns a list of read count matrixes.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -263,7 +270,7 @@ makeReadCountsInROI <- function(
       txt_out(x = "=")
       message(roi)
       txt_out(x = "-")
-      cnt <- makeReadCountMatrix(
+      cnt <- MakeReadCountMatrix(
         ALN, ROI[[roi]], ignore.strand = ignore.strand, ...
       )
       colnames(cnt) <- labels

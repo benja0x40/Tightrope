@@ -1,60 +1,5 @@
 # FUNCTIONS | KNN STATS ########################################################
 
-# # =============================================================================.
-# #' knn in 1D (not so fast, NOT FULLY WORKING)
-# # -----------------------------------------------------------------------------.
-# #' @param data
-# #' numeric matrix representing multivariate data where rows = observations
-# #' and columns = measurement conditions.
-# #'
-# #' @param k
-# #' number of nearest neighbors.
-# #'
-# #' @return
-# # -----------------------------------------------------------------------------.
-# #' @keywords internal
-# #' @export
-# get.knn_1D <- function(data, k) {
-#
-#   N  <- length(data) # number of observations
-#
-#   o <- order(data)
-#   h <- data[o]
-#
-#   d  <- matrix(0, N, k)
-#   da.1 <- c(h[2:N] - h[1:(N - 1)], Inf)
-#   db.1 <- c(Inf, h[2:N] - h[1:(N - 1)])
-#
-#   da <- da.1
-#   db <- db.1
-#
-#   i  <- matrix(0, N, k)
-#   ia <- 1:N
-#   ib <- 1:N
-#
-#   for(j in 1:k) {
-#     # find nn either below or above
-#     ma <- which(da <  db)
-#     mb <- which(db <= da)
-#     # update nn index
-#     ia[ma] <- ia[ma] + 1
-#     ib[mb] <- ib[mb] - 1
-#     # save nn index
-#     i[ma, j] <- ia[ma]
-#     i[mb, j] <- ib[mb]
-#     # save nn distance
-#     d[ma, j] <- da[ma]
-#     d[mb, j] <- db[mb]
-#     # update nn distances
-#     da[ma] <- da[ma] + da.1[ia[ma]]
-#     db[mb] <- db[mb] + db.1[ib[mb]]
-#   }
-#   i[o, ] <- i
-#   d[o, ] <- d
-#
-#   list(nn.index = i, nn.dist = d)
-# }
-
 # =============================================================================.
 #' Extract local values from knn index matrix
 # -----------------------------------------------------------------------------.
@@ -65,7 +10,7 @@
 #' precomputed matrix of nearest neighbor indices.
 #'
 #' @return
-#' knn_values returns a matrix.
+#' \code{knn_values} returns a matrix.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -78,20 +23,16 @@ knn_values <- function(v, i) {
 #' Apply smoothing function to local values
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{knn_density},
-#'   \link{knn_musigma2}
+#' \link{knn_density},
+#' \link{knn_musigma2}
 # -----------------------------------------------------------------------------.
-#' @param v
-#' numeric vector.
-#'
-#' @param i
-#' precomputed matrix of nearest neighbor indices.
+#' @inheritParams knn_values
 #'
 #' @param f
 #' smoothing function (default = mean).
 #'
 #' @return
-#' knn_smoothing returns a numeric vector.
+#' \code{knn_smoothing} returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -107,8 +48,8 @@ knn_smoothing <- function(v, i, f = mean) {
 #' knn density estimator
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{knn_musigma2},
-#'   \link{knn_mean}
+#' \link{knn_musigma2},
+#' \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @description
 #' k-nearest neighbor (knn) estimator of the density \deqn{P(Xi) ~ k / N Vi}
@@ -122,7 +63,7 @@ knn_smoothing <- function(v, i, f = mean) {
 #'
 #' @param k
 #' number of nearest neighbors, which corresponds to the smoothing parameter
-#' of estimated densities (larger values = smoother).
+#' of estimated densities (larger k values = smoother).
 #'
 #' @param i
 #' precomputed matrix of nearest neighbor indices (optional).
@@ -131,10 +72,12 @@ knn_smoothing <- function(v, i, f = mean) {
 #' precomputed matrix of nearest neighbor distances (optional).
 #'
 #' @param smoothing
-#' perfom a knn average smoothing of the density (default = T, recommended).
+#' perfom a local average smoothing of
+#' the estimated density for \link{knn_density} (default = T, recommended)
+#' or the estimated variance for \link{knn_musigma2} (default = F).
 #'
 #' @return
-#' knn_density returns a numeric vector.
+#' \code{knn_density} returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @export
 knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
@@ -167,30 +110,16 @@ knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
 #' Local mean and variance
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{knn_density},
-#'   \link{knn_mean}
+#' \link{knn_density},
+#' \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @description
 #' k-nearest neighbor (knn) centroid and corresponding standard deviation.
 #'
-#' @param x
-#' numeric matrix representing multivariate data where rows = observations
-#' and columns = measurement conditions.
-#'
-#' @param k
-#' number of nearest neighbors (i.e. smoothing factor).
-#'
-#' @param i
-#' precomputed matrix of nearest neighbor indices (optional).
-#'
-#' @param d
-#' precomputed matrix of nearest neighbor distances (optional).
-#'
-#' @param smoothing
-#' perfom a knn average smoothing of the standard deviations (default = F).
+#' @inheritParams knn_density
 #'
 #' @return
-#' knn_musigma2 returns a \code{list} with the following elements:
+#' \code{knn_musigma2} returns a list with the following elements:
 #' \item{mu}{knn centroids}
 #' \item{sigma2}{knn variances (squared standard deviations)}
 # -----------------------------------------------------------------------------.
@@ -231,31 +160,20 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' Local mean
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{knn_musigma2},
-#'   \link{knn_density}
+#' \link{knn_musigma2},
+#' \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @description
 #' compute k-nearest neighbor (knn) centroids (i.e. mean vectors).
 #'
-#' @param x
-#' numeric matrix representing multivariate data where rows = observations
-#' and columns = measurement conditions.
-#'
-#' @param k
-#' number of nearest neighbors (i.e. smoothing factor).
-#'
-#' @param i
-#' precomputed matrix of nearest neighbor indices (optional).
-#'
-#' @param d
-#' precomputed matrix of nearest neighbor distances (optional).
+#' @inheritParams knn_density
 #'
 #' @return
-#' knn_mean returns a \code{matrix} of knn centroids.
+#' \code{knn_mean} returns a matrix of knn centroids.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-knn_mean <- function(x, k, i = NULL, d = NULL, smoothing = F) {
+knn_mean <- function(x, k, i = NULL, d = NULL) {
 
   x <- as.matrix(x)
 

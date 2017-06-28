@@ -23,14 +23,14 @@ makeReadCountsInROI(ALN, ROI, CNT = NULL, labels = NULL,
 \item{...}{}
 }
 \value{
-makeReadCountsInROI returns a \code{list} of read count matrixes
+\code{makeReadCountsInROI} returns a list of read count matrixes.
 }
 \description{
 makeReadCountsInROI
 }
 \seealso{
 \link{JoinColumns},
-  \link{ExtractColumns},
-  \link{makeReadCountMatrix}
+\link{ExtractColumns},
+\link{MakeReadCountMatrix}
 }
 \keyword{internal}

@@ -2,9 +2,9 @@
 #' Count Density after Dithering and Dimensionality Reduction
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD},
-#'   \link{DitherCounts},
-#'   \link{knn_density}
+#' \link{BRD},
+#' \link{DitherCounts},
+#' \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -54,7 +54,7 @@
 #' show progress bar (logical, default = F).
 #'
 #' @return
-#' CDaDaDR returns a \code{list} with the following elements:
+#' \code{CDaDaDR} returns a list with the following elements:
 #' \item{parameters}{list with the value of each CDaDaDR argument}
 #' \item{status}{list with informations on the dimensionality reduction}
 #' \item{density}{knn density}

@@ -2,20 +2,24 @@
 % Please edit documentation in R/PlotBRD.R
 \name{PlotBRD}
 \alias{PlotBRD}
-\title{PlotBRD}
+\title{control plots for BRD results}
 \usage{
-PlotBRD(brd, with.axes = T, with.legend = T, res = 200)
+PlotBRD(brd, with.axes = T, with.legend = T, res = 300)
 }
 \arguments{
-\item{brd}{result from \link{BRD}}
+\item{brd}{result from the \link{BRD} function.}
 
-\item{with.axes}{logical (default = T)}
+\item{with.axes}{logical, include plot axes (default = T).}
 
-\item{with.legend}{logical (default = T)}
+\item{with.legend}{logical, include legends (default = T).}
 
-\item{res}{integer}
+\item{res}{number of bins used to make the intensity-density scatterplot
+(default = 300).}
 }
 \description{
-PlotBRD
+control plots for BRD results
 }
-\keyword{internal}
+\seealso{
+\link{BRD},
+\link{CDaDaDR}
+}

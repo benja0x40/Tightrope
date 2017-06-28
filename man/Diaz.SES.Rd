@@ -14,7 +14,7 @@ Diaz.SES(x, y, o = NULL)
 \item{o}{precomputed ordering of \code{y} (default = NULL).}
 }
 \value{
-scaling factor
+\code{Diaz.SES} returns a scaling factor.
 }
 \description{
 Signal Extraction Scaling (Diaz et al., 2012)

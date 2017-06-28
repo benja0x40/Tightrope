@@ -12,10 +12,10 @@ SX2Y(x, y)
 \item{y}{numeric vector}
 }
 \value{
-SX2Y returns x rescaled such that range(x) = range(y)
+\code{SX2Y} returns x rescaled such that range(x) = range(y).
 }
 \description{
-rescale x into range(y)
+rescale x values into range(y)
 }
 \seealso{
 \link{S01}

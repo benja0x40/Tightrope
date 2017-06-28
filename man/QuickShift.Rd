@@ -8,19 +8,20 @@ QuickShift(x, d, progress = F)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
-and columns = samples or conditions.}
+and columns = measurement conditions.}
 
 \item{d}{numeric vector representing the density estimation at each observation.}
 
-\item{progress}{progress bar (logical, default = F)}
+\item{progress}{progress bar (logical, default = F).}
 }
 \value{
-QuickShift returns a graph object (igraph package)
+\code{QuickShift} returns a graph object (igraph package).
 }
 \description{
 QuickShift algorithm (Vedaldi & Soatto, 2008)
 }
 \seealso{
+\link{QuickShiftCutClusters},
 \link{QuickShiftClustering}
 }
 \keyword{internal}
