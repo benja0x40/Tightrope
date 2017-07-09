@@ -128,59 +128,6 @@ DitherCounts <- function(x) {
 }
 
 # =============================================================================.
-#' Merge count data
-# -----------------------------------------------------------------------------.
-#' @seealso
-#' \link{ExtractColumns},
-#' \link{MakeReadCountMatrix},
-#' \link{makeReadCountsInROI}
-# -----------------------------------------------------------------------------.
-#' @param x
-#' list of read count matrices
-#' (rows = observations, columns = measurement conditions).
-#'
-#' @param y
-#' list of read count matrices.
-#'
-#' @return
-#' \code{JoinColumns} returns a list.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-JoinColumns <- function(x, y) {
-  for(lbl in names(x)) {
-    x[[lbl]] <- cbind(x[[lbl]], y[[lbl]])
-  }
-  x
-}
-# =============================================================================.
-#' Extract count data
-# -----------------------------------------------------------------------------.
-#' @seealso
-#' \link{JoinColumns},
-#' \link{MakeReadCountMatrix},
-#' \link{makeReadCountsInROI}
-# -----------------------------------------------------------------------------.
-#' @param x
-#' list of read count matrices
-#' (rows = observations, columns = measurement conditions).
-#'
-#' @param lst
-#' column names or indices to be extracted
-#'
-#' @return
-#' \code{ExtractColumns} returns a list.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-ExtractColumns <- function(x, lst) {
-  for(lbl in names(x)) {
-    x[[lbl]] <- x[[lbl]][, lst, drop = F]
-  }
-  x
-}
-
-# =============================================================================.
 #' count reads overlapping with genomic intervals
 # -----------------------------------------------------------------------------.
 # TODO: implement skipping existing count columns with provided counts

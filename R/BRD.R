@@ -130,8 +130,7 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 # -----------------------------------------------------------------------------.
 #' @export
 BRD <- function(
-  cnt, controls, smobs = F, dither = 3,
-  npc = 2, zscore = T, knn = 200, rare = 0.01, method = "pca",
+  cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
   bdt = c(0.5, 0.05), ncl = 2, mincs = 100, progress = F
 ) {
 
@@ -142,8 +141,8 @@ BRD <- function(
   inp <- match(controls, xps)
 
   parameters <- list(
-    experiments = xps, controls = xps[inp], smobs = smobs, dither = dither,
-    npc = npc, zscore = zscore, knn = knn, rare = rare, method = method,
+    experiments = xps, controls = xps[inp],
+    smobs = smobs, dither = dither, zscore = zscore, knn = knn,
     bdt = bdt, ncl = ncl, mincs = mincs
   )
 
@@ -160,8 +159,8 @@ BRD <- function(
 
   # Compute count density after dithering and dimensionality reduction
   dred <- CDaDaDR(
-    cnt, knn = knn, smobs = smobs, movs = movs, dither = dither,
-    npc = npc, rare = rare, method = method
+    cnt, knn = knn, smobs = smobs, movs = movs,
+    dither = dither, npc = 2, zscore = zscore, method = "pca"
   )
 
   # Correct density

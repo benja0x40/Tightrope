@@ -107,4 +107,18 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
     brd$subsets, points(b[idx], d[idx], pch = 20, cex = 0.5, col = grp.clr[grp])
   )
   abline(h = min(brd$subsets$d), col = "red", lwd = 1)
+  # Plot curvature /////////////////////////////////////////////////////////////
+  # nn <- get.knn(brd$dred$projection, k = brd$parameters$knn)
+  # h <- knn_curvature(
+  #   brd$dred$density, k = brd$parameters$knn, i = nn$nn.index, d = nn$nn.dist,
+  #   smoothing = T, adaptative = T
+  # )
+  # o <- order(h)
+  # with(
+  #   brd$dred, plot_samples(
+  #     projection[o, ], xlim = lim$x, ylim = lim$y, axes = with.axes,
+  #     col = colorize(h[o], mode = "01", colors = "ry"),
+  #     alpha = ! rare[o], main = "curvature"
+  #   )
+  # )
 }

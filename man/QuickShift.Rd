@@ -10,18 +10,25 @@ QuickShift(x, d, progress = F)
 \item{x}{numeric matrix representing multivariate data where rows = observations
 and columns = measurement conditions.}
 
-\item{d}{numeric vector representing the density estimation at each observation.}
+\item{d}{numeric vector representing a density estimation at each observation.}
 
-\item{progress}{progress bar (logical, default = F).}
+\item{progress}{show progress (logical, default = F).}
 }
 \value{
-\code{QuickShift} returns a graph object (igraph package).
+\code{QuickShift} returns a graph object (see \link{igraph} package).
 }
 \description{
 QuickShift algorithm (Vedaldi & Soatto, 2008)
 }
+\references{
+Vedaldi A., Soatto S. (2008) Quick Shift and Kernel Methods for Mode Seeking.
+In: Forsyth D., Torr P., Zisserman A. (eds) Computer Vision – ECCV 2008.
+ECCV 2008. Lecture Notes in Computer Science, vol 5305.
+Springer, Berlin, Heidelberg
+\url{http://dx.doi.org/10.1007/978-3-540-88693-8_52}
+}
 \seealso{
-\link{QuickShiftCutClusters},
+\link{QuickShiftClusters},
 \link{QuickShiftClustering}
 }
 \keyword{internal}

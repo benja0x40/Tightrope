@@ -23,7 +23,9 @@ of densities estimated by \link{knn_density} (larger knn values = smoother).}
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
 \item{npc}{number of dimensions retained after projection on principal or independent
-components.}
+components. By default, dimensionality reduction is disabled
+(\code{npc = NA}) meaning that all initial dimensions (i.e. conditions)
+of measurements are taken into account to estimate the density.}
 
 \item{zscore}{transform read count projections into z-scores (logical, default = T).}
 

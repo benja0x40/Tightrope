@@ -4,9 +4,8 @@
 \alias{BRD}
 \title{background read density estimation}
 \usage{
-BRD(cnt, controls, smobs = F, dither = 3, npc = 2, zscore = T,
-  knn = 200, rare = 0.01, method = "pca", bdt = c(0.5, 0.05), ncl = 2,
-  mincs = 100, progress = F)
+BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
+  bdt = c(0.5, 0.05), ncl = 2, mincs = 100, progress = F)
 }
 \arguments{
 \item{cnt}{matrix of read counts
@@ -19,19 +18,10 @@ BRD(cnt, controls, smobs = F, dither = 3, npc = 2, zscore = T,
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
 1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
 
-\item{npc}{number of dimensions retained after projection on principal or independent
-components.}
-
 \item{zscore}{transform read count projections into z-scores (logical, default = T).}
 
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
 of densities estimated by \link{knn_density} (larger knn values = smoother).}
-
-\item{rare}{mark rare observations corresponding to exceptionally low density values
-(default = 0.01).}
-
-\item{method}{projection method, either "pca" (default) performed by \link{prcomp},
-or "ica" performed by \link{icafast}.}
 
 \item{bdt}{numeric vector of length 2 defining background density thresholds both
 expressed as proportions between 0 and 1.

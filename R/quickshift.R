@@ -3,8 +3,15 @@
 # =============================================================================.
 #' QuickShift algorithm (Vedaldi & Soatto, 2008)
 # -----------------------------------------------------------------------------.
+#' @references
+#' Vedaldi A., Soatto S. (2008) Quick Shift and Kernel Methods for Mode Seeking.
+#' In: Forsyth D., Torr P., Zisserman A. (eds) Computer Vision – ECCV 2008.
+#' ECCV 2008. Lecture Notes in Computer Science, vol 5305.
+#' Springer, Berlin, Heidelberg
+#' \url{http://dx.doi.org/10.1007/978-3-540-88693-8_52}
+# -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{QuickShiftCutClusters},
+#' \link{QuickShiftClusters},
 #' \link{QuickShiftClustering}
 # -----------------------------------------------------------------------------.
 #' @param x
@@ -12,13 +19,13 @@
 #' and columns = measurement conditions.
 #'
 #' @param d
-#' numeric vector representing the density estimation at each observation.
+#' numeric vector representing a density estimation at each observation.
 #'
 #' @param progress
-#' progress bar (logical, default = F).
+#' show progress (logical, default = F).
 #'
 #' @return
-#' \code{QuickShift} returns a graph object (igraph package).
+#' \code{QuickShift} returns a graph object (see \link{igraph} package).
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -32,11 +39,12 @@ QuickShift <- function (x, d, progress = F) {
   while(length(i.a) > 1) {
 
     knn <- get.knnx(
-      data = x[i.a,], query = x[i.a,], k = 2, algorithm = "kd_tree"
+      data = x[i.a, ], query = x[i.a, ], k = 2, algorithm = "kd_tree"
     )
-    i.b <- i.a[knn$nn.index[, 2]]
 
+    i.b <- i.a[knn$nn.index[, 2]]
     chk <- d[i.b] >= d[i.a]
+
     g <- g + igraph::edges(
       rbind(i.a, i.b)[, chk], distance = knn$nn.dist[chk, 2]
     )
@@ -50,7 +58,7 @@ QuickShift <- function (x, d, progress = F) {
 }
 
 # =============================================================================.
-#' Split a QuickShift tree into clusters
+#' split a QuickShift graph into clusters
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{QuickShift},
@@ -60,71 +68,71 @@ QuickShift <- function (x, d, progress = F) {
 #' QuickShift graph resulting from the \link{QuickShift} function.
 #'
 #' @param n
-#' expected number of clusters.
-#'
-#' @param ecut
-#' maximum branch length.
+#' desired number of clusters.
 #'
 #' @return
-#' \code{QuickShiftCutClusters} returnd a list with the following elements:
-#' \item{membership}{vector of cluster memberships}
-#' \item{csize}{cluster sizes}
-#' \item{center}{indice of the maximum density value in each cluster}
+#' \code{QuickShiftClustering} and \code{QuickShiftClusters} return a list
+#' with the same following elements:
+#' \item{membership}{
+#'   vector of integers in [1, \code{n}] indicating to which cluster each
+#'   observation belongs.
+#' }
+#' \item{sizes}{number of observations in each cluster.}
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-QuickShiftCutClusters <- function(g, n = NULL, ecut = NULL) {
-  if(is.null(ecut) & ! is.null(n)) {
-    ecut <- mean(sort(E(g)$distance, decreasing = T)[c(n, n+1) - 1])
-  }
-  if(is.null(ecut)) stop("Missing value for n or ecut")
+QuickShiftClusters <- function(g, n) {
+
+  # Split QuickShift graph into desired number of subgraphs/clusters
+  ecut <- mean(sort(E(g)$distance, decreasing = T)[c(n, n+1) - 1])
   V(g)$id <- 1:length(V(g))
   g <- g - E(g)[distance > ecut]
+
+  # Find root observation for each subgraph
   r <- which(igraph::degree(g, mode = "out") == 0)
-  grp <- list(
+  if(length(r) != n) stop("unexpected graph structure")
+
+  # Tag each observation with an identifier of the subgraph it belongs to
+  qsc <- list(
     membership = rep(NA, length(V(g))),
-    csize      = rep(0, length(r)),
-    center     = r,
-    nbr        = length(r),
-    ecut       = ecut
+    sizes      = rep(0, n),
+    nbr        = n
   )
-  for(k in 1:length(r)) {
+  for(k in 1:n) {
     sg <- subcomponent(g, v = r[k], mode = "in")
-    grp$membership[sg$id] <- k
+    qsc$membership[sg$id] <- k
   }
-  grp$csize <- as.vector(table(grp$membership))
-  o <- order(grp$csize, decreasing = T, na.last = T)
-  grp$csize <- grp$csize[o]
-  grp$membership <- o[grp$membership]
-  grp
+  qsc$sizes <- as.vector(table(qsc$membership))
+
+  # Reallocate subgraph/cluster ids by decreasing population sizes
+  o <- order(qsc$sizes, decreasing = T, na.last = T)
+  qsc$sizes <- qsc$sizes[o]
+  qsc$membership <- o[qsc$membership]
+
+  qsc
 }
 
 # =============================================================================.
-#' hierarchical clustering algorithm based on density gradient ascent
+#' hierarchical clustering based on density gradient ascent
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{QuickShift},
-#' \link{QuickShiftCutClusters}
+#' \link{QuickShiftClusters}
 # -----------------------------------------------------------------------------.
+#' @inherit QuickShift references
 #' @inheritParams QuickShift
-#' numeric matrix representing multivariate data where rows = observations
-#' and columns = measurement conditions.
 #'
 #' @param n
-#' number of clusters.
+#' desired number of clusters.
 #'
 #' @param ...
 #'
-#' @return
-#' \code{QuickShiftClustering} returns a list with the following elements:
-#' \item{membership}{vector of cluster memberships}
-#' \item{csize}{cluster sizes}
-#' \item{center}{indice of the maximum density value in each cluster}
+#' @inherit QuickShiftClusters return
 # -----------------------------------------------------------------------------.
 #' @export
 QuickShiftClustering <- function (x, d, n, ...) {
 
   qs <- QuickShift(x, d, ...)
-  qs <- QuickShiftCutClusters(qs, n = n)
+  qs <- QuickShiftClusters(qs, n = n)
   qs
 }

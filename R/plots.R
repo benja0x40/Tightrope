@@ -68,7 +68,9 @@ plot_samples <- function(
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-PlotQuickShift <- function(x, g, new = T, ...) {
+PlotQuickShift <- function(
+  x, g, new = T, length = 0.05, col = rgb(0, 0, 0, 0.2), ...
+) {
 
   if(new) plot(x[, 1], x[, 2], type='n')
 
@@ -76,7 +78,7 @@ PlotQuickShift <- function(x, g, new = T, ...) {
   suppressWarnings(
     arrows(
       x[el[, 1], 1], x[el[, 1], 2], x[el[, 2], 1], x[el[, 2], 2],
-      length = 0.05, col = rgb(0, 0, 0, 0.2)
+      length = length, col = col, ...
     )
   )
 }

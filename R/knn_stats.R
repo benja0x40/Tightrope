@@ -1,7 +1,12 @@
 # FUNCTIONS | KNN STATS ########################################################
 
 # =============================================================================.
-#' Extract local values from knn index matrix
+#' Extract local values based on a knn index matrix
+# -----------------------------------------------------------------------------.
+#' @seealso
+#' \link{knn_density},
+#' \link{knn_musigma2},
+#' \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @param v
 #' numeric vector.
@@ -20,7 +25,7 @@ knn_values <- function(v, i) {
 }
 
 # =============================================================================.
-#' Apply smoothing function to local values
+#' Apply a smoothing function to local values
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{knn_density},
@@ -73,14 +78,14 @@ knn_smoothing <- function(v, i, f = mean) {
 #'
 #' @param smoothing
 #' perfom a local average smoothing of
-#' the estimated density for \link{knn_density} (default = T, recommended)
-#' or the estimated variance for \link{knn_musigma2} (default = F).
+#' the estimated density for \link{knn_density} (default = T)
+#' or the local variance for \link{knn_musigma2} (default = F).
 #'
 #' @return
 #' \code{knn_density} returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @export
-knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
+knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T, sum2one = T) {
 
   x <- as.matrix(x)
 
@@ -88,9 +93,7 @@ knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T) {
   D  <- ncol(x) # number of dimensions of each observation
 
   if(is.null(i) | is.null(d)) {
-    if(D == 1) r <- get.knn(data = x, k = k)
-    else       r <- get.knn(data = x, k = k)
-
+    r <- get.knn(data = x, k = k)
     i <- r$nn.index
     d <- r$nn.dist
   }
@@ -133,9 +136,7 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
   D  <- ncol(x) # number of dimensions of each observation
 
   if(is.null(i) | is.null(d)) {
-    if(D == 1) r <- get.knn(data = x, k = k)
-    else       r <- get.knn(data = x, k = k)
-
+    r <- get.knn(data = x, k = k)
     i <- r$nn.index
     d <- r$nn.dist
   }
@@ -181,9 +182,7 @@ knn_mean <- function(x, k, i = NULL, d = NULL) {
   D  <- ncol(x) # number of dimensions of each observation
 
   if(is.null(i) | is.null(d)) {
-    if(D == 1) r <- get.knn(data = x, k = k)
-    else       r <- get.knn(data = x, k = k)
-
+    r <- get.knn(data = x, k = k)
     i <- r$nn.index
     d <- r$nn.dist
   }

@@ -95,12 +95,12 @@ test_that("QuickShift", {
   d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
-  g <- suppressWarnings(QuickShift(x, d, plot = F))
-  grp <- QuickShiftCutClusters(g, n = 3)
+  g <- QuickShift(x, d)
+  grp <- QuickShiftClusters(g, n = 3)
   clr <- rainbow(grp$nbr, alpha = 0.5)
   clr <- plot_groups_2D(x, clr = clr[grp$membership], pch = 20)
 
-  expect_equal(grp$csize, nbr)
+  expect_equal(grp$sizes, nbr)
   expect_true(all(grp$membership == mbr))
 
   # Test ////
@@ -116,11 +116,11 @@ test_that("QuickShift", {
   d <- knn_density(x, k = 75)
   plot(x, pch = 20, col = grey(0, alpha = 0.5))
   plot(x, pch = 20, col = colorize(d))
-  g <- suppressWarnings(QuickShift(x, d, plot = F))
-  grp <- QuickShiftCutClusters(g, n = 3)
+  g <- QuickShift(x, d)
+  grp <- QuickShiftClusters(g, n = 3)
   clr <- rainbow(grp$nbr, alpha = 0.5)
   clr <- plot_groups_2D(x, clr = clr[grp$membership], pch = 20)
 
-  expect_equal(grp$csize, nbr)
+  expect_equal(grp$sizes, nbr)
   expect_true(all(grp$membership == mbr))
 })

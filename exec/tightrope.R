@@ -119,9 +119,10 @@ FindOutliers <- function(
 # =============================================================================.
 # Dataset
 # -----------------------------------------------------------------------------.
-# ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al
-load_dataset   <- "E14_EPZ" # "ALL"
-target_dataset <- "E14_EPZ" # c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
+# ESC_BRD, NSC_K27M, E14_EPZ, Lu_et_al, Orlando_et_al
+load_dataset   <- "Orlando_et_al" # "ALL"
+# c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al", "Orlando_et_al")
+target_dataset <- "Orlando_et_al"
 # -----------------------------------------------------------------------------.
 # H3K27me3, H3K27me2, H3K27me1, Suz12, H3K36me3
 # antibody <- "H3K27me2"
@@ -130,17 +131,14 @@ target_dataset <- "E14_EPZ" # c("ESC_BRD", "NSC_K27M", "E14_EPZ", "Lu_et_al")
 base_path <- "/media/benjamin/USB16GB/LT_WORKS/" # mistral
 base_path <- "/Volumes/USB16GB/LT_WORKS/"        # iMac
 # -----------------------------------------------------------------------------.
-save.results <- F
+save.results <- T
 with.legend  <- T
 with.axes    <- T
 # -----------------------------------------------------------------------------.
 smobs   <- T
 dither  <- 5
-npc     <- 2
 zscore  <- T
 knn     <- 300
-rare    <- 0.01
-method  <- "ica"
 mincs   <- 10
 # -----------------------------------------------------------------------------.
 
@@ -159,7 +157,7 @@ ROI.LST <- readRDS(paste0(base_path, "NextSeq_E14EPZ/_RDATA_/ROI.LST.rdata"))
 if(any(c("ESC_BRD", "E14_EPZ", "ALL") %in% load_dataset)) {
   ESC_BRD <- list()
 
-  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R1_TEST/"
+  data_path <- paste0(base_path, "NextSeq_ESC_BRD_R1_TEST/")
   ESC_BRD$R1 <- list(
     ann = read.delim(
       paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
@@ -169,7 +167,7 @@ if(any(c("ESC_BRD", "E14_EPZ", "ALL") %in% load_dataset)) {
   )
   rm(data_path)
 
-  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R2_TEST/"
+  data_path <- paste0(base_path, "NextSeq_ESC_BRD_R2_TEST/")
   ESC_BRD$R2 <- list(
     ann = read.delim(
       paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
@@ -182,11 +180,12 @@ if(any(c("ESC_BRD", "E14_EPZ", "ALL") %in% load_dataset)) {
   # Reshape to join replicates
   ESC_BRD <- list(
     name = "ESC_BRD",
-    data_path = "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_RDATA/",
+    data_path =   data_path <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/"),
     ann = rbind(
       ESC_BRD$R1$ann,
       ESC_BRD$R2$ann
     ),
+    ROI = readRDS(paste0(data_path, "ROI.LST.rdata")),
     CNT = with(ESC_BRD, JoinColumns(R1$CNT, R2$CNT))
   )
 
@@ -201,7 +200,7 @@ if(any(c("ESC_BRD", "E14_EPZ", "ALL") %in% load_dataset)) {
 # NSC_K27M
 # -----------------------------------------------------------------------------.
 if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
-  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_K27M_spike_in/"
+  data_path <- paste0(base_path, "NextSeq_K27M_spike_in/")
   NSC_K27M <- list(
     name = "NSC_K27M",
     data_path = paste0(data_path, "_RDATA_/"),
@@ -209,6 +208,7 @@ if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
       paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
       comment.char = "#", stringsAsFactors = F
     ),
+    ROI = readRDS(paste0(data_path, "_RDATA_/ROI.LST.rdata")),
     CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
   )
   rm(data_path)
@@ -224,7 +224,7 @@ if(any(c("NSC_K27M", "ALL") %in% load_dataset)) {
 # E14_EPZ
 # -----------------------------------------------------------------------------.
 if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
-  data_path <- "/Volumes/USB16GB/LT_WORKS/NextSeq_E14EPZ/"
+  data_path <- paste0(base_path, "NextSeq_E14EPZ/")
   E14_EPZ <- list(
     name = "E14_EPZ",
     data_path = paste0(data_path, "_RDATA_/"),
@@ -232,6 +232,7 @@ if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
       paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
       comment.char = "#", stringsAsFactors = F
     ),
+    ROI = readRDS(paste0(data_path, "_RDATA_/ROI.LST.rdata")),
     CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
   )
   rm(data_path)
@@ -258,7 +259,7 @@ if(any(c("E14_EPZ", "ALL") %in% load_dataset)) {
 # Lu_et_al
 # -----------------------------------------------------------------------------.
 if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
-  data_path <- "/Volumes/USB16GB/LT_WORKS/GSE63195_Lu_et_al_2016/"
+  data_path <- paste0(base_path, "GSE63195_Lu_et_al_2016/")
   Lu_et_al <- list(
     name = "Lu_et_al",
     data_path = paste0(data_path, "_RDATA_/"),
@@ -266,6 +267,7 @@ if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
       paste0(data_path, "_LittleThumb_/datasets/bowtie2_mm10.txt"),
       comment.char = "#", stringsAsFactors = F
     ),
+    ROI = readRDS(paste0(data_path, "_RDATA_/ROI.LST.rdata")),
     CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
   )
   rm(data_path)
@@ -275,6 +277,30 @@ if(any(c("Lu_et_al", "ALL") %in% load_dataset)) {
   }
   # ---------------------------------------------------------------------------.
   Lu_et_al <- list2env(Lu_et_al)
+}
+
+# =============================================================================.
+# Orlando_et_al
+# -----------------------------------------------------------------------------.
+if(any(c("Orlando_et_al", "ALL") %in% load_dataset)) {
+  data_path <- paste0(base_path, "GSE60104_Orlando_et_al_2014/")
+  Orlando_et_al <- list(
+    name = "Orlando_et_al",
+    data_path = paste0(data_path, "_RDATA_/"),
+    ann = read.delim(
+      paste0(data_path, "_LittleThumb_/datasets/bowtie2_hg38.txt"),
+      comment.char = "#", stringsAsFactors = F
+    ),
+    ROI = readRDS(paste0(data_path, "_RDATA_/ROI.LST.rdata")),
+    CNT = readRDS(paste0(data_path, "_RDATA_/ROI.CNT.rdata"))
+  )
+  rm(data_path)
+
+  if(! with(Orlando_et_al, all(ann$lt_id == colnames(CNT$GN)))) {
+    stop("Inconsistent annotation of samples in Orlando_et_al")
+  }
+  # ---------------------------------------------------------------------------.
+  Orlando_et_al <- list2env(Orlando_et_al)
 }
 
 # CONFIGURATIONS ###############################################################
@@ -371,6 +397,31 @@ CFG_DTS[[wks_name]] <- list(
   ncl     = 2
 )
 
+# =============================================================================.
+# Orlando_et_al
+# -----------------------------------------------------------------------------.
+wks_name <- "Orlando_et_al"
+CFG_DTS[[wks_name]] <- list(
+  abd.lst = c("H3K79me2", "H3K4me3"),
+  abd.prm = c("ref_roi", "ncl"),
+  abd.chk = c("Input"),
+  viz = list(
+    c("Input_0_R1", "X---X_100_R1", "X---X_25_R1", "X---X_0_R1"),
+    c("Input_0_R2", "X---X_100_R2", "X---X_25_R2", "X---X_0_R2"),
+
+    c("X---X_100_R1", "X---X_25_R1"),
+    c("X---X_100_R2", "X---X_25_R2"),
+
+    c("X---X_25_R1",  "X---X_25_R2")
+  ),
+  layout  = matrix(1:9, 3, 3, byrow = T),
+  nxp     = 0,
+  rex     = "Input",
+  ref_roi = c(H3K79me2 = "GN", H3K4me3 = "GN"),
+  bdt     = c(0.5, 0.05),
+  ncl     = c(H3K79me2 = 1, H3K4me3 = 2)
+)
+
 # PROCESSING ###################################################################
 
 for(dts in target_dataset) { # //////////////////////////////////////////////////
@@ -398,8 +449,8 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
     # BRD estimation
     brd <- with(
       cfg, BRD(
-        cnt, controls = controls, smobs = smobs, dither = dither,
-        npc = npc, zscore = zscore, knn = knn, rare = rare, method = method,
+        cnt, controls = controls, smobs = smobs,
+        dither = dither, zscore = zscore, knn = knn,
         bdt = bdt, ncl = ncl, mincs = mincs
       )
     )
@@ -501,3 +552,298 @@ for(dts in target_dataset) { # /////////////////////////////////////////////////
   }
   rm(cmp, lbl, idx, d, o)
 }
+
+# =============================================================================.
+stop("finished")
+# =============================================================================.
+
+# PLAYGROUND ###################################################################
+
+library(Tightrope)
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+knuth.welford.start <- function() {
+  list(i=0, delta=0, Xmean=0, Vn=0)
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+knuth.welford.iterate <- function(Xi, KW) {
+  KW$i <- KW$i + 1
+  KW$delta <- Xi - KW$Xmean
+  KW$Xmean <- KW$Xmean + KW$delta / KW$i
+  KW$Vn  <- KW$Vn + KW$delta * (Xi - KW$Xmean)
+  KW
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+knuth.welford.end <- function(KW) {
+  KW$Vn/(KW$i-1)
+  KW
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+global_edge_list <- function(g, i) {
+  e <- as_edgelist(g)
+  e[, 1] <- i[e[, 1]]
+  e[, 2] <- i[e[, 2]]
+  e
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+increment_edges <- function(g, q, i) {
+  g <- g + edges(t(global_edge_list(q, i)))
+  w <- E(g)$weight
+  w[is.na(w)] <- 1
+  E(g)$weight <- w + count_multiple(g) - 1
+  simplify(g)
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+density_mode <- function(x, ...) {
+  d <- density(x, ...)
+  d$x[which.max(d$y)]
+}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+plot_sources_1D <- function(
+  x, theta = NULL, bins = 200, res = bins, xlim = NULL, clr = NULL, ...
+) {
+
+  n <- length(x)
+
+  bins <- bins - 1
+  r <- diff(range(x), na.rm = T)
+  brk <- 0:bins/bins * (1.2 * r) - 0.1 * r + min(x, na.rm = T)
+  h.x <- hist(x, breaks = brk, plot = F)
+
+  h.x$counts <- h.x$counts / n
+  chk <- h.x$counts > 0
+  h.x$counts[chk] <- with(h.x, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
+
+
+  if(is.null(xlim)) xlim = range(x)
+  ylim <- range(h.x$counts)
+  ylim <- min(ylim) + c(0, 1.1 * diff(ylim))
+  empty.plot(xlim = xlim, ylim = ylim, yaxs = 'i', ...)
+
+  rect(h.x$breaks[-(n+1)], 0, h.x$breaks[-1], h.x$counts, col = "black", border = "black")
+
+  ns <- length(theta) # number of sources
+  if(ns > 0) {
+    if(is.null(clr)) clr <- rgb(1, 0, 0)
+    if(length(clr) == 1) clr = rep(clr, ns)
+
+    b <- SX2Y(0:res, x)
+    u <- (b[-1] + b[-(res+1)])/2
+    for(i in 1:ns) {
+      mu    <- theta[[i]][[2]]
+      sigma <- theta[[i]][[3]]
+      p <- dnorm(u, mean = mu, sd = sigma)
+      p <- theta[[i]][[1]] * p / sum(diff(b) * p)
+      lines(u, p / 5, col = clr[i])
+    }
+  }
+}
+
+# =============================================================================.
+# Split x in 2 random partitions
+# =============================================================================.
+# x <- - sodgk(0:100)
+# y <- x * sodgk(0:100)
+# layout(matrix(1:4, 2, 2, byrow = T))
+# plot(x)
+# plot(y)
+# =============================================================================.
+layout(matrix(1:4, 2, 2, byrow = T))
+n <- 100
+k <- 10
+x <- SquareGrid(k = n, d = 2)$x # , subset = 5001:5100
+x <- matrix(runif(10000, -1, 1), 5000, 2)
+z <-  Wave2D(x, f = 3 , r = rbind(c(1, Inf))) + 2 # rep(3, nrow(x)) #
+nn <- get.knn(x, k)
+h <- knn_curvature(z, k, i = nn$nn.index, d = nn$nn.dist, smoothing = T)
+plot(x, pch = 20, cex = 0.5, col = colorize(z, colors = "WB"))
+plot(x[, 1], z, ylim = range(z, h), pch = 20, cex = 0.5)
+points(x[, 1], h, pch = 20, cex = 0.5, col = "red")
+clr.prm <- defineColors(c(min(h), 0, max(h)), colors = c(rgb(0, 0.5, 1), grey(0.8), rgb(1, 0.5, 0)))
+clr <- makeColors(h, parameters = clr.prm)
+plot(x, pch = 20, cex = 0.5, col = clr)
+# =============================================================================.
+n <- 2000
+x <- SquareGrid(k = 2, d = 2)$x
+x <- ClonalGaussian(n = n, mu = x, sigma = 1/30)$x
+x <- rbind(
+  matrix(runif(2 * n, min(x), max(x)), n),
+  matrix(runif(2 * n, min(x), 0), n),
+  matrix(runif(2 * n, 0, max(x)), n),
+  x
+)
+n <- nrow(x)
+
+layout(matrix(1:4, 2, 2, byrow = T))
+k <- 100
+nn <- get.knn(x, k)
+p <- knn_density(x, k, i = nn$nn.index, d = nn$nn.dist, smoothing = T)
+h <- knn_curvature(p, k, i = nn$nn.index, d = nn$nn.dist, smoothing = T)
+
+clr.prm <- defineColors(c(min(h), 0, max(h)), colors = c(rgb(0, 0.5, 1), grey(0.8), rgb(1, 0.5, 0)))
+clr <- makeColors(h, parameters = clr.prm)
+plot(x, pch = 20, cex = 0.5, col = colorize(p, mode = "01", col = "ry"))
+plot(x, pch = 20, cex = 0.5, col = colorize(p, mode = "01", col = "ry"))
+plot(p, h, pch = 20, cex = 0.5, col = grey(0, 0.2))
+
+Q <-  knuth.welford.start()
+
+G <- graph.empty(n)
+G <- set_edge_attr(G, "weight",   value = 0)
+
+layout(matrix(1:4, 2, 2, byrow = T))
+rnit <- 10
+d <- rep(0, n)
+pb <- txtProgressBar(min = 1, max = rnit, char = "|", style= 3)
+for(r in 1:rnit) {
+  chk <- sample(c(T, F), n, replace = T)
+  # First half
+  i <- which(chk)
+  d[i] <- knn_density(x[i, ], k / 2, smoothing = T)
+  qs <- QuickShift(x[i, ], d[i])
+  G <- increment_edges(G, qs, i)
+  # Second half
+  i <- which(! chk)
+  d[i] <- knn_density(x[i, ], k / 2, smoothing = T)
+  qs <- QuickShift(x[i, ], d[i])
+  G <- increment_edges(G, qs, i)
+  # Online computation of mean+variance
+  Q <- knuth.welford.iterate(2 * d, Q)
+
+  setTxtProgressBar(pb, r)
+}
+close(pb)
+
+Q <- knuth.welford.end(Q)
+
+e <- as_edgelist(G)
+d <- sqrt(rowSums((x[e[, 1], ] - x[e[, 2], ])^2))
+w <- E(G)$weight
+clr <- ReplaceAlpha(colorize(w, mode = "rank"), 0.2)
+# clr[d > 0.4] <- rgb(1 ,0, 0)
+# G <- G - E(G)[d > 0.4]
+
+layout(matrix(1:4, 2, 2, byrow = T))
+plot(x, pch = 20, cex = 0.5, col = colorize(p, mode = "rank", col = "ry"))
+# plot(x, pch = 20, cex = 0.5, col = colorize(Q$Xmean, mode = "rank", col = "ry"))
+# plot(x, pch = 20, cex = 0.5, col = colorize(Q$Vn, mode = "rank", col = "ry"))
+# PlotQuickShift(x, G, col = clr)
+v <- sqrt(Q$Vn)
+# theta <- mv_gmm(v, ns = 2)$theta
+# theta <- list(list(1, mu = density_mode(v), sigma = mad(v)))
+plot_sources_1D(v, theta)
+abline(v = density_mode(v), col = "red")
+plot(x[, 1], p, pch = 20, cex = 0.5, col = grey(0, 0.5))
+z <- p + rnorm(length(p), sd = density_mode(v))
+plot(x[, 1], z, pch = 20, cex = 0.5, col = grey(0, 0.5))
+# -----------------------------------------------------------------------------.
+# plot(density(log10(d)))
+# plot(d, w, log = "xy")
+# -----------------------------------------------------------------------------.
+# plot(p, Q$Xmean, log = "xy")
+# o <- order(Q$Vn)
+# plot(Q$Vn[o], cumsum(rankstat(Q$Vn)[o]), log = "x")
+# -----------------------------------------------------------------------------.
+# g <- QuickShift(x, p)
+# e <- as_edgelist(g)
+# v.a <- e[, 1]
+# v.b <- e[, 2]
+# d <- E(g)$distance
+# z <- p[v.b] - p[v.a]
+#
+# q <- data.frame(
+#   matrix(
+#     F, n, 5, dimnames = list(
+#       NULL, c("root", "node", "parent", "distance", "gradient")
+#     )
+#   )
+# )
+# q[v.a, 3] <- v.b
+# q[v.a, 4] <- d
+# q[v.a, 5] <- z
+# q$node[v.b] <- T
+# q$root <- q$parent == 0
+# -----------------------------------------------------------------------------.
+# layout(matrix(1:4, 2, 2, byrow = T))
+# plot(x, pch = 20, cex = 0.5, col = colorize(p, mode = "rank", col = "ry"))
+# with(q, plot(log10(cbind(d, z)), pch = 20, cex = 0.5))
+# clr <- colorize(d, mode = "rank")
+# clr[log10(d) > -0.5] <- rgb(1 ,0, 0)
+# PlotQuickShift(x, g, col = clr)
+# =============================================================================.
+# g <- QuickShift(x, p)
+# e <- as_edgelist(g)
+# v.a <- e[, 1]
+# v.b <- e[, 2]
+# q <- matrix(0, n, 4)
+# q[v.b, 1] <- 1
+# q[v.a, 2] <- v.b
+#
+# blur <- rep(0, n)
+# pb <- txtProgressBar(min = 1, max = rnit, char = "|", style= 3)
+# for(r in 1:rnit) {
+#   i <- which(sample(c(T, F), n, replace = T))
+#   g <- QuickShift(x[i, ], p[i])
+#   e <- as_edgelist(g)
+#   v.a <- i[e[, 1]]
+#   v.b <- i[e[, 2]]
+#   q[v.a, 2] <- q[v.a, 2] + (q[v.a, 1] ==  v.b)
+#   q[v.a, 3] <- q[v.a, 3] + 1
+#   setTxtProgressBar(pb, r)
+# }
+# close(pb)
+# # hist(q[, 2] / q[, 3], breaks = 30, col = "black")
+#
+# layout(matrix(1:4, 2, 2, byrow = T))
+# plot(x, pch = 20, cex = 0.5, col = grey(0, 0.1))
+# plot(x, pch = 20, cex = 0.5, col = colorize(p, mode = "rank", col = "ry"))
+# plot(x[q[, 2] / q[, 3] > 0.4, ], pch = 20, cex = 0.5, col = grey(0, 0.5))
+#
+# for(r in 1:4) {
+#   i <- which(sample(c(T, F), n, replace = T))
+#   g <- QuickShift(x[i, ], p[i])
+#   e <- as_edgelist(g)
+#   v.a <- i[e[, 1]]
+#   v.b <- i[e[, 2]]
+#   q[v.a, 2] <- q[v.a, 2] + (q[v.a, 1] ==  v.b)
+#   q[v.a, 3] <- q[v.a, 3] + 1
+#   setTxtProgressBar(pb, r)
+# }
+#
+# g <- QuickShift(x, p)
+
+# d <- knn.dist(x, k = 1)
+# plot(density(d))
+
+# g <- QuickShift(x, p)
+# d <- log10(E(g)$distance)
+#
+# f <- density(d)
+# u <- f$x
+# y <- f$y / max(f$y)
+#
+# f <- mv_mle(d)
+# f$sigma <- mad(d)
+# z <- with(f, dnorm(u, mu, sigma))
+# z <- z / max(z)
+#
+# plot(u, y, type = "l")
+# lines(u, z, col = "red")
+#
+# p <- pnorm(abs(d - f$mu), 0, f$sigma, lower.tail = F)
+#
+# PlotQuickShift(x, g, col = ifelse(p < 1E-2, rgb(1, 0, 0, 0.2), grey(0, 0.2)))
