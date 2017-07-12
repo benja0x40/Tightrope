@@ -4,12 +4,12 @@
 \alias{ReadCountMatrix}
 \title{count reads in genomic intervals for different conditions}
 \usage{
-ReadCountMatrix(aln, grg, cnt = NULL, update = F, maxgap = 0L,
-  minoverlap = 1L, type = "any", ignore.strand = T, ...)
+ReadCountMatrix(aln, grg, cnt = NULL, update = F, NameByFile = F,
+  maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...)
 }
 \arguments{
-\item{aln}{a list with named elements, containing exclusively bam file paths or
-\link{GAlignments} objects.}
+\item{aln}{a vector of bam file paths or a list with named elements and containing
+exclusively \link{GAlignments} objects.}
 
 \item{grg}{a \link{GRanges} object defining the genomic intervals of interest.}
 
@@ -19,6 +19,9 @@ rows = observations and columns = measurement conditions.}
 \item{update}{instead of producing new count matrixes from scratch, this argument allows
 to update targeted count columns when existing count matrixes are provided
 (logical, default = F).}
+
+\item{NameByFile}{use file names to generate the name of each measurement condition, meaning
+each sequenced biological sample (logical, default = F).}
 
 \item{maxgap}{
     See \code{\link[IRanges]{findOverlaps}} in the \pkg{IRanges} package
@@ -48,8 +51,8 @@ functions \code{ReadCountMatrix}, \code{AppendReadCounts}, and
 rows = observations and columns = measurement conditions.
 }
 \description{
-\code{ReadCountMatrix} computes the number of reads overlapping with each
-genomic interval of interest for different measurement conditions.
+\code{ReadCountMatrix} computes the number of reads overlapping with provided
+genomic intervals for different measurement conditions.
 }
 \seealso{
 \link{DitherCounts},

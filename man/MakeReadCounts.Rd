@@ -4,12 +4,12 @@
 \alias{MakeReadCounts}
 \title{make read counts for different locations and conditions}
 \usage{
-MakeReadCounts(aln, locations, cnt = NULL, update = F, maxgap = 0L,
-  minoverlap = 1L, type = "any", ignore.strand = T, ...)
+MakeReadCounts(aln, locations, cnt = NULL, update = F, NameByFile = F,
+  maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...)
 }
 \arguments{
-\item{aln}{a list with named elements, containing exclusively bam file paths or
-\link{GAlignments} objects.}
+\item{aln}{a vector of bam file paths or a list with named elements and containing
+exclusively \link{GAlignments} objects.}
 
 \item{locations}{a list with named elements, each one being a \link{GRanges} object defining
 a set of genomic intervals of interest.}
@@ -20,6 +20,9 @@ rows = observations and columns = measurement conditions.}
 \item{update}{instead of producing new count matrixes from scratch, this argument allows
 to update targeted count columns when existing count matrixes are provided
 (logical, default = F).}
+
+\item{NameByFile}{use file names to generate the name of each measurement condition, meaning
+each sequenced biological sample (logical, default = F).}
 
 \item{maxgap}{
     See \code{\link[IRanges]{findOverlaps}} in the \pkg{IRanges} package

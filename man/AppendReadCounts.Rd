@@ -4,17 +4,20 @@
 \alias{AppendReadCounts}
 \title{append read counts for additional conditions}
 \usage{
-AppendReadCounts(cnt, aln, grg, maxgap = 0L, minoverlap = 1L,
-  type = "any", ignore.strand = T, ...)
+AppendReadCounts(cnt, aln, grg, NameByFile = F, maxgap = 0L,
+  minoverlap = 1L, type = "any", ignore.strand = T, ...)
 }
 \arguments{
 \item{cnt}{a numeric matrix representing read counts and where
 rows = observations and columns = measurement conditions.}
 
-\item{aln}{a list with named elements, containing exclusively bam file paths or
-\link{GAlignments} objects.}
+\item{aln}{a vector of bam file paths or a list with named elements and containing
+exclusively \link{GAlignments} objects.}
 
 \item{grg}{a \link{GRanges} object defining the genomic intervals of interest.}
+
+\item{NameByFile}{use file names to generate the name of each measurement condition, meaning
+each sequenced biological sample (logical, default = F).}
 
 \item{maxgap}{
     See \code{\link[IRanges]{findOverlaps}} in the \pkg{IRanges} package

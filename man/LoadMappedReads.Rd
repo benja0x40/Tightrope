@@ -4,11 +4,14 @@
 \alias{LoadMappedReads}
 \title{load/verify a list of mapped read files}
 \usage{
-LoadMappedReads(aln, ...)
+LoadMappedReads(aln, NameByFile = F, ...)
 }
 \arguments{
-\item{aln}{a list with named elements, containing exclusively bam file paths or
-\link{GAlignments} objects.}
+\item{aln}{a vector of bam file paths or a list with named elements and containing
+exclusively \link{GAlignments} objects.}
+
+\item{NameByFile}{use file names to generate the name of each measurement condition, meaning
+each sequenced biological sample (logical, default = F).}
 
 \item{...}{additional arguments passed to the \link{readGAlignments} function.}
 }

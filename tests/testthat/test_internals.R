@@ -19,19 +19,19 @@ test_that("SX2Y", {
 test_that("SkewedProbabilities", {
 
   # Work as expected
-  layout(matrix(1:4, 2, 2, byrow = T))
-  par(mar = c(5, 4, 3, 1))
-  p <- SkewedProbabilities(1000, beta =  1/8, gamma = 0.5, sx = +1, sy = +1, plot = T)
-  p <- SkewedProbabilities(1000, beta =  1/8, gamma = 0.5, sx = -1, sy = -1, plot = T)
-  p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = +1, sy = -1, plot = T)
-  p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = -1, sy = +1, plot = T)
+  # layout(matrix(1:4, 2, 2, byrow = T))
+  # par(mar = c(5, 4, 3, 1))
+  # p <- SkewedProbabilities(1000, beta =  1/8, gamma = 0.5, sx = +1, sy = +1, plot = T)
+  # p <- SkewedProbabilities(1000, beta =  1/8, gamma = 0.5, sx = -1, sy = -1, plot = T)
+  # p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = +1, sy = -1, plot = T)
+  # p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = -1, sy = +1, plot = T)
   # Does not work as expected when gamma != 0.5
-  layout(matrix(1:4, 2, 2, byrow = T))
-  par(mar = c(5, 4, 3, 1))
-  p <- SkewedProbabilities(1000, beta =  1/2, gamma = 0.5, sx = +1, sy = -1, plot = T)
-  p <- SkewedProbabilities(1000, beta =  1/2, gamma = 0.5, sx = -1, sy = +1, plot = T)
-  p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = +1, sy = +1, plot = T)
-  p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = -1, sy = -1, plot = T)
+  # layout(matrix(1:4, 2, 2, byrow = T))
+  # par(mar = c(5, 4, 3, 1))
+  # p <- SkewedProbabilities(1000, beta =  1/2, gamma = 0.5, sx = +1, sy = -1, plot = T)
+  # p <- SkewedProbabilities(1000, beta =  1/2, gamma = 0.5, sx = -1, sy = +1, plot = T)
+  # p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = +1, sy = +1, plot = T)
+  # p <- SkewedProbabilities(1000, beta = -1/8, gamma = 0.5, sx = -1, sy = -1, plot = T)
 
 })
 

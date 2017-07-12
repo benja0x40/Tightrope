@@ -40,7 +40,7 @@ StopOnError <- function(msg, chk, x) {
 VerifyInputs <- function(cnt, grg) {
   chk <- rep(T,  2)
   msg <- rep("", 2)
-  if(! is.matrix(cnt)) {
+  if(! (is.matrix(cnt) | is.null(cnt))) {
     chk[1] <- F
     msg[1] <- "matrix required"
   }
@@ -48,7 +48,7 @@ VerifyInputs <- function(cnt, grg) {
     chk[2] <- F
     msg[2] <- "GRanges object required"
   }
-  if(all(chk)) {
+  if(all(chk) & ! is.null(cnt)) {
     if(is.null(colnames(cnt))) {
       chk[1] <- F
       msg[1] <- "missing column names in count matrix"
@@ -79,8 +79,12 @@ VerifyInputs <- function(cnt, grg) {
 #' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param aln
-#' a list with named elements, containing exclusively bam file paths or
-#' \link{GAlignments} objects.
+#' a vector of bam file paths or a list with named elements and containing
+#' exclusively \link{GAlignments} objects.
+#'
+#' @param NameByFile
+#' use file names to generate the name of each measurement condition, meaning
+#' each sequenced biological sample (logical, default = F).
 #'
 #' @param ...
 #' additional arguments passed to the \link{readGAlignments} function.
@@ -90,25 +94,39 @@ VerifyInputs <- function(cnt, grg) {
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-LoadMappedReads <- function(aln, ...) {
+LoadMappedReads <- function(aln, NameByFile = F, ...) {
 
-  if(is.null(names(aln))) {
+  rex <- "^(.*)\\.(bam|rdata)$"
+
+  if(is.null(names(aln)) & ! (is.character(aln) & NameByFile)) {
     stop("names are required to designate each measurement condition")
   }
   if(is.character(aln)) {
-    chk <- grepl("\\.(bam|rdata)$", aln, perl = T, ignore.case = T)
+
+    chk <- grepl(rex, aln, perl = T, ignore.case = T)
     if(! StopOnError("file path not ending by .bam or .rdata", chk, aln)) {
+
       chk <- file.exists(aln)
       if(! StopOnError("mapped reads file not found", chk, aln)) {
+
+        if(NameByFile) {
+          names(aln) <- gsub(
+            rex, "\\1", basename(aln), perl = T, ignore.case = T
+          )
+        }
+        ext <- gsub(rex, "\\2", aln, perl = T, ignore.case = T)
         message("loading mapped reads:\n", paste(names(aln), collapse = "\n"))
-        aln <- lapply(aln, readGAlignments, ...)
+
+        if(all(ext == "bam"))   aln <- lapply(aln, readGAlignments, ...)
+        if(all(ext == "rdata")) aln <- lapply(aln, readRDS)
+
       }
     }
   } else {
     if(! is.list(aln)) {
       msg <- paste(
-        "mapped reads must be provided as a list containing either",
-        "bam file paths or GAlignments objects"
+        "mapped reads must be provided as a vector of bam file paths",
+        "or as a list containing GAlignments objects"
       )
       stop(msg)
     }
@@ -136,11 +154,15 @@ LoadMappedReads <- function(aln, ...) {
 #' rows = observations and columns = measurement conditions.
 #'
 #' @param aln
-#' a list with named elements, containing exclusively bam file paths or
-#' \link{GAlignments} objects.
+#' a vector of bam file paths or a list with named elements and containing
+#' exclusively \link{GAlignments} objects.
 #'
 #' @param grg
 #' a \link{GRanges} object defining the genomic intervals of interest.
+#'
+#' @param NameByFile
+#' use file names to generate the name of each measurement condition, meaning
+#' each sequenced biological sample (logical, default = F).
 #'
 #' @param ...
 #' additional arguments passed to the \link{readGAlignments} function.
@@ -153,17 +175,17 @@ LoadMappedReads <- function(aln, ...) {
 #' @keywords internal
 #' @export
 AppendReadCounts <- function(
-  cnt, aln, grg,
+  cnt, aln, grg, NameByFile = F,
   maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...
 ) {
 
   VerifyInputs(cnt, grg)
   cnt.col <- colnames(cnt)
 
-  aln <- LoadMappedReads(aln, ...)
+  aln <- LoadMappedReads(aln, NameByFile = NameByFile, ...)
   aln.col <- names(aln)
 
-  chk <- aln.col %in% cnt.col
+  chk <- ! aln.col %in% cnt.col
   StopOnError("column already exist in read count matrix", chk, aln.col)
 
   cnt <- cbind(
@@ -195,17 +217,17 @@ AppendReadCounts <- function(
 #' @keywords internal
 #' @export
 UpdateReadCounts <- function(
-  cnt, aln, grg,
+  cnt, aln, grg, NameByFile = F,
   maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...
 ) {
 
   VerifyInputs(cnt, grg)
   cnt.col <- colnames(cnt)
 
-  aln <- LoadMappedReads(aln, ...)
+  aln <- LoadMappedReads(aln, NameByFile = NameByFile, ...)
   aln.col <- names(aln)
 
-  chk <- ! aln.col %in% cnt.col
+  chk <- aln.col %in% cnt.col
   StopOnError("column doesn't exist in read count matrix", chk, aln.col)
 
   for(i in aln.col) {
@@ -232,8 +254,8 @@ UpdateReadCounts <- function(
 #' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @description
-#' \code{ReadCountMatrix} computes the number of reads overlapping with each
-#' genomic interval of interest for different measurement conditions.
+#' \code{ReadCountMatrix} computes the number of reads overlapping with provided
+#' genomic intervals for different measurement conditions.
 #'
 #' @inherit AppendReadCounts
 #'
@@ -244,13 +266,13 @@ UpdateReadCounts <- function(
 # -----------------------------------------------------------------------------.
 #' @export
 ReadCountMatrix <- function(
-  aln, grg, cnt = NULL, update = F,
+  aln, grg, cnt = NULL, update = F, NameByFile = F,
   maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...
 ) {
 
   if(update & is.null(cnt)) stop("missing the read count matrix to be updated")
 
-  aln <- LoadMappedReads(aln, ...)
+  aln <- LoadMappedReads(aln, NameByFile = NameByFile, ...)
 
   if(is.null(cnt) | ! update) {
     cnt <- matrix(
@@ -300,7 +322,7 @@ ReadCountMatrix <- function(
 # -----------------------------------------------------------------------------.
 #' @export
 MakeReadCounts <- function(
-  aln, locations, cnt = NULL, update = F,
+  aln, locations, cnt = NULL, update = F, NameByFile = F,
   maxgap = 0L, minoverlap = 1L, type = "any", ignore.strand = T, ...
 ) {
 
@@ -309,23 +331,18 @@ MakeReadCounts <- function(
   }
   if(update & is.null(cnt)) stop("missing read count matrix to be updated")
 
-  if(is.null(cnt) | ! update) cnt <- list()
+  if(is.null(cnt)) cnt <- list()
 
   for(spl in names(aln)) {
 
-    x <- LoadMappedReads(aln[spl], ...)
+    x <- LoadMappedReads(aln[spl], NameByFile = NameByFile, ...)
 
     for(roi in names(locations)) {
-      message("processing ", roi)
+      message("counting reads ", spl, " | ", roi)
 
-      if(is.null(cnt[[roi]]) | ! update) {
-        cnt[[roi]] <- matrix(
-          0, length(locations[[roi]]), length(aln),
-          dimnames = list(NULL, names(aln))
-        )
-      }
+      if(update) f <- UpdateReadCounts else  f <- AppendReadCounts
 
-      cnt[[roi]] <- UpdateReadCounts(
+      cnt[[roi]] <- f(
         cnt[[roi]], aln = x, grg = locations[[roi]],
         maxgap = maxgap, minoverlap = minoverlap, type = type,
         ignore.strand = ignore.strand
@@ -335,12 +352,6 @@ MakeReadCounts <- function(
 
   cnt
 }
-
-# lst <- dir(
-#   "/Volumes/USB16GB/LT_WORKS/NextSeq_ESC_BRD_R1_TEST/_MAPPEDREADS_/bowtie2/genomic_dm6/",
-#   full.names = T
-# )
-# names(lst) <- gsub("\\.[^\\.]+$", "", basename(lst), perl = T)
 
 # =============================================================================.
 #' Merge count data
@@ -393,7 +404,7 @@ JoinColumns <- function(x, y) {
 #' @export
 ExtractColumns <- function(x, lst) {
   for(lbl in names(x)) {
-    x[[lbl]] <- x[[lbl]][, idx, drop = F]
+    x[[lbl]] <- x[[lbl]][, lst, drop = F]
   }
   x
 }
