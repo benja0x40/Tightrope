@@ -71,5 +71,5 @@ background read density estimation
 \link{PlotBRD},
 \link{CDaDaDR},
 \link{QuickShiftClustering},
-\link{MakeReadCountMatrix}
+\link{ReadCountMatrix}
 }

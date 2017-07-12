@@ -39,3 +39,4 @@ Springer, Berlin, Heidelberg
 \link{QuickShift},
 \link{QuickShiftClusters}
 }
+\keyword{internal}

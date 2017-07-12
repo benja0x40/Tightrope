@@ -129,6 +129,7 @@ QuickShiftClusters <- function(g, n) {
 #'
 #' @inherit QuickShiftClusters return
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 QuickShiftClustering <- function (x, d, n, ...) {
 

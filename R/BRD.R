@@ -79,7 +79,7 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 #' \link{PlotBRD},
 #' \link{CDaDaDR},
 #' \link{QuickShiftClustering},
-#' \link{MakeReadCountMatrix}
+#' \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inheritParams CDaDaDR
 #'

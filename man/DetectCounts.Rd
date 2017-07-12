@@ -25,8 +25,8 @@ If \code{detailed} is equal to \code{TRUE}, the returned \code{data.frame} also 
 DetectCounts
 }
 \seealso{
-\link{FiniteValues},
 \link{NonZeroCounts},
-\link{MakeReadCountMatrix}
+\link{ReadCountMatrix},
+\link{MakeReadCounts}
 }
 \keyword{internal}

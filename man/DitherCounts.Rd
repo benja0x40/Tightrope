@@ -17,5 +17,6 @@ dithering of read counts
 }
 \seealso{
 \link{NonZeroCounts},
-\link{MakeReadCountMatrix}
+\link{ReadCountMatrix},
+\link{MakeReadCounts}
 }

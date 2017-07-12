@@ -1,12 +1,46 @@
 # FUNCTIONS | READ COUNTS ######################################################
 
 # =============================================================================.
+#' dithering of read counts
+# -----------------------------------------------------------------------------.
+#' @seealso
+#' \link{NonZeroCounts},
+#' \link{ReadCountMatrix},
+#' \link{MakeReadCounts}
+# -----------------------------------------------------------------------------.
+#' @param x
+#' matrix of read counts (rows = observations, columns = samples or conditions).
+#'
+#' @return
+#' \code{DitherCounts} returns a matrix of dithered counts.
+# -----------------------------------------------------------------------------.
+#' @export
+DitherCounts <- function(x) {
+
+  zero <- x == 0
+  xmin <- min(x[! zero], na.rm = T)
+  xmax <- max(x[! zero], na.rm = T)
+
+  # dithering
+  x <- x + rtriangle(length(x), a = -1, b = 1)
+  # lower limit
+  k <- x < xmin & ! zero
+  x[k] <- runif(sum(k), xmin - 0.5, xmin)
+  # upper limit
+  k <- x > xmax
+  x[k] <- runif(sum(k), xmax, xmax + 0.5)
+  # no count
+  x[zero] <- 0
+
+  x
+}
+
+# =============================================================================.
 #' Localise safe numeric values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{NonZeroCounts},
-#' \link{DetectCounts},
-#' \link{MakeReadCountMatrix}
+#' \link{DetectCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric vector or matrix.
@@ -31,9 +65,9 @@ FiniteValues <- function(x) {
 #' remove observations with missing values
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{FiniteValues},
 #' \link{DetectCounts},
-#' \link{MakeReadCountMatrix}
+#' \link{ReadCountMatrix},
+#' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -42,6 +76,7 @@ FiniteValues <- function(x) {
 #' @return
 #' \code{NonZeroCounts} returns a matrix.
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 NonZeroCounts <- function(cnt) {
   chk <- FiniteValues(log2(cnt))
@@ -53,9 +88,9 @@ NonZeroCounts <- function(cnt) {
 #' DetectCounts
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{FiniteValues},
 #' \link{NonZeroCounts},
-#' \link{MakeReadCountMatrix}
+#' \link{ReadCountMatrix},
+#' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -91,139 +126,4 @@ DetectCounts <- function(cnt, detailed = F) {
     res$max <- apply(cnt, MARGIN = 1, FUN = max)
   }
   res
-}
-
-# =============================================================================.
-#' dithering of read counts
-# -----------------------------------------------------------------------------.
-#' @seealso
-#' \link{NonZeroCounts},
-#' \link{MakeReadCountMatrix}
-# -----------------------------------------------------------------------------.
-#' @param x
-#' matrix of read counts (rows = observations, columns = samples or conditions).
-#'
-#' @return
-#' \code{DitherCounts} returns a matrix of dithered counts.
-# -----------------------------------------------------------------------------.
-#' @export
-DitherCounts <- function(x) {
-
-  zero <- x == 0
-  xmin <- min(x[! zero], na.rm = T)
-  xmax <- max(x[! zero], na.rm = T)
-
-  # dithering
-  x <- x + rtriangle(length(x), a = -1, b = 1)
-  # lower limit
-  k <- x < xmin & ! zero
-  x[k] <- runif(sum(k), xmin - 0.5, xmin)
-  # upper limit
-  k <- x > xmax
-  x[k] <- runif(sum(k), xmax, xmax + 0.5)
-  # no count
-  x[zero] <- 0
-
-  x
-}
-
-# =============================================================================.
-#' count reads overlapping with genomic intervals
-# -----------------------------------------------------------------------------.
-# TODO: implement skipping existing count columns with provided counts
-# TODO: check if this can be faster and as/more flexible using summerizeOverlaps
-# -----------------------------------------------------------------------------.
-#' @seealso
-#' \link{NonZeroCounts},
-#' \link{DitherCounts},
-#' \link{JoinColumns},
-#' \link{ExtractColumns},
-#' \link{makeReadCountsInROI}
-# -----------------------------------------------------------------------------.
-#' @param aln
-#' list of \link{GAlignments} objects with mapped reads from different samples
-#'
-#' @param grg
-#' \link{GRanges} object defining the considered genomic intervals
-#'
-#' @return
-#' \code{MakeReadCountMatrix} returns a matrix of read counts with
-#' rows = observations and columns = measurement conditions.
-# -----------------------------------------------------------------------------.
-#' @export
-MakeReadCountMatrix <- function(aln, grg, ...) {
-  cnt <- matrix(0, length(grg), length(aln))
-  for(i in 1:length(aln)) {
-    message("Read counts for sample ", i)
-    cnt[,i] <- countOverlaps(
-      query=grg, subject=aln[[i]], ...
-    )
-  }
-  cnt
-}
-
-# =============================================================================.
-#' makeReadCountsInROI
-# -----------------------------------------------------------------------------.
-# TODO: implement read.extension
-# TODO: implement different inputs (bam files, GenomicAlignment)
-# -----------------------------------------------------------------------------.
-#' @seealso
-#' \link{JoinColumns},
-#' \link{ExtractColumns},
-#' \link{MakeReadCountMatrix}
-# -----------------------------------------------------------------------------.
-#' @param ALN
-#' mapped reads
-#'
-#' @param ROI
-#' genomic intervals
-#'
-#' @param CNT
-#' previsouly computed read counts
-#'
-#' @param labels
-#' sample names
-#'
-#' @param ignore.strand
-#' default = T
-#'
-#' @param read.extension
-#' not yet implemented
-#'
-#' @param ...
-#'
-#' @return
-#' \code{makeReadCountsInROI} returns a list of read count matrixes.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-makeReadCountsInROI <- function(
-  ALN, ROI, CNT = NULL, labels = NULL, ignore.strand = T, read.extension = 0,
-  ...
-) {
-
-  ROI.CNT        <- vector("list", length(ROI))
-  names(ROI.CNT) <- names(ROI)
-
-  if(is.null(labels)) labels <- names(ALN)
-
-  for(roi in names(ROI)) {
-
-    if(! is.null(CNT[[roi]])) { # Skip if counts already provided in CNT
-      ROI.CNT[[roi]] <- CNT[[roi]]
-    } else {
-
-      txt_out(x = "=")
-      message(roi)
-      txt_out(x = "-")
-      cnt <- MakeReadCountMatrix(
-        ALN, ROI[[roi]], ignore.strand = ignore.strand, ...
-      )
-      colnames(cnt) <- labels
-      ROI.CNT[[roi]] <- cnt
-    }
-  }
-
-  ROI.CNT
 }

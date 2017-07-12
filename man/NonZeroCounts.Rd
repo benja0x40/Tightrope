@@ -17,7 +17,8 @@ NonZeroCounts(cnt)
 remove observations with missing values
 }
 \seealso{
-\link{FiniteValues},
 \link{DetectCounts},
-\link{MakeReadCountMatrix}
+\link{ReadCountMatrix},
+\link{MakeReadCounts}
 }
+\keyword{internal}

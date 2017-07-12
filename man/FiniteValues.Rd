@@ -17,7 +17,6 @@ Localise safe numeric values (i.e. not NA nor Inf)
 }
 \seealso{
 \link{NonZeroCounts},
-\link{DetectCounts},
-\link{MakeReadCountMatrix}
+\link{DetectCounts}
 }
 \keyword{internal}
