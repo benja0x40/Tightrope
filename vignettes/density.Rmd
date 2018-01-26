@@ -2,7 +2,9 @@
 title: "Multivariate density estimation"
 author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document: default
+  pdf_document:  default
 vignette: >
   %\VignetteIndexEntry{density}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,7 +36,7 @@ p <- knn_density(x, k = 100)
 ```{r , fig.width=7.15, fig.height=2.65}
 layout(matrix(1:3, 1, 3))
 par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 1.0, cex.axis = 1.0)
-h <- histogram2D(x, method = "ash", plot = T, main = "ash density")
+h <- Histogram2D(x, method = "ash", plot = T, main = "ash density")
 plot_samples(x, clr = colorize(p), cex = 0.2, main = "knn density")
 ```
 

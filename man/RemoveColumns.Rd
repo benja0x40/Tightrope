@@ -21,7 +21,6 @@ Remove count data
 \seealso{
 \link{JoinColumns},
 \link{ExtractColumns},
-\link{ReadCountMatrix},
 \link{MakeReadCounts}
 }
 \keyword{internal}

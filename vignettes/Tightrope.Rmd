@@ -50,7 +50,7 @@ Density estimation with dithered counts and dimensionality reduction.
 
 ```{r}
 r <- CDaDaDR(y, k = 100, smobs = F, zscore = T)
-r <- list(x = r$projection$x, d = r$density)
+r <- list(x = r$projection, d = r$density)
 ```
 
 Moderate density threshold to increase clustering robustness.

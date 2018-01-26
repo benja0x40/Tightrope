@@ -12,10 +12,10 @@ MakeReadCounts(aln, locations, cnt = NULL, update = F, NameByFile = F,
 exclusively \link{GAlignments} objects.}
 
 \item{locations}{a list with named elements, each one being a \link{GRanges} object defining
-a set of genomic intervals of interest.}
+a set of genomic intervals.}
 
-\item{cnt}{a numeric matrix representing read counts and where
-rows = observations and columns = measurement conditions.}
+\item{cnt}{a numeric matrix representing read counts,
+where rows = observations and columns = measurement conditions.}
 
 \item{update}{instead of producing new count matrixes from scratch, this argument allows
 to update targeted count columns when existing count matrixes are provided
@@ -55,9 +55,6 @@ locations and different measurement conditions.
 }
 \seealso{
 \link{LoadMappedReads},
-\link{AppendReadCounts},
-\link{UpdateReadCounts},
-\link{ReadCountMatrix},
 \link{JoinColumns},
 \link{ExtractColumns},
 \link{RemoveColumns}

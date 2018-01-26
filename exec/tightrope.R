@@ -733,7 +733,8 @@ Q <- knuth.welford.end(Q)
 e <- as_edgelist(G)
 d <- sqrt(rowSums((x[e[, 1], ] - x[e[, 2], ])^2))
 w <- E(G)$weight
-clr <- ReplaceAlpha(colorize(w, mode = "rank"), 0.2)
+clr <- colorize(w, mode = "rank")
+ColorChannel(clr, "a") <- 0.2
 # clr[d > 0.4] <- rgb(1 ,0, 0)
 # G <- G - E(G)[d > 0.4]
 

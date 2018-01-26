@@ -1,5 +1,5 @@
 # =============================================================================.
-#' smooth density estimation in reduced dimensions
+#' density estimation in reduced dimensions
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{BRD},

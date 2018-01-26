@@ -102,7 +102,7 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
     )
   )
   # Overlay subsets
-  grp.clr <- ReplaceAlpha(grp.clr, 0.05)
+  ColorChannel(grp.clr, "a") <- 0.05
   with(
     brd$subsets, points(b[idx], d[idx], pch = 20, cex = 0.5, col = grp.clr[grp])
   )

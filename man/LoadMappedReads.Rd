@@ -22,9 +22,9 @@ each sequenced biological sample (logical, default = F).}
 load/verify a list of mapped read files
 }
 \seealso{
-\link{AppendReadCounts},
-\link{UpdateReadCounts},
+\link{MakeReadCounts},
 \link{ReadCountMatrix},
-\link{MakeReadCounts}
+\link{AppendReadCounts},
+\link{UpdateReadCounts}
 }
 \keyword{internal}

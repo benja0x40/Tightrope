@@ -1,0 +1,77 @@
+<h1>Tightrope</h1>
+
+<p><code>Tightrope</code> is an R package with functions for the normalization and analysis
+of ChIP-seq data on histone marks and histone variants.</p>
+
+<h3>Main features</h3>
+
+<p>See Gallery below for examples.</p>
+
+<p>Tutorials and documentation can be found in the package vignettes.</p>
+
+<h3>Package installation</h3>
+
+<h4>Prerequisites</h4>
+
+<ul>
+<li><a href="https://www.r-project.org/">R environment</a> version 3.x</li>
+<li>CRAN packages <code>devtools</code>, <code>igraph</code>, <code>FNN</code>, <code>triangle</code>, <code>mixtools</code></li>
+<li><a href="http://www.bioconductor.org/">Bioconductor</a> packages
+<code>GenomicAlignments</code>, <code>GenomicRanges</code></li>
+<li><a href="https://github.com/benja0x40/">GitHub</a> R package <code>Barbouille</code></li>
+</ul>
+
+<p>Run the R code below to install CRAN and Bioconductor package dependencies
+for <code>Tightrope</code>.</p>
+
+<pre><code class="R"># Already installed
+pkg &lt;- installed.packages()[, &quot;Package&quot;]
+
+# CRAN packages
+lst &lt;- c(&quot;devtools&quot;, &quot;igraph&quot;, &quot;FNN&quot;, &quot;triangle&quot;, &quot;mixtools&quot;)
+lst &lt;- setdiff(lst, pkg)
+if(length(lst) &gt; 0) install.packages(lst, repos = &quot;https://cloud.r-project.org/&quot;)
+
+# Bioconductor packages
+lst &lt;- c(&quot;GenomicAlignments&quot;, &quot;GenomicRanges&quot;)
+lst &lt;- setdiff(lst, pkg)
+if(length(lst) &gt; 0) {
+  source(&quot;https://bioconductor.org/biocLite.R&quot;)
+  biocLite(lst)
+
+# GitHub packages
+library(&quot;devtools&quot;)
+install_github(&quot;benja0x40/Barbouille&quot;)
+}
+</code></pre>
+
+<h4>Installation from github</h4>
+
+<p>Run the bash code below to build package <code>Tightrope</code> from github.</p>
+
+<pre><code class="bash"># Clone github repository
+cd ~/DataImportTools
+git clone git@github.com:benja0x40/Tightrope.git
+
+# Update cloned repository
+cd ~/DataImportTools/Tightrope
+git pull
+
+# Build package
+cd ..
+R CMD build Tightrope
+</code></pre>
+
+<p>Run the R code below to install <code>Tightrope</code>.</p>
+
+<pre><code class="r"># When package will be public
+# library(&quot;devtools&quot;)
+# install_github(&quot;benja0x40/Tightrope&quot;)
+
+# Using manually built package archive
+install.packages(&quot;Tightrope_0.1.0.tar.gz&quot;)
+</code></pre>
+
+<h3>Gallery</h3>
+
+<h3>Links/References</h3>

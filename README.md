@@ -1,78 +1,69 @@
 Tightrope
 ================================================================================
 
-`Tightrope` is an R package with functions for the normalization and analysis
+## Overview
+
+`Tightrope` is an R package for the normalization and analysis
 of ChIP-seq data on histone marks and histone variants.
 
-### Main features ###
+## Examples
 
-See Gallery below for examples.
+Here are some examples...
 
-Tutorials and documentation can be found in the package vignettes.
+Further documentation can be found in the package vignette and reference manual.
 
-### Package installation ###
+## Installation
 
-#### Prerequisites ####
-
-  - [R environment](https://www.r-project.org/) version 3.x
-  - CRAN packages `devtools`, `igraph`, `FNN`, `triangle`, `mixtools`
-  - [Bioconductor](http://www.bioconductor.org/) packages
-    `GenomicAlignments`, `GenomicRanges`
-  - [GitHub](https://github.com/benja0x40/) R package `Barbouille`
-  
-Run the R code below to install CRAN and Bioconductor package dependencies
-for `Tightrope`.
+Run the `R` code below to install `Tightrope`.
 
 ```R
-# Already installed
-pkg <- installed.packages()[, "Package"]
+library("devtools")
+install_github("benja0x40/Tightrope")
+```
+
+If the installation fails, try to install dependencies as indicated below.
+
+### Dependencies
+
+  - [R environment](https://www.r-project.org/) version 3.4 or newer
+  - CRAN packages `devtools`, `igraph`, `FNN`, `triangle`, `mixtools`
+  - [Bioconductor](http://www.bioconductor.org/) packages `GenomicAlignments`, `GenomicRanges`
+  - GitHub `R` package
+    [Barbouille](https://github.com/benja0x40/Barbouille)
+
+Run the `R` code below to install all dependencies.
+
+```R
+# Setting value below to TRUE will reinstall all required packages (optional)
+reinstall <- FALSE
+
+# Detect already installed packages
+pkg <- ifelse(reinstall, c(), installed.packages()[, "Package"])
 
 # CRAN packages
 lst <- c("devtools", "igraph", "FNN", "triangle", "mixtools")
 lst <- setdiff(lst, pkg)
-if(length(lst) > 0) install.packages(lst, repos = "https://cloud.r-project.org/")
+if(length(lst) > 0) install.packages(lst, dependencies = T)
 
 # Bioconductor packages
+source("https://bioconductor.org/biocLite.R")
 lst <- c("GenomicAlignments", "GenomicRanges")
 lst <- setdiff(lst, pkg)
-if(length(lst) > 0) {
-  source("https://bioconductor.org/biocLite.R")
-  biocLite(lst)
+if(length(lst) > 0) biocLite(lst)
 
-# GitHub packages
+# GitHub package
 library("devtools")
-install_github("benja0x40/Barbouille")
-}
+lst <- paste0("benja0x40/", c("Barbouille", "Tightrope"))
+lst <- setdiff(lst, pkg)
+if(length(lst) > 0) lapply(lst, install_github)
 ```
 
-#### Installation from github ####
+## Contact
 
-Run the bash code below to build package `Tightrope` from github.
+Benjamin Leblanc (benjaminolivierleblanc@gmail.com)
 
-```bash
-# Clone github repository
-cd ~/DataImportTools
-git clone git@github.com:benja0x40/Tightrope.git
+## References
 
-# Update cloned repository
-cd ~/DataImportTools/Tightrope
-git pull
+Perec 1980 - *Experimental demonstration of the tomatotopic organization in the Soprano (Cantatrix sopranica L.).*  
+[publisher](http://dx.doi.org/10.2307/3684039) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/)
 
-# Build package
-cd ..
-R CMD build Tightrope
-```
-Run the R code below to install `Tightrope`.
-
-```r
-# When package will be public
-# library("devtools")
-# install_github("benja0x40/Tightrope")
-
-# Using manually built package archive
-install.packages("Tightrope_0.1.0.tar.gz")
-```
-
-### Gallery ###
-
-### Links/References ###

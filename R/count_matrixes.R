@@ -73,10 +73,10 @@ VerifyInputs <- function(cnt, grg) {
 #' load/verify a list of mapped read files
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{AppendReadCounts},
-#' \link{UpdateReadCounts},
+#' \link{MakeReadCounts},
 #' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#' \link{AppendReadCounts},
+#' \link{UpdateReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param aln
 #' a vector of bam file paths or a list with named elements and containing
@@ -144,14 +144,13 @@ LoadMappedReads <- function(aln, NameByFile = F, ...) {
 #' @seealso
 #' \link{LoadMappedReads},
 #' \link{UpdateReadCounts},
-#' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#' \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inheritParams GenomicRanges::countOverlaps
 #'
 #' @param cnt
-#' a numeric matrix representing read counts and where
-#' rows = observations and columns = measurement conditions.
+#' a numeric matrix representing read counts,
+#' where rows = observations and columns = measurement conditions.
 #'
 #' @param aln
 #' a vector of bam file paths or a list with named elements and containing
@@ -209,8 +208,7 @@ AppendReadCounts <- function(
 #' @seealso
 #' \link{LoadMappedReads},
 #' \link{AppendReadCounts},
-#' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#' \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inherit AppendReadCounts
 # -----------------------------------------------------------------------------.
@@ -246,12 +244,11 @@ UpdateReadCounts <- function(
 #' count reads in genomic intervals for different conditions
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{DitherCounts},
-#' \link{NonZeroCounts},
 #' \link{LoadMappedReads},
 #' \link{AppendReadCounts},
 #' \link{UpdateReadCounts},
-#' \link{MakeReadCounts}
+#' \link{NonZeroCounts},
+#' \link{DitherCounts}
 # -----------------------------------------------------------------------------.
 #' @description
 #' \code{ReadCountMatrix} computes the number of reads overlapping with provided
@@ -297,9 +294,6 @@ ReadCountMatrix <- function(
 # -----------------------------------------------------------------------------.
 #' @seealso
 #' \link{LoadMappedReads},
-#' \link{AppendReadCounts},
-#' \link{UpdateReadCounts},
-#' \link{ReadCountMatrix},
 #' \link{JoinColumns},
 #' \link{ExtractColumns},
 #' \link{RemoveColumns}
@@ -312,7 +306,7 @@ ReadCountMatrix <- function(
 #'
 #' @param locations
 #' a list with named elements, each one being a \link{GRanges} object defining
-#' a set of genomic intervals of interest.
+#' a set of genomic intervals.
 #'
 #' @param ...
 #' additional arguments passed to the \link{readGAlignments} functions.
@@ -359,7 +353,6 @@ MakeReadCounts <- function(
 #' @seealso
 #' \link{ExtractColumns},
 #' \link{RemoveColumns},
-#' \link{ReadCountMatrix},
 #' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
@@ -387,7 +380,6 @@ JoinColumns <- function(x, y) {
 #' @seealso
 #' \link{JoinColumns},
 #' \link{RemoveColumns},
-#' \link{ReadCountMatrix},
 #' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
@@ -415,7 +407,6 @@ ExtractColumns <- function(x, lst) {
 #' @seealso
 #' \link{JoinColumns},
 #' \link{ExtractColumns},
-#' \link{ReadCountMatrix},
 #' \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param x

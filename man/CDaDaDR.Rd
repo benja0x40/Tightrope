@@ -2,7 +2,7 @@
 % Please edit documentation in R/cdadadr.R
 \name{CDaDaDR}
 \alias{CDaDaDR}
-\title{smooth density estimation in reduced dimensions}
+\title{density estimation in reduced dimensions}
 \usage{
 CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
   zscore = T, rare = 0.01, method = c("pca", "ica"), progress = F)

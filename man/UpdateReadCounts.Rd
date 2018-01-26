@@ -8,8 +8,8 @@ UpdateReadCounts(cnt, aln, grg, NameByFile = F, maxgap = 0L,
   minoverlap = 1L, type = "any", ignore.strand = T, ...)
 }
 \arguments{
-\item{cnt}{a numeric matrix representing read counts and where
-rows = observations and columns = measurement conditions.}
+\item{cnt}{a numeric matrix representing read counts,
+where rows = observations and columns = measurement conditions.}
 
 \item{aln}{a vector of bam file paths or a list with named elements and containing
 exclusively \link{GAlignments} objects.}
@@ -52,7 +52,6 @@ update read counts for specific conditions
 \seealso{
 \link{LoadMappedReads},
 \link{AppendReadCounts},
-\link{ReadCountMatrix},
-\link{MakeReadCounts}
+\link{ReadCountMatrix}
 }
 \keyword{internal}

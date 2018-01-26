@@ -13,8 +13,8 @@ exclusively \link{GAlignments} objects.}
 
 \item{grg}{a \link{GRanges} object defining the genomic intervals of interest.}
 
-\item{cnt}{a numeric matrix representing read counts and where
-rows = observations and columns = measurement conditions.}
+\item{cnt}{a numeric matrix representing read counts,
+where rows = observations and columns = measurement conditions.}
 
 \item{update}{instead of producing new count matrixes from scratch, this argument allows
 to update targeted count columns when existing count matrixes are provided
@@ -55,10 +55,9 @@ rows = observations and columns = measurement conditions.
 genomic intervals for different measurement conditions.
 }
 \seealso{
-\link{DitherCounts},
-\link{NonZeroCounts},
 \link{LoadMappedReads},
 \link{AppendReadCounts},
 \link{UpdateReadCounts},
-\link{MakeReadCounts}
+\link{NonZeroCounts},
+\link{DitherCounts}
 }

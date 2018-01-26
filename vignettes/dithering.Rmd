@@ -2,42 +2,109 @@
 title: "Dithered read counts"
 author: "Benjamin Leblanc"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_document
+output:
+  html_document: default
+  pdf_document:  default
 vignette: >
   %\VignetteIndexEntry{dithering}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}
 suppressPackageStartupMessages(library(Tightrope))
 ```
 
-### Overview
+## Overview
 
-The distributions of read counts from ChIP-seq experiments result in the
-multiplication of identical values in the observations. Dithering these counts
-consist in adding noise to the data in order to eliminate the presence of
-identical values.
+Read counts from genomic experiments like ChIP-seq contain numerous
+identical values. Dithering these counts consist in adding noise to the data
+in order to eliminate the presence of identical values while avoiding
+distortions of the original count distribution.
 
     TODO:
     Here add a short explanation of the dither function.
 
 ```{r}
 library(Tightrope)
+
+Plots <- function(x, y) {
+  li <- function() {
+    # abline(a = 0, b =  1, col = grey(0.5))
+    abline(a = 2, b = -1, col = grey(0.5))
+    segments( 1, -2, 1, 1, lty = 3)
+    segments(-2,  1, 1, 1, lty = 3)
+  } 
+  
+  par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
+  plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+  legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
+  
+  xylim <- range(log2(x), log2(y))
+  plot(
+    log2(x), xlim = xylim, ylim = xylim,
+    pch = 20, cex = 0.5, col = grey(0, 0.05),
+    xlab = "log2(x1)", ylab = "log2(x2)", main = "raw"
+  )
+  li()
+  plot(
+    log2(y), xlim = xylim, ylim = xylim,
+    pch = 20, cex = 0.5, col = grey(0, 0.05),
+    xlab = "log2(y1)", ylab = "log2(y2)", main = "dithered"
+  )
+  li()
+}
 ```
 
-Example with a patterned distribution of counts
+## Examples with count simulations
 
-```{r, message=T, echo=F, warning=FALSE, include=FALSE}
-n <- 100000
-p <- rep(c(1, 1, 2, 3, 2, 1, 1), length.out = 14)
-rs <- RandomCounts(n, d = 2, p = p)
-x <- rs$x
-y <- DitherCounts(rs$x)
+### Poisson distribution
+
+```{r}
+# Number of simulated data points
+n <- 30000
+# Raw counts (one pseudo count is added to prevent infinite values in log space)
+x <- matrix(1 + rpois(n, lambda = 5), nrow = n / 2, ncol = 2)
+# Dithered counts
+y <- DitherCounts(x)
 ```
 
 ```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+# Visualize count distributions
+Plots(x, y)
+```
+
+### Negative binomial distribution
+
+```{r}
+# Number of simulated data points
+n <- 30000
+# Raw counts (one pseudo count is added to prevent infinite values in log space)
+x <- matrix(1 + rnbinom(n, mu = 5, size = 2), nrow = n / 2, ncol = 2)
+# Dithered counts
+y <- DitherCounts(x)
+```
+
+```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+# Visualize count distributions
+Plots(x, y)
+```
+
+### Bimodal distribution
+
+```{r}
+# Number of simulated data points
+n <- 30000
+# Raw counts
+p <- rep(c(1, 1, 2, 3, 2, 1, 1), length.out = 14)
+x <- RandomCounts(n, d = 2, p = p)$x
+# Dithered counts
+y <- DitherCounts(x)
+```
+
+```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
+Plots(x, y)
+
 par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
 plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
 # plotHistograms(x, y = x, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
@@ -62,61 +129,5 @@ plot(
   m, cex = 0.5, col = grey(1 - d), xlim = xylim, ylim = xylim,
   xlab = "x1", ylab = "x2"
 )
-h <- histogram2D(y, plot = T, xlim = xylim, ylim = xylim, method = "bin")
-```
-
-Example with counts following a poisson distribution (+ 1 pseudo count)
-
-```{r}
-n <- 100000
-x <- matrix(1 + rpois(n, lambda = 5), nrow = n / 2, ncol = 2)
-y <- DitherCounts(x)
-```
-
-```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
-par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
-plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
-legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
-
-xylim <- range(log2(x), log2(y))
-plot(
-  log2(x), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
-  xlab = "log2(x1)", ylab = "log2(x2)"
-)
-abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
-abline(a = 0, b = 1, col = grey(0.5))
-plot(
-  log2(y), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
-  xlab = "log2(y1)", ylab = "log2(y2)"
-)
-abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
-abline(a = 0, b = 1, col = grey(0.5))
-```
-
-Example with counts following a negative binomial distribution (+ 1 pseudo count)
-
-```{r}
-n <- 100000
-x <- matrix(1 + rnbinom(n, mu = 5, size = 2), nrow = n / 2, ncol = 2)
-y <- DitherCounts(x)
-```
-
-```{r, echo=FALSE, fig.width=2.5, fig.height=3.0, message=FALSE, warning=FALSE}
-par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
-plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
-legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
-
-xylim <- range(log2(x), log2(y))
-plot(
-  log2(x), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
-  xlab = "log2(x1)", ylab = "log2(x2)"
-)
-abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
-abline(a = 0, b = 1, col = grey(0.5))
-plot(
-  log2(y), cex = 0.5, col = grey(0, 0.05), xlim = xylim, ylim = xylim,
-  xlab = "log2(y1)", ylab = "log2(y2)"
-)
-abline(a = 2, b = - 1, col = rgb(1, 0.5, 0))
-abline(a = 0, b = 1, col = grey(0.5))
+h <- Histogram2D(y, nx = 50, plot = T, xlim = xylim, ylim = xylim, method = "bin", xlab = "y1", ylab = "y2", color.mode = "rank")
 ```

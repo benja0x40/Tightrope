@@ -21,7 +21,6 @@ Merge count data
 \seealso{
 \link{ExtractColumns},
 \link{RemoveColumns},
-\link{ReadCountMatrix},
 \link{MakeReadCounts}
 }
 \keyword{internal}
