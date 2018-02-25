@@ -32,6 +32,6 @@ neighbor.
 }
 \seealso{
 \link{knn_musigma2},
-\link{knn_mean}
+  \link{knn_mean}
 }
 \keyword{internal}

@@ -21,6 +21,7 @@ conditions.
 }
 \description{
 Average ranking for control measurements
+(e.g. input DNA, ChIP-seq performed with IgG or in KO conditions).
 }
 \seealso{
 \link{BRD}

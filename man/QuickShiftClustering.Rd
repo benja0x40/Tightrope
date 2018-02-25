@@ -2,7 +2,7 @@
 % Please edit documentation in R/quickshift.R
 \name{QuickShiftClustering}
 \alias{QuickShiftClustering}
-\title{hierarchical clustering based on density gradient ascent}
+\title{Hierarchical clustering based on density gradient ascent}
 \usage{
 QuickShiftClustering(x, d, n, ...)
 }
@@ -26,7 +26,7 @@ with the same following elements:
 \item{sizes}{number of observations in each cluster.}
 }
 \description{
-hierarchical clustering based on density gradient ascent
+Hierarchical clustering based on density gradient ascent
 }
 \references{
 Vedaldi A., Soatto S. (2008) Quick Shift and Kernel Methods for Mode Seeking.
@@ -37,6 +37,6 @@ Springer, Berlin, Heidelberg
 }
 \seealso{
 \link{QuickShift},
-\link{QuickShiftClusters}
+  \link{QuickShiftClusters}
 }
 \keyword{internal}

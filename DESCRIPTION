@@ -1,8 +1,8 @@
 Package: Tightrope
 Type: Package
 Title: Tightrope
-Version: 0.3.0
-Date: 2017-07-12
+Version: 0.4.0
+Date: 2018-02-25
 Author: Benjamin Leblanc
 Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
 Imports:
@@ -12,6 +12,7 @@ Imports:
     FNN,
     igraph,
     mixtools,
+    Rsamtools,
     GenomicAlignments,
     GenomicRanges,
     Barbouille
@@ -23,6 +24,7 @@ Depends:
     FNN,
     igraph,
     mixtools,
+    Rsamtools,
     GenomicAlignments,
     GenomicRanges,
     Barbouille

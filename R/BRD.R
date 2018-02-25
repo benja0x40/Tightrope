@@ -2,8 +2,12 @@
 #' Average ranking for control measurements
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{BRD}
+#'   \link{BRD}
 # -----------------------------------------------------------------------------.
+#' @description
+#' Average ranking for control measurements
+#' (e.g. input DNA, ChIP-seq performed with IgG or in KO conditions).
+#'
 #' @param x
 #' matrix of read counts
 #' (rows = observations, columns = measurement conditions).
@@ -73,13 +77,13 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 }
 
 # =============================================================================.
-#' background read density estimation
+#' Background Read Density
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{PlotBRD},
-#' \link{CDaDaDR},
-#' \link{QuickShiftClustering},
-#' \link{ReadCountMatrix}
+#'   \link{PlotBRD},
+#'   \link{CDaDaDR},
+#'   \link{QuickShiftClustering},
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inheritParams CDaDaDR
 #'
@@ -211,7 +215,7 @@ BRD <- function(
   for(grp in 1:ncl) {
     idx <- with(sbs, i[core & cluster == grp]) # select cluster core
     if(length(idx) > mincs) {
-      mm <- mv_gmm(ldc[idx, ], ns = 1)          # EM fitting
+      mm <- mv_gmm(ldc[idx, ], ns = 1)         # EM fitting
       theta[[grp]] <- mm$theta[[1]]
     } else {
       theta[[grp]] <- NA

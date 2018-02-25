@@ -24,7 +24,7 @@ Multivariate normal distribution: maximum likelihood estimation
 }
 \seealso{
 \link{mv_pdf},
-\link{mv_rsg},
-\link{mv_gmm}
+  \link{mv_rsg},
+  \link{mv_gmm}
 }
 \keyword{internal}

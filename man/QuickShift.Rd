@@ -29,6 +29,6 @@ Springer, Berlin, Heidelberg
 }
 \seealso{
 \link{QuickShiftClusters},
-\link{QuickShiftClustering}
+  \link{QuickShiftClustering}
 }
 \keyword{internal}

@@ -25,9 +25,54 @@ distortions of the original count distribution.
     TODO:
     Here add a short explanation of the dither function.
 
-```{r}
+```{r include=FALSE}
 library(Tightrope)
 
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+PlotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...) {
+
+  n <- length(x)
+
+  if(log) {
+    x <- log2(x)
+    y <- log2(y)
+  }
+
+  bins <- bins - 1
+  r <- diff(range(x, y, na.rm = T))
+  brk <- 0:bins/bins * (1.2 * r) - 0.1 * r + min(x, y, na.rm = T)
+  h.x <- hist(x, breaks = brk, plot = F)
+  h.y <- hist(y, breaks = brk, plot = F)
+
+  h.x$counts <- h.x$counts / n
+  h.y$counts <- h.y$counts / n
+
+  if(rel) {
+    chk <- h.x$counts > 0
+    h.x$counts[chk] <- with(h.x, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
+    chk <- h.y$counts > 0
+    h.y$counts[chk] <- with(h.y, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
+  }
+
+  if(is.null(xlim)) xlim = range(x, y)
+  ylim <- range(h.x$counts, h.y$counts)
+  ylim <- min(ylim) + c(0, 1.1 * diff(ylim))
+  EmptyPlot(xlim = xlim, ylim = ylim, yaxs = 'i', ...)
+  chk <- h.x$counts > 0
+  k <- length(h.y$mids)
+  x <- c(h.y$mids[1], h.y$mids, h.y$mids[k])
+  y <- c(0, h.y$counts, 0)
+  polygon(x, y, border = NA, col = rgb(1, 0.6, 0, 0.5))
+  chk <- h.y$counts > 0
+  points(h.y$mids[chk], h.y$counts[chk], type = 'l', col = rgb(1, 0, 0, 0.75), lwd = 2)
+  points(h.x$mids[chk], h.x$counts[chk], type = 'h', lwd = 2, col = grey(0.3))
+}
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
 Plots <- function(x, y) {
   li <- function() {
     # abline(a = 0, b =  1, col = grey(0.5))
@@ -37,7 +82,7 @@ Plots <- function(x, y) {
   } 
   
   par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
-  plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+  PlotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
   legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
   
   xylim <- range(log2(x), log2(y))
@@ -106,15 +151,15 @@ y <- DitherCounts(x)
 Plots(x, y)
 
 par(mar = c(5, 4, 3, 1), pch = 20, cex.lab = 0.8, cex.axis = 0.8)
-plotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
-# plotHistograms(x, y = x, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+PlotHistograms(x, y, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
+# PlotHistograms(x, y = x, bins = 100, log = F, rel = T, xlab = "counts", ylab = "frequency")
 legend("topright", legend = c("x", "y"), fill = c("darkgrey", "red"), bty = "n", cex = 0.8)
 
 # p <- knn_density(y, k = 200)
 # p <- p / max(p)
-# clr.prm <- defineColors(thresholds = c(0, 1), colors = grey(1:0), centered = T)
+# clr.prm <- DefineColorMap(thresholds = c(0, 1), colors = grey(1:0), centered = T)
 # plot(
-#   y, cex = 0.5, col = makeColors(p, parameters = clr.prm), xlim = xylim, ylim = xylim,
+#   y, cex = 0.5, col = MakeColors(p, parameters = clr.prm), xlim = xylim, ylim = xylim,
 #   xlab = "y1", ylab = "y2"
 # )
 m <- cbind(
@@ -129,5 +174,5 @@ plot(
   m, cex = 0.5, col = grey(1 - d), xlim = xylim, ylim = xylim,
   xlab = "x1", ylab = "x2"
 )
-h <- Histogram2D(y, nx = 50, plot = T, xlim = xylim, ylim = xylim, method = "bin", xlab = "y1", ylab = "y2", color.mode = "rank")
+h <- BivariateDensity(y, nx = 50, plot = T, xlim = xylim, ylim = xylim, method = "bin", xlab = "y1", ylab = "y2", color.mode = "rank")
 ```

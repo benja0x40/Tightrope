@@ -31,6 +31,6 @@ k-nearest neighbor (knn) centroid and corresponding standard deviation.
 }
 \seealso{
 \link{knn_density},
-\link{knn_mean}
+  \link{knn_mean}
 }
 \keyword{internal}

@@ -11,8 +11,8 @@
 #' \url{http://dx.doi.org/10.1007/978-3-540-88693-8_52}
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{QuickShiftClusters},
-#' \link{QuickShiftClustering}
+#'   \link{QuickShiftClusters},
+#'   \link{QuickShiftClustering}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric matrix representing multivariate data where rows = observations
@@ -58,11 +58,11 @@ QuickShift <- function (x, d, progress = F) {
 }
 
 # =============================================================================.
-#' split a QuickShift graph into clusters
+#' Split a QuickShift graph into clusters
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{QuickShift},
-#' \link{QuickShiftClustering}
+#'   \link{QuickShift},
+#'   \link{QuickShiftClustering}
 # -----------------------------------------------------------------------------.
 #' @param g
 #' QuickShift graph resulting from the \link{QuickShift} function.
@@ -113,11 +113,11 @@ QuickShiftClusters <- function(g, n) {
 }
 
 # =============================================================================.
-#' hierarchical clustering based on density gradient ascent
+#' Hierarchical clustering based on density gradient ascent
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{QuickShift},
-#' \link{QuickShiftClusters}
+#'   \link{QuickShift},
+#'   \link{QuickShiftClusters}
 # -----------------------------------------------------------------------------.
 #' @inherit QuickShift references
 #' @inheritParams QuickShift

@@ -28,7 +28,7 @@ Multivariate expectation-maximization
 }
 \seealso{
 \link{mv_maximization},
-\link{mv_expectation},
-\link{mv_gmm}
+  \link{mv_expectation},
+  \link{mv_gmm}
 }
 \keyword{internal}

@@ -17,6 +17,6 @@ Localise safe numeric values (i.e. not NA nor Inf)
 }
 \seealso{
 \link{NonZeroCounts},
-\link{DetectCounts}
+  \link{DetectCounts}
 }
 \keyword{internal}

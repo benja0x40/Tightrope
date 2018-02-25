@@ -20,7 +20,7 @@ Multivariate normal distribution: probability density function
 }
 \seealso{
 \link{mv_mle},
-\link{mv_rsg},
-\link{mv_gmm}
+  \link{mv_rsg},
+  \link{mv_gmm}
 }
 \keyword{internal}

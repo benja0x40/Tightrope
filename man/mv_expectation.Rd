@@ -22,6 +22,6 @@ Multivariate expectation
 }
 \seealso{
 \link{mv_maximization},
-\link{mv_emloop}
+  \link{mv_emloop}
 }
 \keyword{internal}

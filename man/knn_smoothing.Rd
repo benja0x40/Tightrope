@@ -21,6 +21,6 @@ Apply a smoothing function to local values
 }
 \seealso{
 \link{knn_density},
-\link{knn_musigma2}
+  \link{knn_musigma2}
 }
 \keyword{internal}

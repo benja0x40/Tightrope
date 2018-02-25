@@ -1,12 +1,12 @@
 # FUNCTIONS | READ COUNTS ######################################################
 
 # =============================================================================.
-#' dithering of read counts
+#' Apply dithering to read counts
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{NonZeroCounts},
-#' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#'   \link{NonZeroCounts},
+#'   \link{ReadCountMatrix},
+#'   \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' matrix of read counts (rows = observations, columns = samples or conditions).
@@ -39,8 +39,8 @@ DitherCounts <- function(x) {
 #' Localise safe numeric values (i.e. not NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{NonZeroCounts},
-#' \link{DetectCounts}
+#'   \link{NonZeroCounts},
+#'   \link{DetectCounts}
 # -----------------------------------------------------------------------------.
 #' @param x
 #' numeric vector or matrix.
@@ -62,12 +62,12 @@ FiniteValues <- function(x) {
 }
 
 # =============================================================================.
-#' remove observations with missing values
+#' Remove observations with missing values
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{DetectCounts},
-#' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#'   \link{DetectCounts},
+#'   \link{ReadCountMatrix},
+#'   \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -88,9 +88,9 @@ NonZeroCounts <- function(cnt) {
 #' DetectCounts
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{NonZeroCounts},
-#' \link{ReadCountMatrix},
-#' \link{MakeReadCounts}
+#'   \link{NonZeroCounts},
+#'   \link{ReadCountMatrix},
+#'   \link{MakeReadCounts}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts

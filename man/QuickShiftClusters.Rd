@@ -2,7 +2,7 @@
 % Please edit documentation in R/quickshift.R
 \name{QuickShiftClusters}
 \alias{QuickShiftClusters}
-\title{split a QuickShift graph into clusters}
+\title{Split a QuickShift graph into clusters}
 \usage{
 QuickShiftClusters(g, n)
 }
@@ -21,10 +21,10 @@ with the same following elements:
 \item{sizes}{number of observations in each cluster.}
 }
 \description{
-split a QuickShift graph into clusters
+Split a QuickShift graph into clusters
 }
 \seealso{
 \link{QuickShift},
-\link{QuickShiftClustering}
+  \link{QuickShiftClustering}
 }
 \keyword{internal}

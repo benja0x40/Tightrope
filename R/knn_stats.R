@@ -4,9 +4,9 @@
 #' Extract local values based on a knn index matrix
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{knn_density},
-#' \link{knn_musigma2},
-#' \link{knn_mean}
+#'   \link{knn_density},
+#'   \link{knn_musigma2},
+#'   \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @param v
 #' numeric vector.
@@ -28,8 +28,8 @@ knn_values <- function(v, i) {
 #' Apply a smoothing function to local values
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{knn_density},
-#' \link{knn_musigma2}
+#'   \link{knn_density},
+#'   \link{knn_musigma2}
 # -----------------------------------------------------------------------------.
 #' @inheritParams knn_values
 #'
@@ -53,8 +53,8 @@ knn_smoothing <- function(v, i, f = mean) {
 #' knn density estimator
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{knn_musigma2},
-#' \link{knn_mean}
+#'   \link{knn_musigma2},
+#'   \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @description
 #' k-nearest neighbor (knn) estimator of the density \deqn{P(Xi) ~ k / N Vi}
@@ -114,8 +114,8 @@ knn_density <- function(x, k, i = NULL, d = NULL, smoothing = T, sum2one = T) {
 #' Local mean and variance
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{knn_density},
-#' \link{knn_mean}
+#'   \link{knn_density},
+#'   \link{knn_mean}
 # -----------------------------------------------------------------------------.
 #' @description
 #' k-nearest neighbor (knn) centroid and corresponding standard deviation.
@@ -162,8 +162,8 @@ knn_musigma2 <- function(x, k, i = NULL, d = NULL, smoothing = F) {
 #' Local mean
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{knn_musigma2},
-#' \link{knn_density}
+#'   \link{knn_musigma2},
+#'   \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @description
 #' compute k-nearest neighbor (knn) centroids (i.e. mean vectors).

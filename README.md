@@ -1,20 +1,18 @@
 Tightrope
 ================================================================================
-
-[Benjamin Leblanc](https://www.researchgate.net/profile/Benjamin_Leblanc)
+**Normalization of ChIP-seq experiments involving global variations of chromatin marks**
 
 ### Overview
 
 `Tightrope` is an R package for the normalization and representation
-of ChIP-seq enrichments relative to the experimental background
-(e.g. input DNA, ChIP-seq performed with IgG or in KO conditions),
-providing an empirical solution to the challenging task of estimating
+of ChIP-seq enrichments relative to the experimental background, which
+provides an empirical solution to the challenging task of estimating
 normalization factors in conditions involving global variations
 of chromatin marks.
 
 Accurate normalization of such experiments is increasingly needed in the field
-of chromatin genomics. Knowing that basic sequencing depth normalization
-(*i.e.* RPM) can be dramatically erroneous, this situation led to the recent
+of chromatin genomics. Knowing that basic sequencing depth correction
+can be dramatically erroneous, this situation led to the recent
 introduction of spike-in protocols[<sup>1-4</sup>](#1) proposing
 an experimental solution to ChIP-seq normalization issues.
 Seeking an alternative strategy due to reliability concerns with spike-in 
@@ -32,35 +30,50 @@ Documentation and source code examples showing how to use `Tightrope`
 to normalize a ChIP-seq dataset with the BRD method can be found
 in the package vignettes and the reference manual.
 
+#### Rationale of the BRD normalization
+
+As a prerequisite, the ChIP-seq dataset must include background profiles
+(e.g. input DNA, ChIP-seq performed with IgG or in KO conditions), preferably
+generated using the same sequencing setup as for the experimental profiles.
+
+The BRD normalization is build upon the two following assumptions.
+
+1. For all considered experimental conditions, some portions of the genome are
+   invariably devoid of the immuno-precipitated chromatin mark.
+   These invariable genomic portions are named **background candidates**.
+   
+2. Background candidates can be distinguished as a density mode of
+   transformed ChIP-seq read count distributions
+
 #### Main features
 
 * Generation of read count matrixes from mapped reads (bam files)
 * Estimation of ChIP-seq normalization factors with the BRD method[<sup>5, 6</sup>](#5)
 * Density plots for read count distributions
 
-### Installation
+### <a name="install"></a>Installation
 
 Run the `R` code below to install `Tightrope`.
 
 ```R
 library("devtools")
-install_github("benja0x40/Barbouille")
+install_github("benja0x40/Barbouille") # Graphic and color mapping functions
 install_github("benja0x40/Tightrope")
 ```
 
-If the installation fails, try to install dependencies as indicated below.
+If the installation fails, try to install dependencies as indicated
+in the following section.
 
 #### Dependencies
 
   - [R environment](https://www.r-project.org/) version 3.4 or newer
   - To develop and execute `R` scripts we recommend using [RStudio](https://www.rstudio.com/products/rstudio/download)
-  - CRAN packages `devtools`, `igraph`, `FNN`, `triangle`, `mixtools`
-  - [Bioconductor](http://www.bioconductor.org/) packages `GenomicAlignments`, `GenomicRanges`
-  - GitHub `R` package
-    [Barbouille](https://github.com/benja0x40/Barbouille)
+  - CRAN packages `devtools`, `triangle`, `caTools`, `ica`, `FNN`, `igraph`, `mixtools`
+  - [Bioconductor](http://www.bioconductor.org/) packages `Rsamtools`, `GenomicAlignments`, `GenomicRanges`
+  - GitHub package [Barbouille](https://github.com/benja0x40/Barbouille)
 
-After installing the R environment and RStudio, run the `R` code below
-to install all dependencies for `Tightrope`.
+After installing the R environment (and RStudio), run the `R` code below
+to install all dependencies as well as `Tightrope`.
 
 ```R
 # Setting value below to TRUE will reinstall all required packages (optional)
@@ -70,21 +83,20 @@ reinstall <- FALSE
 pkg <- ifelse(reinstall, c(), installed.packages()[, "Package"])
 
 # CRAN packages
-lst <- c("devtools", "igraph", "FNN", "triangle", "mixtools")
+lst <- c("devtools", "triangle", "caTools", "ica", "FNN", "igraph", "mixtools")
 lst <- setdiff(lst, pkg)
 if(length(lst) > 0) install.packages(lst, dependencies = T)
 
 # Bioconductor packages
 source("https://bioconductor.org/biocLite.R")
-lst <- c("GenomicAlignments", "GenomicRanges")
+lst <- c("Rsamtools", "GenomicAlignments", "GenomicRanges")
 lst <- setdiff(lst, pkg)
 if(length(lst) > 0) biocLite(lst)
 
 # GitHub packages
 library("devtools")
-lst <- paste0("benja0x40/", c("Barbouille", "Tightrope"))
-lst <- setdiff(lst, pkg)
-if(length(lst) > 0) lapply(lst, install_github)
+install_github("benja0x40/Barbouille")
+install_github("benja0x40/Tightrope")
 ```
 
 ### Acknowledgements

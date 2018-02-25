@@ -2,7 +2,7 @@
 % Please edit documentation in R/counts.R
 \name{NonZeroCounts}
 \alias{NonZeroCounts}
-\title{remove observations with missing values}
+\title{Remove observations with missing values}
 \usage{
 NonZeroCounts(cnt)
 }
@@ -14,11 +14,11 @@ NonZeroCounts(cnt)
 \code{NonZeroCounts} returns a matrix.
 }
 \description{
-remove observations with missing values
+Remove observations with missing values
 }
 \seealso{
 \link{DetectCounts},
-\link{ReadCountMatrix},
-\link{MakeReadCounts}
+  \link{ReadCountMatrix},
+  \link{MakeReadCounts}
 }
 \keyword{internal}

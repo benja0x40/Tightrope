@@ -2,7 +2,7 @@
 % Please edit documentation in R/BRD.R
 \name{BRD}
 \alias{BRD}
-\title{background read density estimation}
+\title{Background Read Density}
 \usage{
 BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
   bdt = c(0.5, 0.05), ncl = 2, mincs = 100, progress = F)
@@ -65,11 +65,11 @@ above \code{bdt[1]} percents.}
 }
 }
 \description{
-background read density estimation
+Background Read Density
 }
 \seealso{
 \link{PlotBRD},
-\link{CDaDaDR},
-\link{QuickShiftClustering},
-\link{ReadCountMatrix}
+  \link{CDaDaDR},
+  \link{QuickShiftClustering},
+  \link{ReadCountMatrix}
 }

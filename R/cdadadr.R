@@ -1,10 +1,10 @@
 # =============================================================================.
-#' density estimation in reduced dimensions
+#' Density estimation in reduced dimensions
 # -----------------------------------------------------------------------------.
 #' @seealso
-#' \link{BRD},
-#' \link{DitherCounts},
-#' \link{knn_density}
+#'   \link{BRD},
+#'   \link{DitherCounts},
+#'   \link{knn_density}
 # -----------------------------------------------------------------------------.
 #' @description
 #' Count Density after Dithering and Dimensionality Reduction (CDaDaDR).

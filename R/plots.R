@@ -1,29 +1,6 @@
 # FUNCTIONS | 2D PLOTS #########################################################
 
 # =============================================================================.
-#
-# -----------------------------------------------------------------------------.
-PlotContour <- function(xy, k = 5, poly = F, ...) {
-
-  m <- colMeans(xy)
-  p <- t(t(xy) - m)
-  a   <- atan2(p[,2], p[,1])
-  d   <- sqrt(rowSums(p^2))
-
-  o <- order(a)
-  a <- a[o]
-  d <- caTools::runmean(d[o], k)
-  p <- d * cbind(cos(a), sin(a))
-  p <- t(t(p) + m)
-
-  if(poly) {
-    polygon(p, ...)
-  } else {
-    lines(rbind(p, p[1, ]), ...)
-  }
-}
-
-# =============================================================================.
 #' plot_samples
 # -----------------------------------------------------------------------------.
 #' @param x matrix
@@ -81,60 +58,6 @@ PlotQuickShift <- function(
       length = length, col = col, ...
     )
   )
-}
-
-# =============================================================================.
-#' plotHistograms
-# -----------------------------------------------------------------------------.
-#' @param x numeric vector
-#' @param y numeric vector
-#' @param bins integer
-#' @param xlim range
-#' @param log logical
-#' @param rel logical
-#' @param ...
-#'
-#' @return NULL
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-plotHistograms <- function(x, y, bins = 100, xlim = NULL, log = F, rel = F, ...) {
-
-  n <- length(x)
-
-  if(log) {
-    x <- log2(x)
-    y <- log2(y)
-  }
-
-  bins <- bins - 1
-  r <- diff(range(x, y, na.rm = T))
-  brk <- 0:bins/bins * (1.2 * r) - 0.1 * r + min(x, y, na.rm = T)
-  h.x <- hist(x, breaks = brk, plot = F)
-  h.y <- hist(y, breaks = brk, plot = F)
-
-  h.x$counts <- h.x$counts / n
-  h.y$counts <- h.y$counts / n
-
-  if(rel) {
-    chk <- h.x$counts > 0
-    h.x$counts[chk] <- with(h.x, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
-    chk <- h.y$counts > 0
-    h.y$counts[chk] <- with(h.y, counts[chk] / sum(diff(breaks[c(chk, T)]) * counts[chk]))
-  }
-
-  if(is.null(xlim)) xlim = range(x, y)
-  ylim <- range(h.x$counts, h.y$counts)
-  ylim <- min(ylim) + c(0, 1.1 * diff(ylim))
-  empty.plot(xlim = xlim, ylim = ylim, yaxs = 'i', ...)
-  chk <- h.x$counts > 0
-  k <- length(h.y$mids)
-  x <- c(h.y$mids[1], h.y$mids, h.y$mids[k])
-  y <- c(0, h.y$counts, 0)
-  polygon(x, y, border = NA, col = rgb(1, 0.6, 0, 0.5))
-  chk <- h.y$counts > 0
-  points(h.y$mids[chk], h.y$counts[chk], type = 'l', col = rgb(1, 0, 0, 0.75), lwd = 2)
-  points(h.x$mids[chk], h.x$counts[chk], type = 'h', lwd = 2, col = grey(0.3))
 }
 
 # =============================================================================.

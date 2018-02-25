@@ -2,7 +2,7 @@
 % Please edit documentation in R/cdadadr.R
 \name{CDaDaDR}
 \alias{CDaDaDR}
-\title{density estimation in reduced dimensions}
+\title{Density estimation in reduced dimensions}
 \usage{
 CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
   zscore = T, rare = 0.01, method = c("pca", "ica"), progress = F)
@@ -49,7 +49,7 @@ Count Density after Dithering and Dimensionality Reduction (CDaDaDR).
 }
 \seealso{
 \link{BRD},
-\link{DitherCounts},
-\link{knn_density}
+  \link{DitherCounts},
+  \link{knn_density}
 }
 \keyword{internal}

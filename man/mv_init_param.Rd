@@ -20,6 +20,6 @@ Multivariate normal distribution: parameter initialization
 }
 \seealso{
 \link{mv_gmm},
-\link{mv_emloop}
+  \link{mv_emloop}
 }
 \keyword{internal}
