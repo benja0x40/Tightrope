@@ -68,8 +68,8 @@ in the following section.
 
   - [R environment](https://www.r-project.org/) version 3.4 or newer
   - To develop and execute `R` scripts we recommend using [RStudio](https://www.rstudio.com/products/rstudio/download)
-  - CRAN packages `devtools`, `triangle`, `caTools`, `ica`, `FNN`, `igraph`, `mixtools`
-  - [Bioconductor](http://www.bioconductor.org/) packages `Rsamtools`, `GenomicAlignments`, `GenomicRanges`
+  - CRAN packages `devtools`, `stringr`, `triangle`, `caTools`, `ica`, `FNN`, `igraph`, `mixtools`
+  - [Bioconductor](http://www.bioconductor.org/) packages `Rsamtools`, `GenomicAlignments`, `GenomicRanges`, `GenomicFeatures`, `rtracklayer`, `biomaRt`
   - GitHub package [Barbouille](https://github.com/benja0x40/Barbouille)
 
 After installing the R environment (and RStudio), run the `R` code below
@@ -83,13 +83,13 @@ reinstall <- FALSE
 pkg <- ifelse(reinstall, c(), installed.packages()[, "Package"])
 
 # CRAN packages
-lst <- c("devtools", "triangle", "caTools", "ica", "FNN", "igraph", "mixtools")
+lst <- c("devtools", "stringr", "triangle", "caTools", "ica", "FNN", "igraph", "mixtools")
 lst <- setdiff(lst, pkg)
 if(length(lst) > 0) install.packages(lst, dependencies = T)
 
 # Bioconductor packages
 source("https://bioconductor.org/biocLite.R")
-lst <- c("Rsamtools", "GenomicAlignments", "GenomicRanges")
+lst <- c("Rsamtools", "GenomicAlignments", "GenomicRanges", "GenomicFeatures", "rtracklayer", "biomaRt")
 lst <- setdiff(lst, pkg)
 if(length(lst) > 0) biocLite(lst)
 

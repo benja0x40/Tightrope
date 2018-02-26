@@ -1,0 +1,74 @@
+---
+title: "Normalization of ChIP-seq experiments using Background Read Density"
+author: '[Benjamin Leblanc](https://github.com/benja0x40)'
+date: "`r format(Sys.time(), '%d.%m.%Y')`"
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+
+```{r config_dependencies, include=FALSE}
+library(Tightrope)
+```
+
+```{r import_chipseq_mia, include=FALSE}
+# TODO: manage sequencing runs and paired end files (see SRA and ChIP Atlas)
+# =============================================================================.
+# Load metadata for Mia's ChIP-seq October 2017
+# -----------------------------------------------------------------------------.
+Orlando.meta <- read.delim(
+  "/Volumes/HD_10TB/DATA_BRD/GSE60104_Orlando_et_al_2014/_LittleThumb_/datasets/bowtie2_hg38_bam.txt",
+  comment.char = "#", stringsAsFactors = F
+)
+colnames(Orlando.meta)[34] <- "sample_id"
+Orlando.files <- paste0(
+  "/Volumes/HD_10TB/DATA_BRD/GSE60104_Orlando_et_al_2014/_MAPPEDREADS_/bowtie2/genomic_hg38/"
+)
+
+ROI <- readRDS("")
+
+# -----------------------------------------------------------------------------.
+Orlando.files <- data.table(
+  name   = Orlando.meta$sample_id,
+  paired = F,
+  bam    = fmap(MakePath, CFG$paths$mapped_reads, Orlando.meta$bam_file),
+  bai    = "",
+  rdata  = fmap(
+    MakePath, 
+    CFG$paths$mapped_reads, "rdata", Orlando.meta$sample_id, ext = ".rdata"
+  ),
+  key = "name", stringsAsFactors = F
+)
+Orlando.files$bai <- gsub("\\.bam", ".bai", Orlando.files$bam)
+# =============================================================================.
+# Create paths for GAlignments objects
+# -----------------------------------------------------------------------------.
+mkdir(MakePath(CFG$paths$mapped_reads, "rdata"))
+# =============================================================================.
+# Import mapped reads for Mia's ChIP-seq October 2017
+# -----------------------------------------------------------------------------.
+if(HostName() == "bl_imac") { # mapped reads are available on my work iMac only
+  if(! all(file.exists(Orlando.files$fastq))) stop("missing ChIP-seq fastq files")
+  if(! all(file.exists(Orlando.files$bam))) stop("missing ChIP-seq bam files")
+  if(! all(file.exists(Orlando.files$bai))) stop("missing ChIP-seq bai files")
+  chk <- bam2rdata(
+    Orlando.files$bam, overwrite = with(CFG$build, update | MappedReads),
+    path = MakePath(CFG$paths$mapped_reads, "rdata"), names = Orlando.files$name,
+    paired = T, param = ScanBamParam(flag = CFG$args$bamflag$paired)
+  )
+  if(! all(file.exists(Orlando.files$rdata))) stop("missing ChIP-seq rdata files")
+}
+# =============================================================================.
+# Create paths for results and images
+# -----------------------------------------------------------------------------.
+mkdir(MakePath(CFG$paths$results, "RAW"))
+mkdir(MakePath(CFG$paths$images,  "RAW"))
+# Cleanup ---------------------------------------------------------------------.
+suppressWarnings(rm(chk))
+```
+
