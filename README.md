@@ -57,8 +57,9 @@ Run the `R` code below to install `Tightrope`.
 
 ```R
 library("devtools")
-install_github("benja0x40/Barbouille") # Graphic and color mapping functions
-install_github("benja0x40/Tightrope")
+# Graphic and color mapping functions
+install_github("benja0x40/Barbouille", dependencies = T)
+install_github("benja0x40/Tightrope", dependencies = T)
 ```
 
 If the installation fails, try to install dependencies as indicated
@@ -95,7 +96,7 @@ if(length(lst) > 0) biocLite(lst)
 
 # GitHub packages
 library("devtools")
-install_github("benja0x40/Barbouille")
+install_github("benja0x40/Barbouille", dependencies = T)
 install_github("benja0x40/Tightrope")
 ```
 

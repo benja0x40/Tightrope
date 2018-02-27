@@ -94,10 +94,10 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
     }
   }
   # Plot intensity versus density //////////////////////////////////////////////
-  clrmap <- function(k) colorize(k, mode = "rank")
+  cmf <- function(k) colorize(k, mode = "rank")
   with(
     brd$dred, BivariateDensity(
-      intensity, density, nx = res, plot = T, clrmap = clrmap, axes = with.axes,
+      intensity, density, nx = res, plot = T, mapper = cmf, axes = with.axes,
       xlab = "background intensity", ylab = "density", main = "thresholds"
     )
   )

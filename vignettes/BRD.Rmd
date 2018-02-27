@@ -3,72 +3,217 @@ title: "Normalization of ChIP-seq experiments using Background Read Density"
 author: '[Benjamin Leblanc](https://github.com/benja0x40)'
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
 output:
-  pdf_document:
+  html_document:
     toc: true
     number_sections: true
-  html_document:
+  pdf_document:
     toc: true
     number_sections: true
 ---
 
-
-```{r config_dependencies, include=FALSE}
+```{r hidden_dependencies, include=FALSE}
+library(knitr)
+library(data.table)
+library(Barbouille)
 library(Tightrope)
+data("EGA91_mouse") 
+data("CGI_mm10") 
+data("mm10_blacklist") 
+data("NSC_K27M_METADATA") 
+data("NSC_K27M_COUNTS") 
+data("ESC_BRD_METADATA") 
+data("ESC_BRD_COUNTS") 
 ```
 
-```{r import_chipseq_mia, include=FALSE}
-# TODO: manage sequencing runs and paired end files (see SRA and ChIP Atlas)
-# =============================================================================.
-# Load metadata for Mia's ChIP-seq October 2017
-# -----------------------------------------------------------------------------.
-Orlando.meta <- read.delim(
-  "/Volumes/HD_10TB/DATA_BRD/GSE60104_Orlando_et_al_2014/_LittleThumb_/datasets/bowtie2_hg38_bam.txt",
-  comment.char = "#", stringsAsFactors = F
-)
-colnames(Orlando.meta)[34] <- "sample_id"
-Orlando.files <- paste0(
-  "/Volumes/HD_10TB/DATA_BRD/GSE60104_Orlando_et_al_2014/_MAPPEDREADS_/bowtie2/genomic_hg38/"
-)
+# Introduction
 
-ROI <- readRDS("")
+`Tightrope` is an `R` package proposing a ChIP-seq normalization method, named
+Background Read Density (BRD) **REF**, capable of accurate estimation
+of normalization factors in conditions involving global variations
+of chromatin marks.
 
-# -----------------------------------------------------------------------------.
-Orlando.files <- data.table(
-  name   = Orlando.meta$sample_id,
-  paired = F,
-  bam    = fmap(MakePath, CFG$paths$mapped_reads, Orlando.meta$bam_file),
-  bai    = "",
-  rdata  = fmap(
-    MakePath, 
-    CFG$paths$mapped_reads, "rdata", Orlando.meta$sample_id, ext = ".rdata"
-  ),
-  key = "name", stringsAsFactors = F
-)
-Orlando.files$bai <- gsub("\\.bam", ".bai", Orlando.files$bam)
+The purpose of this document is to provide a practical guide on the use of
+`R` functions available in `Tightrope` to apply the BRD normalization method.
+A basic knowledge of the `R` syntax and data structures, and of Bioconductor
+objects used to represent and manipulate mapped reads and genomic intervals
+will help to understand and adapt the following source code examples to another
+ChIP-seq dataset.
+
+## Installations
+
+The following softwares must be installed before `Tightrope` can be used.
+
+  - [R environment](https://www.r-project.org/) version 3.4 or newer.
+  - To develop and execute `R` scripts we recommend using [RStudio](https://www.rstudio.com/products/rstudio/download).
+  - CRAN packages `devtools`, `stringr`, `triangle`, `caTools`, `ica`, `FNN`, `igraph`, `mixtools`.
+  - [Bioconductor](http://www.bioconductor.org/) packages `Rsamtools`, `GenomicAlignments`, `GenomicRanges`, `GenomicFeatures`, `rtracklayer`, `biomaRt`.
+  - GitHub package [Barbouille](https://github.com/benja0x40/Barbouille).
+
+The next subsections provide further indications for these installations.
+
+### R and RStudio environments
+
+If `R` and RStudio are not already installed.
+  
+  * Manually download and install [R](https://cloud.r-project.org).
+    
+  * Manually download and install [RStudio](https://www.rstudio.com/products/rstudio/download).
+
+### Required packages
+
+Once `R` and RStudio are installed, open RStudio and run the `R` code below
+which should install all required packages automatically. While `R` will perfom
+these tasks, you may be prompted for a confirmation of package installations
+or updates.
+
+```R
+# Setting value below to TRUE will reinstall all required packages (optional)
+reinstall <- FALSE
+
+# Detect already installed packages
+pkg <- ifelse(reinstall, c(), installed.packages()[, "Package"])
+
+# CRAN packages
+lst <- c("devtools", "stringr", "triangle", "caTools", "ica", "FNN", "igraph", "mixtools")
+lst <- setdiff(lst, pkg)
+if(length(lst) > 0) install.packages(lst, dependencies = T)
+
+# Bioconductor packages
+source("https://bioconductor.org/biocLite.R")
+lst <- c("Rsamtools", "GenomicAlignments", "GenomicRanges", "GenomicFeatures", "rtracklayer", "biomaRt")
+lst <- setdiff(lst, pkg)
+if(length(lst) > 0) biocLite(lst)
+
+# GitHub packages
+library("devtools")
+install_github("benja0x40/Barbouille", dependencies = T)
+```
+
+### Tightrope
+
+Install Tightrope using RStudio as follows:
+
+  * Open menu `Tools > Install Packages...`
+
+  * Select `Install from: Package Archive File (.tgz; .tar.gz)`
+  
+  * Browse your computer to select the package archive file (e.g. `Tightrope_0.5.1.tar.gz`)
+  
+  * Click `Install`
+
+
+## ChIP-seq experiments
+
+```{r}
+library(Tightrope)
+data("ESC_BRD_METADATA")
+data("ESC_BRD_COUNTS")
+
+META   <- ESC_BRD_METADATA 
+COUNTS <- ESC_BRD_COUNTS
+rm(ESC_BRD_METADATA, ESC_BRD_COUNTS)
+```
+
+```{r show_dataset, echo=FALSE, out.width="50%"}
+kable(META, caption = "ChIP-seq experiments")
+```
+
+# Raw read counts
+
+```{r}
+load("../data/mm10_blacklist.rda")
+CGI <- resize(CGI_mm10, width = 4000, fix = "center", use.names = F)
+
+chip <- META[antibody == "H3K27me3" & replicate == "R2"]$sample_id
+ctrl <- META[antibody == "Input" & replicate == "R2"]$sample_id
+
+chk <- countOverlaps(CGI_mm10, mm10_blacklist) == 0
+
+cnt <- COUNTS$CGI_UCSC[chk, c(chip, ctrl)]
+l2c <- log2(DitherCounts(cnt))
+chk <- FiniteValues(l2c)
+
+brd <- BRD(cnt[chk, ], controls = ctrl, smobs = T, knn = 300, ncl = 1)
+nrm <- t(t(l2c) + brd$normfactors)
+
+par(pch = 20)
+layout(matrix(1:4, 2, 2, byrow = T))
+PlotBRD(brd)
+
+# Create a color mapping function
+cmf <- function(k) colorize(k, mode = "01", col = "ry")
+r <- SideBySideDensity(l2c, nx = 300, method = "ash", spacing = 0.4, mapper = cmf, las = 2)
+r <- SideBySideDensity(nrm, nx = 300, method = "ash", spacing = 0.4, mapper = cmf, las = 2)
+```
+
+
+
+
+### NSC_K27M
+
+H3WT versus K27M experiments in mouse NSCs.
+
+```{r, echo=FALSE, fig.height=5, fig.width=6.5, message=FALSE}
 # =============================================================================.
-# Create paths for GAlignments objects
-# -----------------------------------------------------------------------------.
-mkdir(MakePath(CFG$paths$mapped_reads, "rdata"))
+fs <- (2 / 9) * (5 + 24) # ~6.5
 # =============================================================================.
-# Import mapped reads for Mia's ChIP-seq October 2017
+#
 # -----------------------------------------------------------------------------.
-if(HostName() == "bl_imac") { # mapped reads are available on my work iMac only
-  if(! all(file.exists(Orlando.files$fastq))) stop("missing ChIP-seq fastq files")
-  if(! all(file.exists(Orlando.files$bam))) stop("missing ChIP-seq bam files")
-  if(! all(file.exists(Orlando.files$bai))) stop("missing ChIP-seq bai files")
-  chk <- bam2rdata(
-    Orlando.files$bam, overwrite = with(CFG$build, update | MappedReads),
-    path = MakePath(CFG$paths$mapped_reads, "rdata"), names = Orlando.files$name,
-    paired = T, param = ScanBamParam(flag = CFG$args$bamflag$paired)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R1_TEST/_RDATA_/mapped_spikein.RData")
+# r1 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_R2_TEST/_RDATA_/mapped_spikein.RData")
+# r2 <- readRDS(fpath)
+# fpath <- paste0(base_path, "NextSeq_ESC_BRD_RDATA/mapped_spikein.rdata")
+# saveRDS(rbind(r1, r2), fpath)
+# rm(r1, r2)
+# =============================================================================.
+data_path <- paste0(base_path, "NextSeq_K27M_spike_in/_RDATA_/")
+# -----------------------------------------------------------------------------.
+mapped_spikein <- readRDS(paste0(data_path, "mapped_spikein.rdata"))
+# -----------------------------------------------------------------------------.
+NSC_K27M.H3K27me3 <- readRDS(paste0(data_path, "GN_ENS_NSC_K27M_H3K27me3_smobs.rdata"))
+# -----------------------------------------------------------------------------.
+roi <- "CGI_UCSC"
+# -----------------------------------------------------------------------------.
+# layout(matrix(1:9, 3, 3, byrow = T))
+par(mar = c(10, 4, 2, 1), pch = 20, cex.main = 0.9, cex.lab = 0.8, cex.axis = 0.8)
+
+for(wks_name in c("NSC_K27M.H3K27me3")) {
+  
+  message(wks_name)
+  wks <- get(wks_name)
+  
+  cnt <- wks$CNT[[roi]]
+  ctl <- match(wks$controls, colnames(cnt))
+  chk <- FiniteValues(log2(cnt))
+  inp.cnt <- cnt[chk, ctl]
+  cnt <- cnt[chk, ]
+  
+  ldc <- log2(DitherCounts(cnt))
+  inp.ldc <- log2(DitherCounts(inp.cnt))
+  
+  inp.brd <- t(t(inp.ldc) + wks$BRD$normfactors[ctl])
+  brd <- t(t(ldc) + wks$BRD$normfactors)
+  
+  crx <- match(colnames(cnt), mapped_spikein$lt_id)
+  crx <- mapped_spikein$mapped_dm6[crx]
+  names(crx) <- colnames(cnt)
+  crx <-  log2(mean(crx) / crx)
+  inp.crx <- t(t(inp.ldc) + crx[ctl])
+  crx <- t(t(ldc) + crx)
+
+  inp.brd <- rowMeans(inp.brd)
+  inp.crx <- rowMeans(inp.crx)
+
+  ylim <- range(crx, brd)
+  h <- SideBySideDensity(
+    crx, nx = 400, ny = 200, plot = T, mapper = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "spike-in", ylim = ylim
   )
-  if(! all(file.exists(Orlando.files$rdata))) stop("missing ChIP-seq rdata files")
+  h <- SideBySideDensity(
+    brd, nx = 400, ny = 200, plot = T, mapper = clr_map, jitter = jit, smoothx = smx, 
+    las = 2, ylab = "log2(counts)", main = "BRD", ylim = ylim
+  )
 }
-# =============================================================================.
-# Create paths for results and images
-# -----------------------------------------------------------------------------.
-mkdir(MakePath(CFG$paths$results, "RAW"))
-mkdir(MakePath(CFG$paths$images,  "RAW"))
-# Cleanup ---------------------------------------------------------------------.
-suppressWarnings(rm(chk))
 ```
 

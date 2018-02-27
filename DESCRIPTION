@@ -1,6 +1,6 @@
 Package: Tightrope
 Type: Package
-Version: 0.5.0
+Version: 0.5.1
 Author: Benjamin Leblanc
 Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
 URL: https://github.com/benja0x40/Tightrope
@@ -23,8 +23,8 @@ Imports:
     GenomicAlignments,
     GenomicRanges,
     GenomicFeatures,
-    biomaRt,
     rtracklayer,
+    biomaRt,
     Barbouille
 Depends:
     R (>= 3.4.0),
@@ -39,8 +39,8 @@ Depends:
     GenomicAlignments,
     GenomicRanges,
     GenomicFeatures,
-    biomaRt,
     rtracklayer,
+    biomaRt,
     Barbouille
 Suggests:
     testthat,
