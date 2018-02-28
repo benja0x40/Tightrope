@@ -1,14 +1,21 @@
 ---
-title: "Dithered read counts"
-author: "Benjamin Leblanc"
-date: "`r Sys.Date()`"
-output:
-  html_document: default
-  pdf_document:  default
+title: "Dithering of read counts"
+author: '[Benjamin Leblanc](https://github.com/benja0x40)'
+date: "`r format(Sys.time(), '%d.%m.%Y')`"
+fontsize: 10pt
 vignette: >
   %\VignetteIndexEntry{dithering}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+  pdf_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE}

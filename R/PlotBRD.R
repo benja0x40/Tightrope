@@ -97,12 +97,13 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
   cmf <- function(k) colorize(k, mode = "rank")
   with(
     brd$dred, BivariateDensity(
-      intensity, density, nx = res, plot = T, mapper = cmf, axes = with.axes,
+      intensity, density, nx = res, method = "ash", ash = list(m = c(3, 3)),
+      plot = T, axes = with.axes, # mapper = cmf,
       xlab = "background intensity", ylab = "density", main = "thresholds"
     )
   )
   # Overlay subsets
-  ColorChannel(grp.clr, "a") <- 0.05
+  ColorChannel(grp.clr, "a") <- 0.1
   with(
     brd$subsets, points(b[idx], d[idx], pch = 20, cex = 0.5, col = grp.clr[grp])
   )

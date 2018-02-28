@@ -4,8 +4,8 @@
 \alias{BRD}
 \title{Background Read Density}
 \usage{
-BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
-  bdt = c(0.5, 0.05), ncl = 2, mincs = 100, progress = F)
+BRD(cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
+  bdt = c(0.2, 0.05), ncl = 1, mincs = 100, progress = F)
 }
 \arguments{
 \item{cnt}{matrix of read counts
@@ -30,9 +30,9 @@ with low density prior to clustering.
 \code{bdt[2]} determines the maximum density loss allowed
 when selecting core observations relatively to the local maximum density
 in each cluster, and thus defining the candidate background populations.
-By default the value of \code{bdt} is \code{c(0.5, 0.05)} meaning that,
-in terms of density percentiles, the bottom 30 percents will be filtered out
-before clustering and only the top 10 percents can be selected as background
+By default the value of \code{bdt} is \code{c(0.2, 0.05)} meaning that,
+in terms of density percentiles, the bottom 20 percents will be filtered out
+before clustering and only the top 5 percents can be selected as background
 candidates among each cluster.}
 
 \item{ncl}{number of clusters partitioning the population of observations with density

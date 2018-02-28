@@ -10,21 +10,10 @@ provides an empirical solution to the challenging task of estimating
 normalization factors in conditions involving global variations
 of chromatin marks.
 
-Accurate normalization of such experiments is increasingly needed in the field
-of chromatin genomics. Knowing that basic sequencing depth correction
-can be dramatically erroneous, this situation led to the recent
-introduction of spike-in protocols[<sup>1-4</sup>](#1) proposing
-an experimental solution to ChIP-seq normalization issues.
-Seeking an alternative strategy due to reliability concerns with spike-in 
-results while we were studying H3K27me3 profiles in a cellular model
-of DIPG[<sup>5</sup>](#5), we designed a naive computational approach named
-Background Read Density (BRD).
-After our initial validation and successful application of the BRD normalization
-for H3K27me3, we introduced several key improvements to achieve accurate
-normalizations with various experimental setups and chromatin marks.
-We are currently working on the manuscript describing the BRD method
-and presenting comparative analyses between spike-in
-and BRD normalizations for different datasets[<sup>6</sup>](#6).
+`Tightrope` is an `R` package proposing a ChIP-seq normalization method, named
+Background Read Density (BRD)[<sup>1,2</sup>](#1), capable of accurate
+estimation of normalization factors in conditions involving global variations
+of chromatin marks.
 
 Documentation and source code examples showing how to use `Tightrope` 
 to normalize a ChIP-seq dataset with the BRD method can be found
@@ -106,23 +95,3 @@ Thanks to Itys Comet, Sachin Pundhir and Albin Sandelin for their comments and
 suggestions during the development of the BRD normalization, and to Sudeep
 Sahadevan and Jens Vilstrup Johansen from the bioinformatics core facility
 at the [Biotech Research and Innovation Centre](http://www.bric.ku.dk). 
-
-### References
-
-<a name="1"></a>1. Bonhoure et al. 2014 - *Quantifying ChIP-seq data: a spiking method providing an internal reference for sample-to-sample normalization*  
-[publisher](https://dx.doi.org/10.1101/gr.168260.113) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/24709819)
-
-<a name="2"></a>2. Orlando et al. 2014 - *Quantitative ChIP-Seq normalization reveals global modulation of the epigenome.*  
-[publisher](https://dx.doi.org/10.1016/j.celrep.2014.10.018) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/25437568)
-
-<a name="3"></a>3. Hu et al. 2015 - *Biological chromodynamics: a general method for measuring protein occupancy across the genome by calibrating ChIP-seq.*  
-[publisher](https://dx.doi.org/10.1093/nar/gkv670) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/26130708)
-
-<a name="4"></a>4. Egan et al. 2016 - *An Alternative Approach to ChIP-Seq Normalization Enables Detection of Genome-Wide Changes in Histone H3 Lysine 27 Trimethylation upon EZH2 Inhibition.*  
-[publisher](https://dx.doi.org/10.1371/journal.pone.0166438) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27875550)
-
-<a name="5"></a>5. Mohammad et al. 2017 - *EZH2 is a potential therapeutic target for H3K27M-mutant pediatric gliomas.*  
-[publisher](https://dx.doi.org/10.1038/nm.4293) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/28263309)
-
-Leblanc B., Mohammad F., Hojfeldt J., Helin K. - *Normalization of ChIP-seq experiments involving global variations of chromatin marks.*  
-(in preparation)
