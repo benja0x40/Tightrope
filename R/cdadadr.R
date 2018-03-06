@@ -26,7 +26,7 @@
 #'
 #' @param dither
 #' number of replicates of the count dithering performed by \link{DitherCounts}:
-#' 1 = single, 2 = duplicate, 3 = triplicate (default), etc.
+#' 1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5)
 #'
 #' @param npc
 #' number of dimensions retained after projection on principal or independent
@@ -59,7 +59,7 @@
 #' @export
 CDaDaDR <- function(
   cnt, knn, smobs = T, movs = NULL,
-  dither = 3, npc = NA, zscore = T, rare = 0.01,
+  dither = 5, npc = NA, zscore = T, rare = 0.01,
   method = c("pca", "ica"),
   progress = F
 ) {

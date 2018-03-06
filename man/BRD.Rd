@@ -4,7 +4,7 @@
 \alias{BRD}
 \title{Background Read Density}
 \usage{
-BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
+BRD(cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
   bdt = c(0.2, 0.05), ncl = 1, mincs = 100, progress = F)
 }
 \arguments{
@@ -16,7 +16,7 @@ BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
 \item{smobs}{subtract a mean count value for each observation (logical, default = T).}
 
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
-1 = single, 2 = duplicate, 3 = triplicate (default), etc.}
+1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5)}
 
 \item{zscore}{transform read count projections into z-scores (logical, default = T).}
 

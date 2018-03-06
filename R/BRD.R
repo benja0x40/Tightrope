@@ -136,7 +136,7 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 # -----------------------------------------------------------------------------.
 #' @export
 BRD <- function(
-  cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
+  cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
   bdt = c(0.2, 0.05), ncl = 1, mincs = 100, progress = F
 ) {
 
