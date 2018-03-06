@@ -4,7 +4,7 @@
 \alias{CDaDaDR}
 \title{Density estimation in reduced dimensions}
 \usage{
-CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
+CDaDaDR(cnt, knn, smobs = T, movs = NULL, dither = 3, npc = NA,
   zscore = T, rare = 0.01, method = c("pca", "ica"), progress = F)
 }
 \arguments{
@@ -14,13 +14,13 @@ CDaDaDR(cnt, knn, smobs = F, movs = NULL, dither = 1, npc = NA,
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
 of densities estimated by \link{knn_density} (larger knn values = smoother).}
 
-\item{smobs}{subtract the mean count value of each observation (logical, default = F).}
+\item{smobs}{subtract a mean count value for each observation (logical, default = T).}
 
 \item{movs}{precomputed mean count values to be subtracted to each observation
 (default = NULL, zero).}
 
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
-1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
+1 = single, 2 = duplicate, 3 = triplicate (default), etc.}
 
 \item{npc}{number of dimensions retained after projection on principal or independent
 components. By default, dimensionality reduction is disabled

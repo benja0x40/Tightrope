@@ -4,7 +4,7 @@
 \alias{BRD}
 \title{Background Read Density}
 \usage{
-BRD(cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
+BRD(cnt, controls, smobs = T, dither = 3, zscore = T, knn = 300,
   bdt = c(0.2, 0.05), ncl = 1, mincs = 100, progress = F)
 }
 \arguments{
@@ -13,10 +13,10 @@ BRD(cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
 
 \item{controls}{count columns corresponding to control measurements (Input, IgG, etc.).}
 
-\item{smobs}{subtract the mean count value of each observation (logical, default = F).}
+\item{smobs}{subtract a mean count value for each observation (logical, default = T).}
 
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
-1 = single (default), 2 = duplicate, 3 = triplicate, etc.}
+1 = single, 2 = duplicate, 3 = triplicate (default), etc.}
 
 \item{zscore}{transform read count projections into z-scores (logical, default = T).}
 
@@ -35,8 +35,7 @@ in terms of density percentiles, the bottom 20 percents will be filtered out
 before clustering and only the top 5 percents can be selected as background
 candidates among each cluster.}
 
-\item{ncl}{number of clusters partitioning the population of observations with density
-above \code{bdt[1]} percents.}
+\item{ncl}{number of clusters (density modes) with density above \code{bdt[1]} percents.}
 
 \item{mincs}{minimum size of cluster cores, as number of observations.}
 
@@ -62,6 +61,9 @@ above \code{bdt[1]} percents.}
 }
 \item{log2counts}{
   dithered and log2 transformed counts.
+}
+\item{normfactors}{
+  BRD normalization factors.
 }
 }
 \description{
