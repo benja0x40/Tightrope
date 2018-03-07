@@ -216,7 +216,7 @@ Install `Tightrope` using RStudio as follows:
 
   * Select `Install from: Package Archive File (.tgz; .tar.gz)`
   
-  * Browse your computer to select the package archive file (e.g. `Tightrope_0.5.3.tar.gz`)
+  * Browse your computer to select the package archive file (e.g. `Tightrope_0.5.4.tar.gz`)
   
   * Click `Install`
 

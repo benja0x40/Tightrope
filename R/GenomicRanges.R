@@ -28,6 +28,42 @@ GenomicTiling <- function(g, s, w = NULL) {
 # HIDDEN #######################################################################
 
 # =============================================================================.
+#' Import tab delimited text files representing genomic interval data
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{df2grg}
+# -----------------------------------------------------------------------------.
+#' @inheritParams df2grg
+#'
+#' @param fpath
+#' path to a text file defining genomic ranges.
+#'
+#' @param seqinfo
+#' a \link{Seqinfo} object.
+#'
+#' @param header
+#' logical indicating if column names are present (default = F).
+#'
+#' @param ...
+#' optional parameters forwarded to the \link{read.delim} function.
+#'
+#' @return
+#' \code{ImportGenomicRanges} returns a \link{GRanges} object.
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+ImportGenomicRanges <- function(
+  fpath, chr = 1, start = 2, end = 3, strand = NULL, seqinfo = NULL,
+  xidx = NULL, xlbl = NULL, header = F, ...
+) {
+  con <- file(fpath)
+  grg <- read.delim(con, header = header, stringsAsFactors=F, ...)
+  grg <- df2grg(grg, chr, start, end, strand, xidx, xlbl)
+  if(! is.null(seqinfo)) seqinfo(grg) <- seqinfo[seqlevels(grg)]
+  grg
+}
+
+# =============================================================================.
 #' Compute the genomic length covered by sequencing reads
 # -----------------------------------------------------------------------------.
 #' @param cvg
@@ -184,4 +220,71 @@ ConsensusGRanges <- function(grl, minoverlap, ignore.strand = T, seqinfo = NULL)
     r[qhx] <- cmn
   }
   r
+}
+
+# NOT EXPORTED #################################################################
+
+# =============================================================================.
+#' Convert \code{data.frame} to \link{GRanges}
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ImportGenomicRanges}
+# -----------------------------------------------------------------------------.
+#' @param df
+#' a data.frame defining genomic ranges.
+#'
+#' @param chr
+#' column for chromsome identifiers (default = 1).
+#'
+#' @param start
+#' column for start position (default = 2).
+#'
+#' @param end
+#' column for end position (default = 3).
+#'
+#' @param strand
+#' column for strand (default = NULL, e.g. none).
+#'
+#' @param xidx
+#' list of extra column indexes to be imported.
+#' By default all available columns are imported.
+#'
+#' @param xlbl
+#' character vector defining the name of imported extra columns
+#' (default = NULL).
+#'
+#' @return
+#' \code{df2grg} returns a \link{GRanges} object.
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+df2grg <- function(
+  df, chr = 1, start = 2, end = 3, strand = NULL, xidx = NULL, xlbl = NULL
+) {
+
+  if(is.character(chr))    chr    <- match(chr, colnames(df))
+  if(is.character(start))  start  <- match(start, colnames(df))
+  if(is.character(end))    end    <- match(end, colnames(df))
+  if(is.character(strand)) strand <- match(strand, colnames(df))
+
+  # Copy all extra data by default
+  if(is.null(xidx)) {
+    xidx <- which(! (1:ncol(df)) %in% c(chr, start, end, strand))
+  }
+
+  df <- df[,c(chr, start, end, strand, xidx)]
+  grg <- GRanges(
+    seqnames = df[,1],
+    ranges = IRanges(start=df[,2], end=df[,3], names=NULL)
+  )
+
+  if(! is.null(strand)) {
+    strand(grg) <- df[,4]
+  }
+
+  mcols(grg) <- df[,(5-is.null(strand)):ncol(df)]
+  if(! is.null(xlbl)) {
+    colnames(mcols(grg)) <- xlbl
+  }
+
+  grg
 }
