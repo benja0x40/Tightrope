@@ -255,3 +255,30 @@ BRD <- function(
 
   res
 }
+
+# =============================================================================.
+#' Get scaling factors
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{BRD}
+# -----------------------------------------------------------------------------.
+#' @description
+#' Extract the vector of scaling factors from the result of a prior call to the
+#' \link{BRD} function.
+#'
+#' @param x
+#' result of of a prior call to the \link{BRD} function.
+#'
+#' @param as.log2
+#' logical (default = F, no).
+#'
+#' @return
+#' \code{ScalingFactors} returns a numeric vector.
+# -----------------------------------------------------------------------------.
+#' @export
+ScalingFactors <- function(x, as.log2 = F) {
+  x <- x$normfactors
+  if(is.null(x)) warning("invalid object")
+  if(! as.log2) x <- 2^x
+  x
+}

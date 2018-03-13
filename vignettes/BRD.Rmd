@@ -3,16 +3,16 @@ title: "Normalization of ChIP-seq experiments using Background Read Density"
 author: '[Benjamin Leblanc](https://github.com/benja0x40)'
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
 vignette: >
-  %\VignetteIndexEntry{BRD normalization}
+  %\VignetteIndexEntry{ChIP-seq normalization using BRD}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 fontsize: 11pt
 output:
-  pdf_document:
+  html_document:
     number_sections: true
     toc: true
     toc_depth: 2
-  html_document:
+  pdf_document:
     number_sections: true
     toc: true
     toc_depth: 2
@@ -25,7 +25,7 @@ suppressPackageStartupMessages(library(Tightrope))
 
 ___
 
-The purpose of this document is to provide a practical guide to the use of
+The purpose of this documentation is to provide a practical guide to the use of
 `R` functions available in `Tightrope`. A basic knowledge of the `R` syntax
 and data structures, and of [Bioconductor](http://www.bioconductor.org/)
 objects used to represent and manipulate mapped reads and genomic intervals
@@ -135,6 +135,8 @@ analysis and a non-parametric density estimation, followed by the identification
 of the local density mode which corresponds to the best background candidates
 (**C**) thanks to a clustering technique based on density gradients.
 
+## User interventions
+
 Overall, using the BRD method involves two key interventions. As explained in
 the previous section, the first one consists in choosing genomic regions that
 are relevant for the search of background candidates and generating the
@@ -172,7 +174,7 @@ If `R` and RStudio are not already installed.
     
   * Manually download and install [RStudio](https://www.rstudio.com/products/rstudio/download).
 
-## Required packages
+## R package dependencies
 
 Once `R` and RStudio are installed, open RStudio and run the `R` code below
 which should install all required packages automatically. While `R` will perfom
@@ -216,7 +218,7 @@ Install `Tightrope` using RStudio as follows:
 
   * Select `Install from: Package Archive File (.tgz; .tar.gz)`
   
-  * Browse your computer to select the package archive file (e.g. `Tightrope_0.5.4.tar.gz`)
+  * Browse your computer to select the package archive file (e.g. `Tightrope_0.6.0.tar.gz`)
   
   * Click `Install`
 
@@ -244,7 +246,7 @@ vignette("BRD", package = "Tightrope")
 
 \newpage
 
-# Preparations
+# Standard workflow
 
 ## Genomic regions
 
@@ -357,7 +359,7 @@ cnt <- ReadCountMatrix(
 )
 ```
 
-## Adjustment of BRD parameters
+## Adjustment of parameters
 
 Once the read count matrix aimed for the search of background candidates has
 been generated, a preliminary application of the BRD method takes the following
@@ -403,406 +405,21 @@ nrm <- t(t(cnt) * 2^brd$normfactors)
 More detailed examples of normalization with real ChIP-seq datasets can be
 found in the next section.
 
+## Normalization and verifications
+
+# Getting help
+
+## Documentation and examples
+
+## Frequently asked questions
+
+  * If I have replicates, should I normalize them separately or all together?
+
+  * I would like to load and use my own annotation object, how should I do?
+  
+  * Why estimated scaling factors differ slightly whether `ncl` is unspecified or manually set to `1`?
+
 \newpage
-
-# Examples
-
-## Data from Orlando et al. 2014
-
-Let's load the data.
-
-```{r}
-# Data from Orlando et al. 2014
-data("Orlando_METADATA") # Annotation of experimental conditions
-data("Orlando_COUNTS")   # Precomputed read count matrixes
-data("Orlando_SPIKEIN")  # Number of Drosophila reads (spike-in) 
-```
-
-The `Orlando_METADATA` object contains a detailed annotation of experimental
-conditions.
-
-```{r echo=FALSE}
-kable(Orlando_METADATA[, c("cell.line", "treatment", "antibody", "cell.mix", "replicate", "sample_id")])
-```
-
-### H3K79me2
-
-Here we select the `chip` and `ctrl` sample identifiers corresponding to 
-H3K79me2 and Input ChIP-seq profiles from the second batch (i.e. replicate)
-of experiments.
-
-```{r}
-chip <- Orlando_METADATA[antibody == "H3K79me2" & replicate == "2"]$sample_id
-ctrl <- Orlando_METADATA[antibody == "Input" & replicate == "2"]$sample_id
-```
-
-Let's check the sample identifiers in `chip`.
-
-```{r}
-cat("List of ChIP samples:", paste(chip, collapse = ", "), sep = "\n")
-```
-
-And the sample identifiers in `ctrl`.
-
-```{r}
-cat("List of Input samples:", paste(ctrl, collapse = ", "), sep = "\n")
-```
-
-We extract read counts over genes for `chip` and `ctrl` samples and copy
-this precomputed read count matrix in `ref`.
-
-```{r}
-# Use read counts over genes as reference for BRD normalization
-ref <- Orlando_COUNTS$GNU[, c(chip, ctrl)]
-```
-
-To search for background candidates among genes, we apply the `BRD` function
-to the `ref` read count matrix, attempting to identify a single density mode
-(`ncl = 1`) and using a slightly more stringent density threshold 
-(`bdt = c(0.2, 0.03)`) than the default values.
-
-```{r}
-brd <- BRD(ref, controls = ctrl, ncl = 1, bdt = c(0.2, 0.03))
-```
-
-We can now plot the control graphs.
-
-```{r fig.height=6.5, out.width="30%"}
-par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
-PlotBRD(brd)                                      # Show the BRD results
-```
-
-The left panel shows the bivariate density distribution of transformed read
-counts. The center panel shows the selected background candidates in the exact
-same bivariate representation. The right panel shows a projection of the 
-bivariate density along a background intensity axis with the indication of
-the lower density threshold (red line) as well as the selected background
-candidates (yellow cluster).
-
-Let's now try to normalize read counts over promoters thanks to these
-background candidates and the corresponding normalization factors.
-
-First we need to extract read counts over TSS for `chip` and `ctrl` samples
-and copy this precomputed read count matrix in `cnt`.
-
-```{r}
-cnt <- Orlando_COUNTS$TSS[, c(chip, ctrl)] # Extract read counts over TSS
-```
-
-Then we apply the dithering filter and the log2 transformation to the read count
-matrix `cnt` and store the result in `l2c`.
-
-```{r}
-l2c <- log2(DitherCounts(cnt)) # Apply dithering and log2 transformation
-```
-
-The purpose of the dithering filter is to avoid frequently identical count
-values. Further documentation about this filter can be found in the dedicated
-vignette.
-
-```{r eval=FALSE}
-vignette("dithering", package = "Tightrope")
-```
-
-We can now apply the BRD normalization factors to the dithered and log2
-transformed read count matrix `l2c` and store the result in `nrm.brd`.
-
-```{r}
-# Apply BRD normalization factors
-nrm.brd <- t(t(l2c) + brd$normfactors[c(chip, ctrl)])
-```
-
-For comparison, we also apply the spike-in normalization factors and store the
-result in `nrm.spk`.
-
-```{r}
-# Apply spike-in normalization
-spk <- Orlando_METADATA$Drosophila.Unique.Reads
-names(spk) <- Orlando_METADATA$sample_id
-spk <- spk[c(chip, ctrl)]             # Extract Drosophila read counts
-spk <-  log2(mean(spk) / spk)         # Compute normalization factors
-nrm.spk <- t(t(l2c) + spk)            # Apply normalization factors
-```
-
-Now we can compare the BRD and spike-in normalizations. For this we use
-plotting and color mapping functions from the `Barbouille` package to represent
-the empirical distribution of the normalized read counts `nrm.spk` and `nrm.brd`
-over promoter regions.
-
-```{r}
-# Create a color mapping function to represent read count distributions 
-cmf <- function(k) colorize(k, mode = "01", col = "Wry")
-```
-
-```{r Orlando_H3K79me2, eval=FALSE}
-# Adjust plot margins to show the name of experimental conditions
-par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1) 
-
-# Show read count distributions after spike-in and BRD normalizations
-r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "spike-in"
-)
-r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "BRD"
-)
-```
-
-```{r show_Orlando_H3K79me2, echo=FALSE, fig.height=5.5, out.width="40%", ref.label='Orlando_H3K79me2'}
-```
-
-### H3K4me3
-
-Here we select the `chip` and `ctrl` sample identifiers corresponding to 
-H3K4me3 and Input ChIP-seq profiles in duplicate experiments.
-
-```{r}
-chip <- Orlando_METADATA[antibody == "H3K4me3"]$sample_id
-ctrl <- Orlando_METADATA[antibody == "Input"]$sample_id
-```
-
-We extract read counts over promoters for `chip` and `ctrl` samples and copy
-this precomputed read count matrix in `ref`.
-
-```{r}
-# Use read counts over TSS as reference for BRD normalization
-ref <- Orlando_COUNTS$TSS[, c(chip, ctrl)]
-```
-
-To search for background candidates among promoters, we apply the `BRD` function
-to the `ref` read count matrix, this time attempting to identify two density
-modes (`ncl = 2`) and using the same density thresholds (`bdt = c(0.2, 0.03)`)
-as in the previous section for the normalization of H3K79me2 experiments.
-
-```{r}
-brd <- BRD(ref, controls = ctrl, ncl = 2, bdt = c(0.2, 0.03))
-```
-
-We plot the control graphs.
-
-```{r fig.height=6.5, out.width="30%"}
-par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
-PlotBRD(brd)                                      # Show the BRD results
-```
-
-When several density modes can be observed as in this example, the rightmost
-one in the density projection along the background axis (right panel) always
-corresponds to the best background candidates.
-
-We follow by applying BRD and spike-in normalization factors to read counts
-over promoters.
-
-```{r}
-# Extract read counts over TSS
-cnt <- Orlando_COUNTS$TSS[, c(chip, ctrl)]
-# Apply dithering and log2 transformation
-l2c <- log2(DitherCounts(cnt))
-
-# Apply BRD normalization factors
-nrm.brd <- t(t(l2c) + brd$normfactors[c(chip, ctrl)])
-
-# Apply spike-in normalization 
-spk <- Orlando_SPIKEIN[c(chip, ctrl)] # Extract Drosophila read counts
-spk <-  log2(mean(spk) / spk)         # Compute normalization factors
-nrm.spk <- t(t(l2c) + spk)            # Apply normalization factors
-```
-
-And we compare the result of BRD and spike-in normalizations in this example.
-
-```{r Orlando_H3K4me3, eval = FALSE}
-# Adjust plot margins to show the name of experimental conditions
-par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1) 
-
-# Show read count distributions after spike-in and BRD normalizations
-r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "spike-in"
-)
-r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "BRD"
-)
-```
-
-```{r show_Orlando_H3K4me3, echo=FALSE, fig.height=5.5, out.width="40%", ref.label='Orlando_H3K4me3'}
-```
-
-## H3K27me3 datasets
-
-### ESC
-
-The ESC dataset was generated by preparing mixtures of WT and SU12-KO mouse ESCs
-at different ratios followed by H3K27me3 ChIP-seq including spike-in with
-Drosophila chromatin. We used WT over SUZ12-KO cell mix ratios of 100%, 75%,
-50%, 25%, 10% and 0%, to obtain experimental conditions with decreasing global
-levels of H3K27me3.
-
-Let's load the data.
-
-```{r}
-data("ESC_BRD_METADATA") # Annotation of experimental conditions
-data("ESC_BRD_COUNTS")   # Precomputed read count matrixes
-data("ESC_BRD_SPIKEIN")  # Number of Drosophila reads (spike-in) 
-```
-
-The `ESC_BRD_METADATA` object contains a detailed annotation of experimental
-conditions.
-
-```{r echo=FALSE}
-kable(ESC_BRD_METADATA[antibody %in% c("H3K27me3", "Input") & replicate == "R2", -(1:1)])
-```
-
-Here we select the `chip` and `ctrl` sample identifiers corresponding to 
-H3K27me3 and Input ChIP-seq profiles from the second batch (i.e. replicate)
-of experiments.
-
-```{r}
-chip <- ESC_BRD_METADATA[antibody == "H3K27me3" & replicate == "R2"]$sample_id
-ctrl <- ESC_BRD_METADATA[antibody == "Input" & replicate == "R2"]$sample_id
-```
-
-As for H3K79me2 we search for background candidates using read counts over
-genes. However for this H3K27me3 dataset, we need to indentify 2 density modes.
-
-```{r}
-# Use read counts over gene units as reference for BRD normalization
-ref <- ESC_BRD_COUNTS$GNU[, c(chip, ctrl)]
-# Search for background candidates and estimate normalization factors
-brd <- BRD(ref, controls = ctrl, ncl = 2, bdt = c(0.2, 0.03))
-```
-
-We plot the BRD control graphs.
-
-```{r echo=FALSE, fig.height=6.5, out.width="30%"}
-par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
-PlotBRD(brd)                                      # Show the BRD results
-```
-
-We follow by applying BRD and spike-in normalization factors to read counts
-over CpG-islands.
-
-```{r}
-# Extract read counts over CGIs
-cnt <- ESC_BRD_COUNTS$CGI_UCSC[, c(chip, ctrl)]
-# Apply dithering and log2 transformation
-l2c <- log2(DitherCounts(cnt))
-
-# Apply BRD normalization factors 
-nrm.brd <- t(t(l2c) + brd$normfactors[c(chip, ctrl)])
-
-# Apply spike-in normalization 
-spk <- ESC_BRD_SPIKEIN[c(chip, ctrl)] # Extract Drosophila read counts
-spk <-  log2(mean(spk) / spk)         # Compute normalization factors
-nrm.spk <- t(t(l2c) + spk)            # Apply normalization factors
-```
-
-And we compare the result of BRD and spike-in normalizations in this example.
-
-```{r ESC_BRD, eval=FALSE, include=FALSE}
-# Adjust plot margins to show the name of experimental conditions
-par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1) 
-
-# Show read count distributions after spike-in and BRD normalizations
-r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "spike-in"
-)
-r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "BRD"
-)
-```
-
-```{r show_ESC_BRD, echo=FALSE, fig.height=5.5, out.width="40%", ref.label='ESC_BRD'}
-```
-
-### NSC
-
-The NSC dataset was generated by reproducing experiments presented in our study
-about the role of the H3.3K27M histone mutation in DIPG^[1](#R1)^, but
-adding spike-in with Drosophila chromatin in the ChIP-seq protocol.
-Briefly, H3K27me3 ChIP-seq experiments were performed in mouse NSCs, in
-presence or absence of expression of the H3.3K27M histone mutant (K27M)
-as well as with or without treatment with EPZ6438 (EPZ), an inhibitor of the
-catalytic reaction producing the H3K27me3 histone mark.
-
-From a ChIP-seq normalization perspective, this dataset presents 4 experimental
-conditions with highly variable global levels of H3K27me3 due to the presence
-or absence of both the K27M mutation and the EPZ treatment.
-
-Let's load the data.
-
-```{r}
-data("NSC_K27M_METADATA") # Annotation of experimental conditions
-data("NSC_K27M_COUNTS")   # Precomputed read count matrixes
-data("NSC_K27M_SPIKEIN")  # Number of Drosophila reads (spike-in) 
-```
-
-The `NSC_K27M_METADATA` object contains a detailed annotation of experimental
-conditions.
-
-```{r echo=FALSE}
-kable(NSC_K27M_METADATA[, -(1:3)])
-```
-
-Here we select the `chip` and `ctrl` sample identifiers corresponding to 
-H3K27me3 and Input ChIP-seq profiles in duplicate experiments.
-
-```{r}
-chip <- NSC_K27M_METADATA[antibody == "H3K27me3"]$sample_id
-ctrl <- NSC_K27M_METADATA[antibody == "Input"]$sample_id
-```
-
-We then proceed exactly as for the ESC dataset, except that here we can only
-indentify 1 density mode.
-
-```{r}
-# Use read counts over gene units as reference for BRD normalization
-ref <- NSC_K27M_COUNTS$GNU[, c(chip, ctrl)]
-```
-
-```{r}
-brd <- BRD(ref, controls = ctrl, ncl = 1, bdt = c(0.2, 0.03))
-```
-
-```{r echo=FALSE, fig.height=6.5, out.width="30%"}
-par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
-PlotBRD(brd)                                      # Show the BRD results
-```
-
-```{r}
-# Extract read counts over CGIs
-cnt <- NSC_K27M_COUNTS$CGI_UCSC[, c(chip, ctrl)]
-# Apply dithering and log2 transformation
-l2c <- log2(DitherCounts(cnt))
-
-# Apply BRD normalization factors 
-nrm.brd <- t(t(l2c) + brd$normfactors[c(chip, ctrl)])
-
-# Apply spike-in normalization 
-spk <- NSC_K27M_SPIKEIN[c(chip, ctrl)] # Extract Drosophila read counts
-spk <-  log2(mean(spk) / spk)          # Compute normalization factors
-nrm.spk <- t(t(l2c) + spk)             # Apply normalization factors
-```
-
-```{r NSC_K27M, eval=FALSE, include=FALSE}
-# Adjust plot margins to show the name of experimental conditions
-par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1) 
-
-# Show read count distributions after spike-in and BRD normalizations
-r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "spike-in"
-)
-r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
-  mapper = cmf, las = 2, main = "BRD"
-)
-```
-
-```{r show_NSC_K27M, echo=FALSE, fig.height=5.5, out.width="40%", ref.label='NSC_K27M'}
-```
 
 # Acknowledgements
 

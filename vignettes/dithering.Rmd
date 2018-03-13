@@ -2,25 +2,39 @@
 title: "Dithering of read counts"
 author: '[Benjamin Leblanc](https://github.com/benja0x40)'
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
-fontsize: 10pt
 vignette: >
-  %\VignetteIndexEntry{dithering}
+  %\VignetteIndexEntry{Dithering of read counts}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+fontsize: 11pt
 output:
-  html_document:
+  pdf_document:
     number_sections: true
     toc: true
     toc_depth: 2
-  pdf_document:
+  html_document:
     number_sections: true
     toc: true
     toc_depth: 2
 ---
 
-```{r, message=FALSE, warning=FALSE, include=FALSE}
+```{r hidden_dependencies, include=FALSE}
+library(knitr)
 suppressPackageStartupMessages(library(Tightrope))
 ```
+
+___
+
+The purpose of this documentation is to provide a practical guide to the use of
+`R` functions available in `Tightrope`. A basic knowledge of the `R` syntax
+and data structures, and of [Bioconductor](http://www.bioconductor.org/)
+objects used to represent and manipulate mapped reads and genomic intervals
+will help to understand and adapt the included source code examples to other
+ChIP-seq datasets.
+
+___
+
+\newpage
 
 ## Overview
 
