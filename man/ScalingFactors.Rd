@@ -2,12 +2,12 @@
 % Please edit documentation in R/BRD.R
 \name{ScalingFactors}
 \alias{ScalingFactors}
-\title{Get scaling factors}
+\title{Get BRD scaling factors}
 \usage{
-ScalingFactors(x, as.log2 = F)
+ScalingFactors(brd, as.log2 = F)
 }
 \arguments{
-\item{x}{result of of a prior call to the \link{BRD} function.}
+\item{brd}{result of a prior call to the \link{BRD} function.}
 
 \item{as.log2}{logical (default = F, no).}
 }
@@ -19,5 +19,6 @@ Extract the vector of scaling factors from the result of a prior call to the
 \link{BRD} function.
 }
 \seealso{
-\link{BRD}
+\link{BRD},
+  \link{NormalizeCountMatrix}
 }

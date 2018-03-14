@@ -2,7 +2,7 @@
 % Please edit documentation in R/PlotBRD.R
 \name{PlotBRD}
 \alias{PlotBRD}
-\title{Control plots for BRD results}
+\title{Control plots from BRD results}
 \usage{
 PlotBRD(brd, with.axes = T, with.legend = T, res = 300)
 }
@@ -17,7 +17,7 @@ PlotBRD(brd, with.axes = T, with.legend = T, res = 300)
 (default = 300).}
 }
 \description{
-Control plots for BRD results
+Control plots from BRD results
 }
 \seealso{
 \link{BRD},

@@ -13,15 +13,16 @@ BRD(cnt, controls, smobs = T, dither = 5, zscore = T, knn = 300,
 
 \item{controls}{count columns corresponding to control measurements (Input, IgG, etc.).}
 
-\item{smobs}{subtract a mean count value for each observation (logical, default = T).}
+\item{smobs}{subtract a mean count value for each observation (default = T, recommended).}
 
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
-1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5)}
+1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5).}
 
-\item{zscore}{transform read count projections into z-scores (logical, default = T).}
+\item{zscore}{transform read count projections into z-scores (default = T, recommended).}
 
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
-of densities estimated by \link{knn_density} (larger knn values = smoother).}
+of densities estimated by \link{knn_density}. The larger is the value
+of \code{knn}, the smoother is the density estimation.}
 
 \item{bdt}{numeric vector of length 2 defining background density thresholds both
 expressed as proportions between 0 and 1.
@@ -29,13 +30,13 @@ expressed as proportions between 0 and 1.
 with low density prior to clustering.
 \code{bdt[2]} determines the maximum density loss allowed
 when selecting core observations relatively to the local maximum density
-in each cluster, and thus defining the candidate background populations.
+in each cluster, and thus defining the background candidates.
 By default the value of \code{bdt} is \code{c(0.2, 0.05)} meaning that,
 in terms of density percentiles, the bottom 20 percents will be filtered out
 before clustering and only the top 5 percents can be selected as background
 candidates among each cluster.}
 
-\item{ncl}{number of clusters (density modes) with density above \code{bdt[1]} percents.}
+\item{ncl}{number of clusters (density modes) to be distinguished.}
 
 \item{mincs}{minimum size of cluster cores, as number of observations.}
 
@@ -67,7 +68,9 @@ candidates among each cluster.}
 }
 }
 \description{
-Background Read Density
+The \code{BRD} function searches for background candidates based on the
+provided read count matrix and uses these background candidates to estimate
+normalization factors.
 }
 \seealso{
 \link{PlotBRD},

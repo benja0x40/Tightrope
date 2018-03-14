@@ -405,7 +405,9 @@ nrm <- t(t(cnt) * 2^brd$normfactors)
 More detailed examples of normalization with real ChIP-seq datasets can be
 found in the next section.
 
-## Normalization and verifications
+## Normalization
+
+## Verifications
 
 # Getting help
 

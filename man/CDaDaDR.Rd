@@ -12,22 +12,23 @@ CDaDaDR(cnt, knn, smobs = T, movs = NULL, dither = 5, npc = NA,
 (rows = observations, columns = measurement conditions).}
 
 \item{knn}{number of nearest neighbors, which corresponds to the smoothing parameter
-of densities estimated by \link{knn_density} (larger knn values = smoother).}
+of densities estimated by \link{knn_density}. The larger is the value
+of \code{knn}, the smoother is the density estimation.}
 
-\item{smobs}{subtract a mean count value for each observation (logical, default = T).}
+\item{smobs}{subtract a mean count value for each observation (default = T, recommended).}
 
 \item{movs}{precomputed mean count values to be subtracted to each observation
 (default = NULL, zero).}
 
 \item{dither}{number of replicates of the count dithering performed by \link{DitherCounts}:
-1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5)}
+1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5).}
 
 \item{npc}{number of dimensions retained after projection on principal or independent
 components. By default, dimensionality reduction is disabled
 (\code{npc = NA}) meaning that all initial dimensions (i.e. conditions)
 of measurements are taken into account to estimate the density.}
 
-\item{zscore}{transform read count projections into z-scores (logical, default = T).}
+\item{zscore}{transform read count projections into z-scores (default = T, recommended).}
 
 \item{rare}{mark rare observations corresponding to exceptionally low density values
 (default = 0.01).}

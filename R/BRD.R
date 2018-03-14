@@ -85,6 +85,11 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 #'   \link{QuickShiftClustering},
 #'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
+#' @description
+#' The \code{BRD} function searches for background candidates based on the
+#' provided read count matrix and uses these background candidates to estimate
+#' normalization factors.
+#'
 #' @inheritParams CDaDaDR
 #'
 #' @param controls
@@ -97,14 +102,14 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 #' with low density prior to clustering.
 #' \code{bdt[2]} determines the maximum density loss allowed
 #' when selecting core observations relatively to the local maximum density
-#' in each cluster, and thus defining the candidate background populations.
+#' in each cluster, and thus defining the background candidates.
 #' By default the value of \code{bdt} is \code{c(0.2, 0.05)} meaning that,
 #' in terms of density percentiles, the bottom 20 percents will be filtered out
 #' before clustering and only the top 5 percents can be selected as background
 #' candidates among each cluster.
 #'
 #' @param ncl
-#' number of clusters (density modes) with density above \code{bdt[1]} percents.
+#' number of clusters (density modes) to be distinguished.
 #'
 #' @param mincs
 #' minimum size of cluster cores, as number of observations.
@@ -257,17 +262,18 @@ BRD <- function(
 }
 
 # =============================================================================.
-#' Get scaling factors
+#' Get BRD scaling factors
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{BRD}
+#'   \link{BRD},
+#'   \link{NormalizeCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description
 #' Extract the vector of scaling factors from the result of a prior call to the
 #' \link{BRD} function.
 #'
-#' @param x
-#' result of of a prior call to the \link{BRD} function.
+#' @param brd
+#' result of a prior call to the \link{BRD} function.
 #'
 #' @param as.log2
 #' logical (default = F, no).
@@ -276,9 +282,58 @@ BRD <- function(
 #' \code{ScalingFactors} returns a numeric vector.
 # -----------------------------------------------------------------------------.
 #' @export
-ScalingFactors <- function(x, as.log2 = F) {
-  x <- x$normfactors
-  if(is.null(x)) warning("invalid object")
-  if(! as.log2) x <- 2^x
+ScalingFactors <- function(brd, as.log2 = F) {
+
+  # Retrieve normalization factors
+  f <- brd$normfactors
+  if(is.null(f)) warning("invalid argument, this function requires the object resulting from the BRD function as argument")
+
+  # Revert log2 transformation if needed
+  if(! as.log2) f <- 2^f
+
+  f
+}
+
+# =============================================================================.
+#' Apply BRD scaling factors
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{BRD},
+#'   \link{ScalingFactors},
+#'   \link{ReadCountMatrix}
+# -----------------------------------------------------------------------------.
+#' @description
+#' Apply precomputed BRD normalization factors to a read count matrix.
+#' Use \code{as.log2 = TRUE} if you want to provide a matrix of log2
+#' transformed read counts instead of raw read counts.
+#'
+#' @inheritParams ScalingFactors
+#'
+#' @param x
+#' matrix of read counts (rows = observations, columns = samples or conditions).
+#'
+#' @return
+#' \code{NormalizeCountMatrix} returns a \code{matrix}.
+# -----------------------------------------------------------------------------.
+#' @export
+NormalizeCountMatrix <- function(x, brd, as.log2 = F) {
+
+  if(any(x < 0) & ! as.log2) {
+    message("You must use as.log2 = TRUE if you want to normalize log2 transformed read counts")
+    stop("the read count matrix has negative values!!!")
+  }
+
+  # Retrieve normalization factors
+  f <- brd$normfactors
+  if(is.null(f)) warning("invalid argument, this function requires the object resulting from the BRD function as argument")
+  f <- f[colnames(x)]
+
+  if(as.log2) {
+    x <- t(t(x) + f)   # Normalization of log2 transformed counts
+  } else {
+    x <- t(t(x) * 2^f) # Normalization of raw counts
+  }
+
   x
 }
+

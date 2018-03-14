@@ -15,10 +15,11 @@
 #'
 #' @param knn
 #' number of nearest neighbors, which corresponds to the smoothing parameter
-#' of densities estimated by \link{knn_density} (larger knn values = smoother).
+#' of densities estimated by \link{knn_density}. The larger is the value
+#' of \code{knn}, the smoother is the density estimation.
 #'
 #' @param smobs
-#' subtract a mean count value for each observation (logical, default = T).
+#' subtract a mean count value for each observation (default = T, recommended).
 #'
 #' @param movs
 #' precomputed mean count values to be subtracted to each observation
@@ -26,7 +27,7 @@
 #'
 #' @param dither
 #' number of replicates of the count dithering performed by \link{DitherCounts}:
-#' 1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5)
+#' 1 = single, 2 = duplicate, 3 = triplicate, etc. (default = 5).
 #'
 #' @param npc
 #' number of dimensions retained after projection on principal or independent
@@ -35,7 +36,7 @@
 #' of measurements are taken into account to estimate the density.
 #'
 #' @param zscore
-#' transform read count projections into z-scores (logical, default = T).
+#' transform read count projections into z-scores (default = T, recommended).
 #'
 #' @param rare
 #' mark rare observations corresponding to exceptionally low density values

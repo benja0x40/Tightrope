@@ -1,78 +1,70 @@
 library(Tightrope)
 
-# x <- c(
-#   H3K27me3_WT   = -0.08283696,
-#   H3K27me3_K27M = 1.08049920,
-#   Input_WT      = -0.63129889,
-#   Input_K27M    = -0.36636335
-# )
+# FUNCTIONS ####################################################################
+
+# =============================================================================.
 #
+# -----------------------------------------------------------------------------.
+PlotDistribution <- function(x, ...) {
+  SideBySideDensity(
+    x, las = 2, parameters = list(color = "Wry"),
+    method = "ash", ash = list(m = c(3, 3)), ...
+  )
+}
 
-nx <- 10000
-ny <- 20000
+# TESTS ########################################################################
 
-x <- 0.0 + rnbinom(nx, size = 1, mu = 15)
-y <- 1.0 + rnbinom(ny, size = 5, mu = 10)
-k <- cbind(
-  ChIP_A  = c(x, 3.0 * y) + rnbinom(nx + ny, size = 10, mu = 5),
-  ChIP_B  = c(x, 2.0 * y) + rnbinom(nx + ny, size = 10, mu = 5),
-  Input_A = c(x, 1.0 * y) + rnbinom(nx + ny, size = 10, mu = 5),
-  Input_B = c(x, 1.0 * y) + rnbinom(nx + ny, size = 10, mu = 5)
+p <- c(2000, 10000, 10000)
+m <- DefineSimulation(
+  chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 4.0), replicate = 2
 )
-k <- round(k)
+ncl <- 3
 
-k <- t(t(k) * 2:5/2)
+p <- c(2000, 10000, 10000)
+m <- DefineSimulation(
+  chip = 7, patterns = c("^", "v"), enrichment = c(1.0, 3.0), replicate = 1
+)
+ncl <- 3
 
+p <- c(2000, 10000, 10000)
+m <- DefineSimulation(
+  chip = 5, patterns = c("+", "-"), enrichment = c(1.0, 3.0), replicate = 1
+)
+ncl <- 2
+
+
+r <- MakeSimulation(p = p, m = m)
+
+grp <- r$group
+cnt <- r$data
+
+chip <- grep("ChIP", colnames(cnt), value = T)
+ctrl <- grep("Input", colnames(cnt), value = T)
+
+l2c <- log2(DitherCounts(cnt))
+l   <- xylim(l2c, symetric = T)
+
+brd <- BRD(cnt, controls = ctrl, ncl = ncl, dither = 10, knn = 300)
 
 layout(matrix(1:4, 2, 2, byrow = T))
-brd <- BRD(k, controls = colnames(k)[2:3], ncl = 2)
 par(pch = 20)
 PlotBRD(brd, with.legend = F)
 
-
-k <- log2(DitherCounts(k))
-l <- xylim(k, symetric = T)
-
-r <- SideBySideDensity(k, parameters = list(color = "Wry"))
-r <- BivariateDensity(k[1:n, ], xlim = l$x, ylim = l$y, parameters = list(color = "Wry"))
-abline(a = 0, b = 1, col = grey(0.5))
-r <- BivariateDensity(k[1:n+n, ], xlim = l$x, ylim = l$y, parameters = list(color = "Wry"))
-abline(a = 0, b = 1, col = grey(0.5))
-r <- BivariateDensity(k, xlim = l$x, ylim = l$y, parameters = list(color = "Wry"))
-abline(a = 0, b = 1, col = grey(0.5))
-
-
-
-
-y <- x + rnbinom(n, size = 10, mu = 5)
-y <- log2(DitherCounts(y))
-k <- sample(which(y > 3 & y < 6), size = h)
-
-a <- x
-b <- x
-a[k] <- a[k] + abs(rnorm(h, 20, 10))
-b[k] <- b[k] + abs(rnorm(h, 10, 10))
-
-cnt <- cbind(
-  ChIP_A  = 0.9 * (a + rnbinom(n, size = 10, mu = 5)),
-  ChIP_B  = 1.8 * (b + rnbinom(n, size = 10, mu = 5)),
-  Input_A = 0.6 * (x + rnbinom(n, size = 10, mu = 5)),
-  Input_B = 0.8 * x + rnbinom(n, size = 10, mu = 5)
-)
-cnt <- round(cnt)
-
-brd <- BRD(cnt, controls = colnames(cnt)[2:3], ncl = 2)
-PlotBRD(brd)
-
-x <- log2(DitherCounts(cnt))
-
 layout(matrix(1:4, 2, 2, byrow = T))
-r <- SideBySideDensity(x, parameters = list(color = "Wry"))
-r <- BivariateDensity(x[, c(3, 4)], parameters = list(color = "Wry"))
-r <- BivariateDensity(x[, c(1, 2)], parameters = list(color = "Wry"))
-r <- BivariateDensity(x[, c(1, 3)], parameters = list(color = "Wry"))
+r <- PlotDistribution(l2c, ylim = l$y, main = "Total")
+for(i in sort(unique(grp))) {
+  r <- PlotDistribution(l2c[grp == i, ], ylim = l$y, main = paste("Group", i))
+}
 
+# layout(matrix(1:9, 3, 3, byrow = T))
+# input <- rowMeans(l2c[, ctrl])
+# for(lbl in chip) {
+#   r <- BivariateDensity(
+#     input, l2c[, lbl], xlim = l$x, ylim = l$y, parameters = list(color = "Wry"),
+#     method = "ash", ash = list(m = c(3, 3)), xlab = "average Input", ylab = lbl
+#   )
+#   abline(a = 0, b = 1, col = grey(0.5))
+# }
 
-
-
+# 2^brd$normfactors
 
