@@ -4,7 +4,7 @@
 \alias{PlotBRD}
 \title{Control plots from BRD results}
 \usage{
-PlotBRD(brd, with.axes = T, with.legend = T, res = 300)
+PlotBRD(brd, with.axes = T, with.legend = T, res = 400)
 }
 \arguments{
 \item{brd}{result from the \link{BRD} function.}
@@ -14,7 +14,7 @@ PlotBRD(brd, with.axes = T, with.legend = T, res = 300)
 \item{with.legend}{logical, include legends (default = T).}
 
 \item{res}{number of bins used to make the intensity-density scatterplot
-(default = 300).}
+(default = 400).}
 }
 \description{
 Control plots from BRD results

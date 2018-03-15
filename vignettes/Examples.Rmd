@@ -8,11 +8,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 fontsize: 11pt
 output:
-  pdf_document:
+  html_document:
     number_sections: true
     toc: true
     toc_depth: 2
-  html_document:
+  pdf_document:
     number_sections: true
     toc: true
     toc_depth: 2
@@ -105,7 +105,7 @@ brd <- BRD(ref, controls = ctrl, ncl = 1, bdt = c(0.2, 0.03))
 
 We can now plot the control graphs.
 
-```{r fig.height=6.5, out.width="30%"}
+```{r fig.height=6.5, out.width="35%"}
 par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
 PlotBRD(brd)                                      # Show the BRD results
 ```
@@ -178,11 +178,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 
 # Show read count distributions after spike-in and BRD normalizations
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 ```
@@ -219,7 +219,7 @@ brd <- BRD(ref, controls = ctrl, ncl = 2, bdt = c(0.2, 0.03))
 
 We plot the control graphs.
 
-```{r fig.height=6.5, out.width="30%"}
+```{r fig.height=6.5, out.width="35%"}
 par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
 PlotBRD(brd)                                      # Show the BRD results
 ```
@@ -254,11 +254,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 
 # Show read count distributions after spike-in and BRD normalizations
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 ```
@@ -319,7 +319,7 @@ brd <- BRD(ref, controls = ctrl, ncl = 2, bdt = c(0.2, 0.03))
 
 We plot the BRD control graphs.
 
-```{r echo=FALSE, fig.height=6.5, out.width="30%"}
+```{r echo=FALSE, fig.height=6.5, out.width="35%"}
 par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
 PlotBRD(brd)                                      # Show the BRD results
 ```
@@ -350,11 +350,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 
 # Show read count distributions after spike-in and BRD normalizations
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 ```
@@ -411,7 +411,7 @@ ref <- NSC_K27M_COUNTS$GNU[, c(chip, ctrl)]
 brd <- BRD(ref, controls = ctrl, ncl = 1, bdt = c(0.2, 0.03))
 ```
 
-```{r echo=FALSE, fig.height=6.5, out.width="30%"}
+```{r echo=FALSE, fig.height=6.5, out.width="35%"}
 par(pch = 20, mar = c(4.5, 4.5, 1, 1), cex = 1.5) # Adjust graphic options
 PlotBRD(brd)                                      # Show the BRD results
 ```
@@ -437,11 +437,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 
 # Show read count distributions after spike-in and BRD normalizations
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 ```

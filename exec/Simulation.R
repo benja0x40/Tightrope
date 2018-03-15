@@ -7,64 +7,196 @@ library(Tightrope)
 # -----------------------------------------------------------------------------.
 PlotDistribution <- function(x, ...) {
   SideBySideDensity(
-    x, las = 2, parameters = list(color = "Wry"),
-    method = "ash", ash = list(m = c(3, 3)), ...
+    x, method = "ash", parameters = list(color = "Wry"),
+    ylab = "log2(counts)", las = 2, ...
   )
 }
 
-# TESTS ########################################################################
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+Preview <- function(brd.args, sim.prm) {
+  r <- with(sim.prm, MakeSimulation(p = p, m = m))
 
-p <- c(2000, 10000, 10000)
-m <- DefineSimulation(
-  chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 4.0), replicate = 2
-)
-ncl <- 3
+  grp <- r$group
+  cnt <- r$data
 
-p <- c(2000, 10000, 10000)
-m <- DefineSimulation(
-  chip = 7, patterns = c("^", "v"), enrichment = c(1.0, 3.0), replicate = 1
-)
-ncl <- 3
+  chip <- grep("ChIP", colnames(cnt), value = T)
+  ctrl <- grep("Input", colnames(cnt), value = T)
 
-p <- c(2000, 10000, 10000)
-m <- DefineSimulation(
-  chip = 5, patterns = c("+", "-"), enrichment = c(1.0, 3.0), replicate = 1
-)
-ncl <- 2
+  l2c <- log2(DitherCounts(cnt))
+  xyl <- range(l2c[FiniteValues(l2c), ])
 
+  brd <- do.call(BRD, args = c(list(cnt = cnt, controls = ctrl), brd.args))
 
-r <- MakeSimulation(p = p, m = m)
+  layout(matrix(1:9, 3, 3, byrow = T))
+  r <- PlotDistribution(l2c, ylim = xyl, main = "Total")
+  for(i in sort(unique(grp))) {
+    main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
+    r <- PlotDistribution(l2c[grp == i, ], ylim = xyl, main = main)
+  }
+  input <- rowMeans(l2c[, ctrl])
+  for(lbl in chip) {
+    r <- BivariateDensity(
+      input, l2c[, lbl], xlim = xyl, ylim = xyl, parameters = list(color = "Wry"),
+      method = "ash", ash = list(m = c(3, 3)), xlab = "average of Inputs",
+      ylab = lbl
+    )
+    for(i in -10:10) abline(a = i, b = 1, col = grey(0.5, alpha = 0.15))
+    abline(a = 0, b = 1, col = grey(0.5))
+  }
 
-grp <- r$group
-cnt <- r$data
+  layout(matrix(1:4, 2, 2, byrow = T))
+  par(pch = 20)
+  PlotBRD(brd, with.legend = F)
 
-chip <- grep("ChIP", colnames(cnt), value = T)
-ctrl <- grep("Input", colnames(cnt), value = T)
-
-l2c <- log2(DitherCounts(cnt))
-l   <- xylim(l2c, symetric = T)
-
-brd <- BRD(cnt, controls = ctrl, ncl = ncl, dither = 10, knn = 300)
-
-layout(matrix(1:4, 2, 2, byrow = T))
-par(pch = 20)
-PlotBRD(brd, with.legend = F)
-
-layout(matrix(1:4, 2, 2, byrow = T))
-r <- PlotDistribution(l2c, ylim = l$y, main = "Total")
-for(i in sort(unique(grp))) {
-  r <- PlotDistribution(l2c[grp == i, ], ylim = l$y, main = paste("Group", i))
+  reassign(chip, pos = globalenv(), src = environment())
+  reassign(ctrl, pos = globalenv(), src = environment())
+  reassign(cnt, pos = globalenv(), src = environment())
+  reassign(grp, pos = globalenv(), src = environment())
+  reassign(l2c, pos = globalenv(), src = environment())
+  reassign(xyl, pos = globalenv(), src = environment())
+  reassign(brd, pos = globalenv(), src = environment())
 }
 
-# layout(matrix(1:9, 3, 3, byrow = T))
-# input <- rowMeans(l2c[, ctrl])
-# for(lbl in chip) {
-#   r <- BivariateDensity(
-#     input, l2c[, lbl], xlim = l$x, ylim = l$y, parameters = list(color = "Wry"),
-#     method = "ash", ash = list(m = c(3, 3)), xlab = "average Input", ylab = lbl
-#   )
-#   abline(a = 0, b = 1, col = grey(0.5))
-# }
 
-# 2^brd$normfactors
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+RunBenchmark <- function(brd.args, sim.prm, reproduce) {
+
+  res <- list(
+    passed = c(),
+    failed = rep(F, reproduce)
+  )
+  for(i in 1:reproduce) {
+    r <- with(sim.prm, MakeSimulation(p = p, m = m))
+
+    grp <- r$group
+    cnt <- r$data
+    ctrl <- grep("Input", colnames(cnt), value = T)
+
+    brd <- do.call(BRD, args = c(list(cnt = cnt, controls = ctrl), brd.args))
+
+    if(grepl("successful", brd$status)) {
+      res$passed <- rbind(res$passed, ScalingFactors(brd))
+    } else {
+      res$failed[i] <- T
+    }
+  }
+
+  res
+}
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+RunTest <- function(test, values, brd.args, sim.prm, reproduce) {
+
+  chk <- is.null(dim(values))
+  if(chk) {
+    n <- length(values)
+  } else {
+    n <- nrow(values)
+  }
+
+  r <- vector("list", n)
+  for(i in 1:n) {
+    message("[ benchmark ] ", test, " | ", i, " / ", n)
+    if(chk) {
+      brd.args[[test]] <- values[i]
+    } else {
+      brd.args[[test]] <- values[i, ]
+    }
+    r[[i]] <- RunBenchmark(brd.args, sim.prm, reproduce)
+  }
+
+  r
+}
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+PlotBenchmark <- function(r, test, values) {
+  f <- sapply(lapply(r, "[[", "failed"), sum)
+  names(f) <- values
+  barplot(100 * (n - f) / n, xlab = test, ylab = "BRD success (%)")
+
+  p <- lapply(lapply(r, "[[", "passed"), as.vector)
+  BoxPlot(p, xlab = test, ylab = "scaling factors")
+  y <- rep(quantile(unlist(p), probs = 0.005), n)
+  text(x = 1:n, y = y, labels = values, pos = 1, srt = 45, xpd = T)
+}
+
+# CONFIGURATION ################################################################
+
+brd.args <- list(ncl = 3, dither = 3, knn = 300, bdt = c(0.2, 0.05))
+sim.prm <- list(
+  p = c(2000, 10000, 10000),
+  m = DefineSimulation(
+    chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 4.0), replicate = 2
+  )
+)
+
+brd.args <- list(ncl = 3, dither = 3, knn = 300, bdt = c(0.2, 0.05))
+sim.prm <- list(
+  p = c(2000, 10000, 10000),
+  m = DefineSimulation(
+    chip = 7, patterns = c("^", "v"), enrichment = c(1.0, 3.0), replicate = 1
+  )
+)
+
+brd.args <- list(ncl = 3, dither = 3, knn = 300, bdt = c(0.2, 0.05))
+sim.prm <- list(
+  p = c(2000, 10000, 10000),
+  m = DefineSimulation(
+    chip = 5, patterns = c("+", "-"), enrichment = c(1.0, 4.0), replicate = 1
+  )
+)
+
+
+# BENCHMARKS ###################################################################
+
+benchmarks <- list()
+values     <- list()
+
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+sim.prm <- list(
+  p = c(2000, 10000),
+  m = DefineSimulation(
+    chip = 3, patterns = "+", enrichment = c(1.0, 4.0), replicate = 1
+  )
+)
+brd.args <- list(ncl = 2, dither = 5, knn = 150, bdt = c(0.2, 0.1))
+# -----------------------------------------------------------------------------.
+if(F) Preview(brd.args, sim.prm)
+# -----------------------------------------------------------------------------.
+if(T) {
+  test <- "dither"
+  values[[test]] <- 1:10
+  n <- length(values[[test]])
+  benchmarks[[test]] <- RunTest(
+    test, values[[test]], brd.args, sim.prm, reproduce = 15
+  )
+  layout(matrix(1:4, 2, 2, byrow = T))
+  PlotBenchmark(benchmarks[[test]], test, values[[test]])
+}
+# -----------------------------------------------------------------------------.
+if(F) {
+  test <- "knn"
+  values[[test]] <- c(10, 25, 50, 100, 150, 200, 250, 300, 400, 500)
+  n <- length(values[[test]])
+  r <- vector("list", n)
+  for(i in 1:n) {
+    message("Test ", i, " / ", n)
+    brd.args[[test]] <- values[[test]][i]
+    r[[i]] <- RunBenchmark(brd.args, sim.prm, reproduce = 10)
+  }
+  benchmarks[[test]] <- r
+
+  layout(matrix(1:4, 2, 2, byrow = T))
+  PlotBenchmark(r, test, values = values[[test]])
+}
 

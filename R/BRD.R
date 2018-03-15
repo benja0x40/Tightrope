@@ -241,7 +241,7 @@ BRD <- function(
   )
 
   # Background cluster
-  res$status <- "BRD candidate cluster selected"
+  res$status <- "successful selection fo background candidates"
   bg_theta <- theta[[bg_clu]]
   if(length(bg_theta) > 1) {
     res <- c(
@@ -254,7 +254,7 @@ BRD <- function(
       )
     )
   } else {
-    res$status <- "Background candidate population is below the expected minimum size"
+    res$status <- "selection of background candidates has failed"
     warning(res$status)
   }
 

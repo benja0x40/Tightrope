@@ -16,12 +16,12 @@
 #'
 #' @param res
 #' number of bins used to make the intensity-density scatterplot
-#' (default = 300).
+#' (default = 400).
 #'
 #' @return NULL
 # -----------------------------------------------------------------------------.
 #' @export
-PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
+PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
 
   clr.prm <- AutoColorParameters("ry")
   clr.prm$thresholds <- round(clr.prm$thresholds, 2)
@@ -83,10 +83,10 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
     )
   )
   plot_samples(brd$subsets$x[idx, ], col = grp.clr[grp], alpha = alpha, add = T)
-  if(with.legend ) {
-    if(is.null(brd$bg_cluster)) {
-      legend("bottomleft", legend = brd$status, cex = 0.75, bty = 'n')
-    } else {
+  if(is.null(brd$bg_cluster)) {
+    legend("bottomleft", legend = brd$status, cex = 0.75, bty = 'n')
+  } else {
+    if(with.legend) {
       legend(
         "bottomleft", legend = "background candidates",
         fill = grp.clr[bg], cex = 0.75, bty = 'n'
@@ -95,7 +95,7 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
   }
   # Plot intensity versus density //////////////////////////////////////////////
   cmf <- function(k) colorize(k, mode = "rank")
-  with(
+  h <- with(
     brd$dred, BivariateDensity(
       intensity, density, nx = res, method = "ash", ash = list(m = c(3, 3)),
       plot = T, axes = with.axes, # mapper = cmf,
@@ -103,9 +103,25 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 300) {
     )
   )
   # Overlay subsets
-  ColorChannel(grp.clr, "a") <- 0.1
+  ColorChannel(grp.clr, "a") <- 0.15
   with(
     brd$subsets, points(b[idx], d[idx], pch = 20, cex = 0.5, col = grp.clr[grp])
   )
   abline(h = min(brd$subsets$d), col = "red", lwd = 1)
+  # Plot count distribution ////////////////////////////////////////////////////
+  y <- brd$log2counts
+  i <- brd$subsets$i
+  h <- SideBySideDensity(
+    y, method = "ash",
+    xlab = "columns of the read count matrix", ylab = "log2(counts)",
+    main = "distributions", las = 2, x.labels = F
+  )
+  y <- y[i, ]
+  if(! is.null(brd$bg_cluster)) {
+    k <- which(brd$subsets$cluster == brd$bg_cluster)
+    for(j in 1:ncol(y)) {
+      x <- rep(j, length(idx)) + runif(length(idx), -0.45, 0.45)
+      points(x, y[idx, j], pch = 20, cex = 0.5, col = grp.clr[grp])
+    }
+  }
 }

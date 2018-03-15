@@ -71,11 +71,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 # Show read count distributions after spike-in and BRD normalizations
 layout(matrix(1:2, 2, 1, byrow = T)) # Split plotting device (2 panels)
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 
@@ -117,11 +117,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 # Show read count distributions after spike-in and BRD normalizations
 layout(matrix(1:2, 2, 1, byrow = T)) # Split plotting device (2 panels)
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 
@@ -167,11 +167,11 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 # Show read count distributions after spike-in and BRD normalizations
 layout(matrix(1:2, 2, 1, byrow = T)) # Split plotting device (2 panels)
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
 
@@ -217,10 +217,10 @@ par(mar = c(12, 4.5, 3, 1), cex.main = 1.2, cex.lab = 1.1, cex.axis = 1.1)
 # Show read count distributions after spike-in and BRD normalizations
 layout(matrix(1:2, 2, 1, byrow = T)) # Split plotting device (2 panels)
 r <- SideBySideDensity(
-  nrm.spk, nx = ncol(nrm.spk) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.spk, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "spike-in"
 )
 r <- SideBySideDensity(
-  nrm.brd, nx = ncol(nrm.brd) * 25, ny = 150, method = "ash", spacing = 0.4,
+  nrm.brd, ny = 150, method = "ash", spacing = 0.4,
   mapper = cmf, las = 2, main = "BRD"
 )
