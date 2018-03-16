@@ -262,11 +262,37 @@ BRD <- function(
 }
 
 # =============================================================================.
+#' Index of background candidates
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{BRD},
+#'   \link{ScalingFactors},
+#'   \link{NormalizeCountMatrix},
+#'   \link{ReadCountMatrix}
+# -----------------------------------------------------------------------------.
+#' @description
+#' Provides the index of background candidates within rows of the read count
+#' matrix used to identify these candidates.
+#'
+#' @param brd
+#' result of a prior call to the \link{BRD} function.
+#'
+#' @return
+#' \code{BackgroundCandidates} returns an integer vector.
+# -----------------------------------------------------------------------------.
+#' @export
+BackgroundCandidates <- function(brd) {
+  brd$bg_members
+}
+
+# =============================================================================.
 #' Get BRD scaling factors
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{BRD},
-#'   \link{NormalizeCountMatrix}
+#'   \link{BackgroundCandidates},
+#'   \link{NormalizeCountMatrix},
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description
 #' Extract the vector of scaling factors from the result of a prior call to the
@@ -300,6 +326,7 @@ ScalingFactors <- function(brd, as.log2 = F) {
 #' @seealso
 #'   \link{BRD},
 #'   \link{ScalingFactors},
+#'   \link{BackgroundCandidates},
 #'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description

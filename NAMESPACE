@@ -2,6 +2,7 @@
 
 export(AvailableObj)
 export(BRD)
+export(BackgroundCandidates)
 export(BuildGeneFeatures)
 export(BuildSeqInfo)
 export(CDaDaDR)

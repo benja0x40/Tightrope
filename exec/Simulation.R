@@ -42,6 +42,7 @@ Preview <- function(brd.args, sim.prm) {
       method = "ash", ash = list(m = c(3, 3)), xlab = "average of Inputs",
       ylab = lbl
     )
+    # points(cbind(input, l2c[, lbl])[brd$bg_members, ], pch = 20, cex = 0.5, col = rgb(0, 0.5, 1))
     for(i in -10:10) abline(a = i, b = 1, col = grey(0.5, alpha = 0.15))
     abline(a = 0, b = 1, col = grey(0.5))
   }
@@ -171,9 +172,9 @@ sim.prm <- list(
 )
 brd.args <- list(ncl = 2, dither = 5, knn = 150, bdt = c(0.2, 0.1))
 # -----------------------------------------------------------------------------.
-if(F) Preview(brd.args, sim.prm)
+if(T) Preview(brd.args, sim.prm)
 # -----------------------------------------------------------------------------.
-if(T) {
+if(F) {
   test <- "dither"
   values[[test]] <- 1:10
   n <- length(values[[test]])

@@ -24,5 +24,6 @@ transformed read counts instead of raw read counts.
 \seealso{
 \link{BRD},
   \link{ScalingFactors},
+  \link{BackgroundCandidates},
   \link{ReadCountMatrix}
 }
