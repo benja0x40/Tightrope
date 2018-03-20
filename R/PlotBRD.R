@@ -14,6 +14,9 @@
 #' @param with.legend
 #' logical, include legends (default = T).
 #'
+#' @param title
+#' a title for generated plots (optional).
+#'
 #' @param res
 #' number of bins used to make the intensity-density scatterplot
 #' (default = 400).
@@ -21,7 +24,7 @@
 #' @return NULL
 # -----------------------------------------------------------------------------.
 #' @export
-PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
+PlotBRD <- function(brd, with.axes = T, with.legend = T, title = "", res = 400) {
 
   clr.prm <- AutoColorParameters("ry")
   clr.prm$thresholds <- round(clr.prm$thresholds, 2)
@@ -64,7 +67,7 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
     brd$dred, plot_samples(
       projection[o, ], xlim = lim$x, ylim = lim$y, axes = with.axes,
       col = colorize(density[o], mode = "rank", colors = "ry"),
-      alpha = ! rare[o], main = "density"
+      alpha = ! rare[o], main = paste("density", title, sep = "\n")
     )
   )
   if(with.legend) {
@@ -79,7 +82,7 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
     brd$dred, plot_samples(
       projection[o, ], xlim = lim$x, ylim = lim$y, axes = with.axes,
       col = colorize(density[o], mode = "rank"), alpha = ! rare[o],
-      main = "clusters"
+      main = paste("clusters", title, sep = "\n")
     )
   )
   plot_samples(brd$subsets$x[idx, ], col = grp.clr[grp], alpha = alpha, add = T)
@@ -99,7 +102,8 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
     brd$dred, BivariateDensity(
       intensity, density, nx = res, method = "ash", ash = list(m = c(3, 3)),
       plot = T, axes = with.axes, # mapper = cmf,
-      xlab = "background intensity", ylab = "density", main = "thresholds"
+      xlab = "background intensity", ylab = "density",
+      main = paste("thresholds", title, sep = "\n")
     )
   )
   # Overlay subsets
@@ -114,7 +118,7 @@ PlotBRD <- function(brd, with.axes = T, with.legend = T, res = 400) {
   h <- SideBySideDensity(
     y, method = "ash",
     xlab = "columns of the read count matrix", ylab = "log2(counts)",
-    main = "distributions", las = 2, x.labels = F
+    main = paste("distributions", title, sep = "\n"), las = 2, x.labels = F
   )
   y <- y[i, ]
   if(! is.null(brd$bg_cluster)) {
