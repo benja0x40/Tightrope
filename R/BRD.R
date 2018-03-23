@@ -81,8 +81,9 @@ DensityCorrectedByIntensity <- function(d, i, k) {
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{PlotBRD},
-#'   \link{CDaDaDR},
-#'   \link{QuickShiftClustering},
+#'   \link{BackgroundCandidates},
+#'   \link{ScalingFactors},
+#'   \link{NormalizeCountMatrix},
 #'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description
@@ -266,9 +267,8 @@ BRD <- function(
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{BRD},
-#'   \link{ScalingFactors},
-#'   \link{NormalizeCountMatrix},
-#'   \link{ReadCountMatrix}
+#'   \link{PlotBRD},
+#'   \link{PlotCountDistributions}
 # -----------------------------------------------------------------------------.
 #' @description
 #' Provides the index of background candidates within rows of the read count
@@ -290,9 +290,7 @@ BackgroundCandidates <- function(brd) {
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{BRD},
-#'   \link{BackgroundCandidates},
-#'   \link{NormalizeCountMatrix},
-#'   \link{ReadCountMatrix}
+#'   \link{NormalizeCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description
 #' Extract the vector of scaling factors from the result of a prior call to the
@@ -326,7 +324,6 @@ ScalingFactors <- function(brd, as.log2 = F) {
 #' @seealso
 #'   \link{BRD},
 #'   \link{ScalingFactors},
-#'   \link{BackgroundCandidates},
 #'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @description

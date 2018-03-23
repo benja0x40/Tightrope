@@ -8,13 +8,7 @@ library(Tightrope)
 organism <- list(
   name    = "Homo sapiens",
   taxid   = 9606,
-  UCSC    = list(
-    genome = "hg38",
-    cpgIslandExt = paste0(
-      "http://hgdownload.soe.ucsc.edu/goldenPath/", "hg38",
-      "/database/cpgIslandExt.txt.gz"
-    )
-  ),
+  UCSC    = list(genome = "hg38"),
   Ensembl = list(release = 91),
   BSg_pkg = "BSgenome.Hsapiens.UCSC.hg38",
   TxDb = list(
@@ -35,8 +29,7 @@ organism <- list(
 EGA91_human <- BuildGeneFeatures(organism)
 SaveObj(EGA91_human)
 # -----------------------------------------------------------------------------.
-download.file(organism$UCSC$cpgIslandExt, destfile = "CGI_hg38.txt.gz")
-CGI_hg38 <- ImportCpGIslandExt("CGI_hg38.txt.gz", seqinfo = EGA91_human$seqinfo)
+CGI_hg38 <- ImportCpGIslandExt(organism$UCSC$genome)
 SaveObj(CGI_hg38)
 # -----------------------------------------------------------------------------.
 devtools::use_data(EGA91_human, overwrite = T)
@@ -48,13 +41,7 @@ devtools::use_data(CGI_hg38, overwrite = T)
 organism <- list(
   name  = "Homo sapiens",
   taxid = 9606,
-  UCSC = list(
-    genome = "hg19",
-    cpgIslandExt = paste0(
-      "http://hgdownload.soe.ucsc.edu/goldenPath/", "hg19",
-      "/database/cpgIslandExt.txt.gz"
-    )
-  ),
+  UCSC    = list(genome = "hg19"),
   Ensembl = list(release = 75),
   BSg_pkg = "BSgenome.Hsapiens.UCSC.hg19",
   TxDb = list(
@@ -75,8 +62,7 @@ organism <- list(
 EGA75_human <- BuildGeneFeatures(organism)
 SaveObj(EGA75_human)
 # -----------------------------------------------------------------------------.
-download.file(organism$UCSC$cpgIslandExt, destfile = "CGI_hg19.txt.gz")
-CGI_hg19 <- ImportCpGIslandExt("CGI_hg19.txt.gz", seqinfo = EGA75_human$seqinfo)
+CGI_hg19 <- ImportCpGIslandExt(organism$UCSC$genome)
 SaveObj(CGI_hg19)
 # -----------------------------------------------------------------------------.
 devtools::use_data(EGA75_human, overwrite = T)
@@ -90,13 +76,7 @@ devtools::use_data(CGI_hg19, overwrite = T)
 organism <- list(
   name    = "Mus musculus",
   taxid   = 10090,
-  UCSC    = list(
-    genome = "mm10",
-    cpgIslandExt = paste0(
-      "http://hgdownload.soe.ucsc.edu/goldenPath/", "mm10",
-      "/database/cpgIslandExt.txt.gz"
-    )
-  ),
+  UCSC    = list(genome = "mm10"),
   Ensembl = list(release = 91),
   BSg_pkg = "BSgenome.Mmusculus.UCSC.mm10",
   TxDb = list(
@@ -117,8 +97,7 @@ organism <- list(
 EGA91_mouse <- BuildGeneFeatures(organism)
 SaveObj(EGA91_mouse)
 # -----------------------------------------------------------------------------.
-download.file(organism$UCSC$cpgIslandExt, destfile = "CGI_mm10.txt.gz")
-CGI_mm10 <- ImportCpGIslandExt("CGI_mm10.txt.gz", seqinfo = EGA91_mouse$seqinfo)
+CGI_mm10 <- ImportCpGIslandExt(organism$UCSC$genome)
 SaveObj(CGI_mm10)
 # -----------------------------------------------------------------------------.
 devtools::use_data(EGA91_mouse, overwrite = T)
@@ -130,13 +109,7 @@ devtools::use_data(CGI_mm10, overwrite = T)
 organism <- list(
   name    = "Mus musculus",
   taxid   = 10090,
-  UCSC    = list(
-    genome = "mm9",
-    cpgIslandExt = paste0(
-      "http://hgdownload.soe.ucsc.edu/goldenPath/", "mm9",
-      "/database/cpgIslandExt.txt.gz"
-    )
-  ),
+  UCSC    = list(genome = "mm9"),
   Ensembl = list(release = 67),
   BSg_pkg = "BSgenome.Mmusculus.UCSC.mm9",
   TxDb = list(
@@ -157,8 +130,7 @@ organism <- list(
 EGA67_mouse <- BuildGeneFeatures(organism, gene_name = "mgi_symbol")
 SaveObj(EGA67_mouse)
 # -----------------------------------------------------------------------------.
-download.file(organism$UCSC$cpgIslandExt, destfile = "CGI_mm9.txt.gz")
-CGI_mm9 <- ImportCpGIslandExt("CGI_mm9.txt.gz", seqinfo = EGA67_mouse$seqinfo)
+CGI_mm9 <- ImportCpGIslandExt(organism$UCSC$genome)
 SaveObj(CGI_mm9)
 # -----------------------------------------------------------------------------.
 devtools::use_data(EGA67_mouse, overwrite = T)

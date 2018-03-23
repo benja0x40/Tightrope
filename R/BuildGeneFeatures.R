@@ -1,6 +1,11 @@
 # =============================================================================.
 #' Build an R environment containing genomic features from Ensembl
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ImportCpGIslandExt},
+#'   \link{ImportGenomicRanges},
+#'   \link{ReadCountMatrix}
+# -----------------------------------------------------------------------------.
 #' @param organism
 #' list.
 #'

@@ -20,7 +20,5 @@ Extract the vector of scaling factors from the result of a prior call to the
 }
 \seealso{
 \link{BRD},
-  \link{BackgroundCandidates},
-  \link{NormalizeCountMatrix},
-  \link{ReadCountMatrix}
+  \link{NormalizeCountMatrix}
 }

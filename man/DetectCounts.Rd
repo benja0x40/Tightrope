@@ -26,7 +26,6 @@ DetectCounts
 }
 \seealso{
 \link{NonZeroCounts},
-  \link{ReadCountMatrix},
-  \link{MakeReadCounts}
+  \link{ReadCountMatrix}
 }
 \keyword{internal}

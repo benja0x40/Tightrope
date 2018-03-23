@@ -51,3 +51,8 @@ and columns to the provided bam files.
 \description{
 Compute read counts over genomic intervals for multiple bam files
 }
+\seealso{
+\link{DitherCounts},
+  \link{NormalizeCountMatrix},
+  \link{PlotCountDistributions}
+}

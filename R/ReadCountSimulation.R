@@ -63,11 +63,21 @@ DefineSimulation <- function(
 #' @seealso
 #'   \link{DefineSimulation}
 # -----------------------------------------------------------------------------.
+#' @description
+#' The \code{MakeSimulation} function generates random read count matrixes
+#' presenting distinct populations accross simulated ChIP and Input samples.
+#' By design the first population is globally invariable, such that the true
+#' value of normalization factors between the simulated conditions is always
+#' equal to 1.0. The simulated variable populations can be defined using the
+#' \link{DefineSimulation} function.
+#'
 #' @param p
-#' integer vector, population sizes
+#' integer vector of population sizes, the first one corresponding to the
+#' invariable population.
 #'
 #' @param m
-#' matrix of parameters produced by the \link{DefineSimulation} function.
+#' matrix of parameters for the variable populations, which can be produced by
+#' calling the \link{DefineSimulation} function.
 #'
 #' @param f
 #' list of functions allowing to use custom generators for simulated
@@ -77,6 +87,31 @@ DefineSimulation <- function(
 #' \code{MakeSimulation} returns a \code{list} with the following elements:
 #' \item{data}{matrix of simulated ChIP-seq read counts.}
 #' \item{group}{population memberships.}
+# -----------------------------------------------------------------------------.
+#' @examples
+#' # Simulation of a read count matrix with 3 populations of 10000 observations
+#' p <- c(10000, 10000, 10000)
+#' m <- DefineSimulation(
+#'   chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 3), replicate = 2
+#' )
+#' r <-  MakeSimulation(p = p, m = m)
+#'
+#' grp <- r$group # Population memberships
+#' cnt <- r$data  # Simulated counts
+#'
+#' # Prepare figure layout and graphic options
+#' layout(matrix(1:4, 2, 2, byrow = T))
+#' par(pch = 20)
+#'
+#' # Show the empirical distribution of simulated populations
+#' l2c <- log2(DitherCounts(cnt)) # Dithering and log2 transformation
+#' xyl <- range(l2c[FiniteValues(l2c), ])
+#'
+#' r <- PlotCountDistributions(l2c, ylim = xyl, main = "Total")
+#' for(i in sort(unique(grp))) {
+#'   main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
+#'   r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
+#' }
 # -----------------------------------------------------------------------------.
 #' @export
 MakeSimulation <- function(p = NULL, m = NULL, f = NULL) {
@@ -111,6 +146,8 @@ MakeSimulation <- function(p = NULL, m = NULL, f = NULL) {
 
   list(data = round(r), group = k)
 }
+
+# HIDDEN #######################################################################
 
 # =============================================================================.
 #' Random counts

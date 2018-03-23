@@ -2,7 +2,7 @@
 % Please edit documentation in R/counts.R
 \name{FiniteValues}
 \alias{FiniteValues}
-\title{Localise safe numeric values (i.e. not NA nor Inf)}
+\title{Localise fully safe numeric observations (i.e. no NA nor Inf)}
 \usage{
 FiniteValues(x)
 }
@@ -13,10 +13,9 @@ FiniteValues(x)
 \code{FiniteValues} returns a logical vector.
 }
 \description{
-Localise safe numeric values (i.e. not NA nor Inf)
+Localise fully safe numeric observations (i.e. no NA nor Inf)
 }
 \seealso{
 \link{NonZeroCounts},
   \link{DetectCounts}
 }
-\keyword{internal}

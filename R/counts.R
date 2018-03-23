@@ -1,13 +1,14 @@
-# FUNCTIONS | READ COUNTS ######################################################
-
 # =============================================================================.
 #' Apply dithering to read counts
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{NonZeroCounts},
-#'   \link{ReadCountMatrix},
-#'   \link{MakeReadCounts}
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
+#' @description
+#' The \code{DitherCounts} function applies a triangular dithering filter
+#' which eliminates the presence of identical values in a read count matrix.
+#'
 #' @param x
 #' matrix of read counts (rows = observations, columns = samples or conditions).
 #'
@@ -36,7 +37,7 @@ DitherCounts <- function(x) {
 }
 
 # =============================================================================.
-#' Localise safe numeric values (i.e. not NA nor Inf)
+#' Localise fully safe numeric observations (i.e. no NA nor Inf)
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{NonZeroCounts},
@@ -48,7 +49,6 @@ DitherCounts <- function(x) {
 #' @return
 #' \code{FiniteValues} returns a logical vector.
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
 FiniteValues <- function(x) {
   if(is.null(dim(x))) {
@@ -61,13 +61,14 @@ FiniteValues <- function(x) {
   x
 }
 
+# HIDDEN #######################################################################
+
 # =============================================================================.
 #' Remove observations with missing values
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{DetectCounts},
-#'   \link{ReadCountMatrix},
-#'   \link{MakeReadCounts}
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts
@@ -89,8 +90,7 @@ NonZeroCounts <- function(cnt) {
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{NonZeroCounts},
-#'   \link{ReadCountMatrix},
-#'   \link{MakeReadCounts}
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @param cnt
 #' matrix of read counts

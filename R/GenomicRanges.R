@@ -1,8 +1,14 @@
 # =============================================================================.
 #' Whole genome tiling with regular bins (i.e. running windows)
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ImportGenomicRanges},
+#'   \link{ImportCpGIslandExt},
+#'   \link{BuildGeneFeatures},
+#'   \link{ReadCountMatrix}
+# -----------------------------------------------------------------------------.
 #' @param g
-#' a \link{Seqinfo} object.
+#' \link{Seqinfo} object for the considered organism.
 #'
 #' @param s
 #' integer, spacing between genomic bins in bp.
@@ -25,13 +31,14 @@ GenomicTiling <- function(g, s, w = NULL) {
   grg
 }
 
-# HIDDEN #######################################################################
-
 # =============================================================================.
 #' Import tab delimited text files representing genomic interval data
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{df2grg}
+#'   \link{ImportCpGIslandExt},
+#'   \link{BuildGeneFeatures},
+#'   \link{GenomicTiling},
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
 #' @inheritParams df2grg
 #'
@@ -39,7 +46,7 @@ GenomicTiling <- function(g, s, w = NULL) {
 #' path to a text file defining genomic ranges.
 #'
 #' @param seqinfo
-#' a \link{Seqinfo} object.
+#' \link{Seqinfo} object for the considered organism.
 #'
 #' @param header
 #' logical indicating if column names are present (default = F).
@@ -50,7 +57,6 @@ GenomicTiling <- function(g, s, w = NULL) {
 #' @return
 #' \code{ImportGenomicRanges} returns a \link{GRanges} object.
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
 ImportGenomicRanges <- function(
   fpath, chr = 1, start = 2, end = 3, strand = NULL, seqinfo = NULL,
@@ -64,50 +70,36 @@ ImportGenomicRanges <- function(
 }
 
 # =============================================================================.
-#' Compute the genomic length covered by sequencing reads
-# -----------------------------------------------------------------------------.
-#' @param cvg
-#' a coverage object, see \link{GenomicAlignments::coverage}.
-#'
-#' @return
-#' \code{CoveredLength} returns the genomic length covered by sequencing reads.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-CoveredLength <- function(cvg) {
-  s <- 0L
-  for(chr in names(cvg)) {
-    i <- which(runValue(cvg[[chr]]) > 0)
-    s <- s + sum(as.numeric(runLength(cvg[[chr]])[i]))
-  }
-  s
-}
-
-# =============================================================================.
 #' Cleanup genomic ranges
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{ImportGenomicRanges},
+#'   \link{ImportCpGIslandExt}
+# -----------------------------------------------------------------------------.
 #' @description
-#' Cleanup genomic ranges (e.g. for imported ChIP-seq peaks from bed files).
+#' Cleanup genomic ranges such as imported ChIP-seq peaks from bed files by
+#' removing ranges corresponding to non canonical chromosomes.
 #'
 #' @param grg
 #' a \link{GRanges} object.
 #'
 #' @param seqinfo
-#' a \link{Seqinfo} object.
+#' \link{Seqinfo} object for the considered organism.
 #'
 #' @param organism
-#' character.
+#' name of the organism (e.g. "Homo sapiens", "Mus musculus").
 #'
 #' @param blacklist
-#' a \link{GRanges} object (default = NULL, none).
+#' an optional \link{GRanges} object used to filter out any genomic ranges
+#' overlaping with the blacklisted one (default = NULL, none).
 #'
 #' @param keep.strand
-#' logical (default = F, no).
+#' logical, when TRUE strand information is retained, when FALSE (default)
+#' strand information is discarded (i.e. strand = "*").
 #'
 #' @return
 #' \code{CleanupGRanges} returns a \link{GRanges} object.
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
 CleanupGRanges <- function(
   grg, seqinfo, organism, blacklist = NULL, keep.strand = F
@@ -129,6 +121,54 @@ CleanupGRanges <- function(
 }
 
 # =============================================================================.
+#' Total coverage of genomic intervals
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{CoveredLength}
+# -----------------------------------------------------------------------------.
+#' @param x
+#' a \link{GRanges} object.
+#'
+#' @param u
+#' numeric, base unit value (e.g 1 => bp, 1E3 => kb, 1E6 => Mb).
+#' By default u = 1 (bp).
+#'
+#' \code{GenomicCoverage} returns the total coverage of x.
+# -----------------------------------------------------------------------------.
+#' @export
+GenomicCoverage <- function(x, u = 1) {
+  x <- width(FlatGRanges(x, seqinfo(x)))
+  x <- sum(as.numeric(x))
+  if(u != 1) x <- round(x / u)
+  x
+}
+
+# HIDDEN #######################################################################
+
+# =============================================================================.
+#' Compute the genomic length covered by sequence reads
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{GenomicCoverage}
+# -----------------------------------------------------------------------------.
+#' @param cvg
+#' a coverage object, see \link{GenomicAlignments::coverage}.
+#'
+#' @return
+#' \code{CoveredLength} returns the genomic length covered by sequencing reads.
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+CoveredLength <- function(cvg) {
+  s <- 0L
+  for(chr in names(cvg)) {
+    i <- which(runValue(cvg[[chr]]) > 0)
+    s <- s + sum(as.numeric(runLength(cvg[[chr]])[i]))
+  }
+  s
+}
+
+# =============================================================================.
 #' Reduce genomic intervals
 # -----------------------------------------------------------------------------.
 #' @param x
@@ -147,27 +187,6 @@ FlatGRanges <- function(x, seqinfo) {
   strand(x) <- "*"
   x <- reduce(x)
   seqinfo(x) <- seqinfo[seqlevels(x)]
-  x
-}
-
-# =============================================================================.
-#' Total coverage of genomic intervals
-# -----------------------------------------------------------------------------.
-#' @param x
-#' a \link{GRanges} object.
-#'
-#' @param u
-#' numeric, base unit value (e.g 1 => bp, 1E3 => kb, 1E6 => Mb).
-#' By default u = 1 (bp).
-#'
-#' \code{GenomicCoverage} returns the total coverage of x.
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-GenomicCoverage <- function(x, u = 1) {
-  x <- width(FlatGRanges(x, seqinfo(x)))
-  x <- sum(as.numeric(x))
-  if(u != 1) x <- round(x / u)
   x
 }
 

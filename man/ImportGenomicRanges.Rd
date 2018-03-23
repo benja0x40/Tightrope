@@ -18,7 +18,7 @@ ImportGenomicRanges(fpath, chr = 1, start = 2, end = 3, strand = NULL,
 
 \item{strand}{column for strand (default = NULL, e.g. none).}
 
-\item{seqinfo}{a \link{Seqinfo} object.}
+\item{seqinfo}{\link{Seqinfo} object for the considered organism.}
 
 \item{xidx}{list of extra column indexes to be imported.
 By default all available columns are imported.}
@@ -37,6 +37,8 @@ By default all available columns are imported.}
 Import tab delimited text files representing genomic interval data
 }
 \seealso{
-\link{df2grg}
+\link{ImportCpGIslandExt},
+  \link{BuildGeneFeatures},
+  \link{GenomicTiling},
+  \link{ReadCountMatrix}
 }
-\keyword{internal}

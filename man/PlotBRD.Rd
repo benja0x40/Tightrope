@@ -4,22 +4,30 @@
 \alias{PlotBRD}
 \title{Control plots from BRD results}
 \usage{
-PlotBRD(brd, with.axes = T, with.legend = T, title = "", res = 400)
+PlotBRD(brd, title = "", plots = c("density", "clusters", "thresholds",
+  "distributions"), with.axes = T, with.legend = T, res = 400)
 }
 \arguments{
-\item{brd}{result from the \link{BRD} function.}
+\item{brd}{result from calling the \link{BRD} function.}
 
-\item{with.axes}{logical, include plot axes (default = T).}
+\item{title}{common title for the generated plots (default = none).}
 
-\item{with.legend}{logical, include legends (default = T).}
+\item{plots}{character vector specifying which plots are being generated. By default
+\code{PlotBRD} generates 4 plots named "density", "clusters", "thresholds",
+and "distributions". It is possible to generate only a subset of these plots
+by using the corresponding vector of plot names, like for instance
+\code{plots = c("density", "thresholds")}.}
 
-\item{title}{a title for generated plots (optional).}
+\item{with.axes}{logical, include plot axes or not (default = T, yes).}
 
-\item{res}{number of bins used to make the intensity-density scatterplot
-(default = 400).}
+\item{with.legend}{logical, include legends or not (default = T, yes).}
+
+\item{res}{resolution in number of bins for the "thresholds" plot (default = 400).}
 }
 \description{
-Control plots from BRD results
+The \code{PlotBRD} function produces control graphs representing intermediate
+results of the \link{BRD} function. These control graphs are useful to adapt
+parameters of the BRD method to the considered read count matrix.
 }
 \seealso{
 \link{BRD},

@@ -18,7 +18,6 @@ matrix used to identify these candidates.
 }
 \seealso{
 \link{BRD},
-  \link{ScalingFactors},
-  \link{NormalizeCountMatrix},
-  \link{ReadCountMatrix}
+  \link{PlotBRD},
+  \link{PlotCountDistributions}
 }

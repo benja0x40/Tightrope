@@ -1,6 +1,11 @@
 # =============================================================================.
 #' Compute read counts over genomic intervals for multiple bam files
 # -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{DitherCounts},
+#'   \link{NormalizeCountMatrix},
+#'   \link{PlotCountDistributions}
+# -----------------------------------------------------------------------------.
 #' @inheritParams GenomicRanges::countOverlaps
 #'
 #' @param bam.files

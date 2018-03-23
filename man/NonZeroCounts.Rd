@@ -18,7 +18,6 @@ Remove observations with missing values
 }
 \seealso{
 \link{DetectCounts},
-  \link{ReadCountMatrix},
-  \link{MakeReadCounts}
+  \link{ReadCountMatrix}
 }
 \keyword{internal}

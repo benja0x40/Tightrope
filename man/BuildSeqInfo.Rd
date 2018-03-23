@@ -4,10 +4,10 @@
 \alias{BuildSeqInfo}
 \title{Retrieve chromosome information from UCSC and build Seqinfo object}
 \usage{
-BuildSeqInfo(x)
+BuildSeqInfo(genome)
 }
 \arguments{
-\item{x}{character.}
+\item{genome}{name of an UCSC genome build.}
 }
 \value{
 \code{BuildSeqInfo} returns a \link{Seqinfo} object.

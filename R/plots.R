@@ -1,4 +1,53 @@
-# FUNCTIONS | 2D PLOTS #########################################################
+# =============================================================================.
+#' Plot empirical distributions of read counts
+# -----------------------------------------------------------------------------.
+#' @seealso
+#'   \link{DitherCounts},
+#'   \link{SideBySideDensity},
+#'   \link{ReadCountMatrix}
+# -----------------------------------------------------------------------------.
+#' @param x
+#' a read count matrix, preferably dithered and log2 transformed.
+#'
+#' @param ...
+#' optional arguments forwarded to the \link{SideBySideDensity} function.
+#'
+#' @return NULL
+# -----------------------------------------------------------------------------.
+#' @examples
+#' # Simulation of a read count matrix with 3 populations of 10000 observations
+#' p <- c(10000, 10000, 10000)
+#' m <- DefineSimulation(
+#'   chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 3), replicate = 2
+#' )
+#' r <-  MakeSimulation(p = p, m = m)
+#'
+#' grp <- r$group # Population memberships
+#' cnt <- r$data  # Simulated counts
+#'
+#' # Prepare figure layout and graphic options
+#' layout(matrix(1:4, 2, 2, byrow = T))
+#' par(pch = 20)
+#'
+#' # Show the empirical distribution of simulated populations
+#' l2c <- log2(DitherCounts(cnt)) # Dithering and log2 transformation
+#' xyl <- range(l2c[FiniteValues(l2c), ])
+#'
+#' r <- PlotCountDistributions(l2c, ylim = xyl, main = "Total")
+#' for(i in sort(unique(grp))) {
+#'   main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
+#'   r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
+#' }
+# -----------------------------------------------------------------------------.
+#' @export
+PlotCountDistributions <- function(x, ...) {
+  r <- SideBySideDensity(
+    x, method = "ash", parameters = list(color = "Wry"),
+    ylab = "log2(counts)", las = 2, ...
+  )
+}
+
+# HIDDEN #######################################################################
 
 # =============================================================================.
 #' plot_samples
@@ -32,32 +81,6 @@ plot_samples <- function(
   )
 
   # for(g in grp_order) points(x[grp == g, ], col = grp_clr[g], cex = cex)
-}
-
-# =============================================================================.
-#' PlotQuickShift
-# -----------------------------------------------------------------------------.
-#' @param x matrix
-#' @param g graph
-#' @param ...
-#'
-#' @return NULL
-# -----------------------------------------------------------------------------.
-#' @keywords internal
-#' @export
-PlotQuickShift <- function(
-  x, g, new = T, length = 0.05, col = rgb(0, 0, 0, 0.2), ...
-) {
-
-  if(new) plot(x[, 1], x[, 2], type='n')
-
-  el <- as_edgelist(g)
-  suppressWarnings(
-    arrows(
-      x[el[, 1], 1], x[el[, 1], 2], x[el[, 2], 1], x[el[, 2], 2],
-      length = length, col = col, ...
-    )
-  )
 }
 
 # =============================================================================.
@@ -150,4 +173,30 @@ plot_sources_2D <- function(theta, components = NULL, p = 0.5, clr = NULL, cente
     )
     if(center) points(mu[1], mu[2], col = clr[i], pch = 19)
   }
+}
+
+# =============================================================================.
+#' PlotQuickShift
+# -----------------------------------------------------------------------------.
+#' @param x matrix
+#' @param g graph
+#' @param ...
+#'
+#' @return NULL
+# -----------------------------------------------------------------------------.
+#' @keywords internal
+#' @export
+PlotQuickShift <- function(
+  x, g, new = T, length = 0.05, col = rgb(0, 0, 0, 0.2), ...
+) {
+
+  if(new) plot(x[, 1], x[, 2], type='n')
+
+  el <- as_edgelist(g)
+  suppressWarnings(
+    arrows(
+      x[el[, 1], 1], x[el[, 1], 2], x[el[, 2], 1], x[el[, 2], 2],
+      length = length, col = col, ...
+    )
+  )
 }

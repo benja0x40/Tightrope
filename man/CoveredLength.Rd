@@ -2,7 +2,7 @@
 % Please edit documentation in R/GenomicRanges.R
 \name{CoveredLength}
 \alias{CoveredLength}
-\title{Compute the genomic length covered by sequencing reads}
+\title{Compute the genomic length covered by sequence reads}
 \usage{
 CoveredLength(cvg)
 }
@@ -13,6 +13,9 @@ CoveredLength(cvg)
 \code{CoveredLength} returns the genomic length covered by sequencing reads.
 }
 \description{
-Compute the genomic length covered by sequencing reads
+Compute the genomic length covered by sequence reads
+}
+\seealso{
+\link{GenomicCoverage}
 }
 \keyword{internal}

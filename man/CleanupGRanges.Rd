@@ -9,18 +9,24 @@ CleanupGRanges(grg, seqinfo, organism, blacklist = NULL, keep.strand = F)
 \arguments{
 \item{grg}{a \link{GRanges} object.}
 
-\item{seqinfo}{a \link{Seqinfo} object.}
+\item{seqinfo}{\link{Seqinfo} object for the considered organism.}
 
-\item{organism}{character.}
+\item{organism}{name of the organism (e.g. "Homo sapiens", "Mus musculus").}
 
-\item{blacklist}{a \link{GRanges} object (default = NULL, none).}
+\item{blacklist}{an optional \link{GRanges} object used to filter out any genomic ranges
+overlaping with the blacklisted one (default = NULL, none).}
 
-\item{keep.strand}{logical (default = F, no).}
+\item{keep.strand}{logical, when TRUE strand information is retained, when FALSE (default)
+strand information is discarded (i.e. strand = "*").}
 }
 \value{
 \code{CleanupGRanges} returns a \link{GRanges} object.
 }
 \description{
-Cleanup genomic ranges (e.g. for imported ChIP-seq peaks from bed files).
+Cleanup genomic ranges such as imported ChIP-seq peaks from bed files by
+removing ranges corresponding to non canonical chromosomes.
 }
-\keyword{internal}
+\seealso{
+\link{ImportGenomicRanges},
+  \link{ImportCpGIslandExt}
+}

@@ -13,10 +13,10 @@ DitherCounts(x)
 \code{DitherCounts} returns a matrix of dithered counts.
 }
 \description{
-Apply dithering to read counts
+The \code{DitherCounts} function applies a triangular dithering filter
+which eliminates the presence of identical values in a read count matrix.
 }
 \seealso{
 \link{NonZeroCounts},
-  \link{ReadCountMatrix},
-  \link{MakeReadCounts}
+  \link{ReadCountMatrix}
 }

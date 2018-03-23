@@ -17,4 +17,6 @@ By default u = 1 (bp).
 \description{
 Total coverage of genomic intervals
 }
-\keyword{internal}
+\seealso{
+\link{CoveredLength}
+}

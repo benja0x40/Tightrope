@@ -74,7 +74,8 @@ normalization factors.
 }
 \seealso{
 \link{PlotBRD},
-  \link{CDaDaDR},
-  \link{QuickShiftClustering},
+  \link{BackgroundCandidates},
+  \link{ScalingFactors},
+  \link{NormalizeCountMatrix},
   \link{ReadCountMatrix}
 }

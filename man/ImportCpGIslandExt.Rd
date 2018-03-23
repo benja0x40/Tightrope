@@ -2,12 +2,24 @@
 % Please edit documentation in R/UCSC.R
 \name{ImportCpGIslandExt}
 \alias{ImportCpGIslandExt}
-\title{Import UCSC cpgIslandExt.txt file format}
+\title{Import CpG-islands from UCSC genomes}
 \usage{
-ImportCpGIslandExt(fpath, ...)
+ImportCpGIslandExt(genome = NULL, fpath = NULL,
+  goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
+  cpgIslandExt = "database/cpgIslandExt.txt.gz", ...)
 }
 \arguments{
-\item{fpath}{file path or url.}
+\item{genome}{name of an UCSC genome build. When \code{genome} is unspecified, the
+\code{fpath} argument must be specified.}
+
+\item{fpath}{path to a cpgIslandExt.txt.gz file. When \code{fpath} is unspecified, the
+\code{genome} argument must be specified.}
+
+\item{goldenPath}{base URL of UCSC genome repositories
+(default = "http://hgdownload.soe.ucsc.edu/goldenPath").}
+
+\item{cpgIslandExt}{path to cpgIslandExt.txt.gz files in the UCSC genome repositories
+(default = "database/cpgIslandExt.txt.gz").}
 
 \item{...}{optional parameters forwarded to the \link{ImportGenomicRanges} function.}
 }
@@ -15,9 +27,10 @@ ImportCpGIslandExt(fpath, ...)
 \code{ImportCpGIslandExt} returns a \link{GRanges} object.
 }
 \description{
-Import UCSC cpgIslandExt.txt file format
+Import CpG-islands from UCSC genomes
 }
 \seealso{
-\link{ImportGenomicRanges}
+\link{ImportGenomicRanges},
+  \link{CleanupGRanges},
+  \link{ReadCountMatrix}
 }
-\keyword{internal}

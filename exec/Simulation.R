@@ -5,16 +5,6 @@ library(Tightrope)
 # =============================================================================.
 #
 # -----------------------------------------------------------------------------.
-PlotDistribution <- function(x, ...) {
-  SideBySideDensity(
-    x, method = "ash", parameters = list(color = "Wry"),
-    ylab = "log2(counts)", las = 2, ...
-  )
-}
-
-# =============================================================================.
-#
-# -----------------------------------------------------------------------------.
 Preview <- function(brd.args, sim.prm) {
   r <- with(sim.prm, MakeSimulation(p = p, m = m))
 
@@ -30,10 +20,10 @@ Preview <- function(brd.args, sim.prm) {
   brd <- do.call(BRD, args = c(list(cnt = cnt, controls = ctrl), brd.args))
 
   layout(matrix(1:9, 3, 3, byrow = T))
-  r <- PlotDistribution(l2c, ylim = xyl, main = "Total")
+  r <- PlotCountDistributions(l2c, ylim = xyl, main = "Total")
   for(i in sort(unique(grp))) {
     main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
-    r <- PlotDistribution(l2c[grp == i, ], ylim = xyl, main = main)
+    r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
   }
   input <- rowMeans(l2c[, ctrl])
   for(lbl in chip) {
@@ -155,6 +145,48 @@ sim.prm <- list(
   )
 )
 
+# TESTS ########################################################################
+
+if(F) {
+  # Simulation of a read count matrix with 3 populations of observations
+  # The first population is globally invariable (N = 1000) whereas the two
+  # others present negatively correlated variations.
+  # By design, the simulation of the invariable population is such that the
+  # true value of normalization factors is always equal to 1.0
+  p <- c(1000, 4000, 10000)
+  m <- DefineSimulation(
+    chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 2.5), replicate = 2
+  )
+  r <-  MakeSimulation(p = p, m = m)
+
+  grp <- r$group # Population memberships
+  cnt <- r$data  # Simulated counts
+
+  # Names of the simulated ChIP and Input samples
+  chip <- grep("ChIP", colnames(cnt), value = T)
+  ctrl <- grep("Input", colnames(cnt), value = T)
+
+  # Prepare figure layout and graphic options
+  layout(matrix(1:4, 2, 2, byrow = T))
+  par(pch = 20)
+
+  # Show the empirical distribution of simulated populations
+  l2c <- log2(DitherCounts(cnt))
+  xyl <- range(l2c[FiniteValues(l2c), ])
+
+  r <- PlotCountDistributions(l2c, ylim = xyl, main = "Total")
+  for(i in sort(unique(grp))) {
+    main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
+    r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
+  }
+
+  # Search background candidates knowing only that there should be 3 populations
+  brd <- BRD(cnt = cnt, controls = ctrl, ncl = 3, bdt = c(0.1, 0.05))
+
+  PlotBRD(brd) # Show control graphs
+
+  barplot(ScalingFactors(brd), las = 2) # Show normalization factors
+}
 
 # BENCHMARKS ###################################################################
 
@@ -172,7 +204,7 @@ sim.prm <- list(
 )
 brd.args <- list(ncl = 2, dither = 5, knn = 150, bdt = c(0.2, 0.1))
 # -----------------------------------------------------------------------------.
-if(T) Preview(brd.args, sim.prm)
+if(F) Preview(brd.args, sim.prm)
 # -----------------------------------------------------------------------------.
 if(F) {
   test <- "dither"

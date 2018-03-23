@@ -7,7 +7,7 @@
 GenomicTiling(g, s, w = NULL)
 }
 \arguments{
-\item{g}{a \link{Seqinfo} object.}
+\item{g}{\link{Seqinfo} object for the considered organism.}
 
 \item{s}{integer, spacing between genomic bins in bp.}
 
@@ -18,4 +18,10 @@ GenomicTiling(g, s, w = NULL)
 }
 \description{
 Whole genome tiling with regular bins (i.e. running windows)
+}
+\seealso{
+\link{ImportGenomicRanges},
+  \link{ImportCpGIslandExt},
+  \link{BuildGeneFeatures},
+  \link{ReadCountMatrix}
 }

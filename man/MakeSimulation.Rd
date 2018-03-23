@@ -7,9 +7,11 @@
 MakeSimulation(p = NULL, m = NULL, f = NULL)
 }
 \arguments{
-\item{p}{integer vector, population sizes}
+\item{p}{integer vector of population sizes, the first one corresponding to the
+invariable population.}
 
-\item{m}{matrix of parameters produced by the \link{DefineSimulation} function.}
+\item{m}{matrix of parameters for the variable populations, which can be produced by
+calling the \link{DefineSimulation} function.}
 
 \item{f}{list of functions allowing to use custom generators for simulated
 measurements (default = NULL, recommended).}
@@ -20,7 +22,37 @@ measurements (default = NULL, recommended).}
 \item{group}{population memberships.}
 }
 \description{
-Simulate ChIP-seq read count matrixes
+The \code{MakeSimulation} function generates random read count matrixes
+presenting distinct populations accross simulated ChIP and Input samples.
+By design the first population is globally invariable, such that the true
+value of normalization factors between the simulated conditions is always
+equal to 1.0. The simulated variable populations can be defined using the
+\link{DefineSimulation} function.
+}
+\examples{
+# Simulation of a read count matrix with 3 populations of 10000 observations
+p <- c(10000, 10000, 10000)
+m <- DefineSimulation(
+  chip = 5, patterns = c("^", "v"), enrichment = c(1.0, 3), replicate = 2
+)
+r <-  MakeSimulation(p = p, m = m)
+
+grp <- r$group # Population memberships
+cnt <- r$data  # Simulated counts
+
+# Prepare figure layout and graphic options
+layout(matrix(1:4, 2, 2, byrow = T))
+par(pch = 20)
+
+# Show the empirical distribution of simulated populations
+l2c <- log2(DitherCounts(cnt)) # Dithering and log2 transformation
+xyl <- range(l2c[FiniteValues(l2c), ])
+
+r <- PlotCountDistributions(l2c, ylim = xyl, main = "Total")
+for(i in sort(unique(grp))) {
+  main <- ifelse(i == 1, "Invariable subset", paste("Variable subset", i - 1))
+  r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
+}
 }
 \seealso{
 \link{DefineSimulation}

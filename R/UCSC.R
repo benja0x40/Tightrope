@@ -1,34 +1,26 @@
 # =============================================================================.
-#' Retrieve chromosome information from UCSC and build Seqinfo object
-# -----------------------------------------------------------------------------.
-#' @param x
-#' character.
-#'
-#' @return
-#' \code{BuildSeqInfo} returns a \link{Seqinfo} object.
-# -----------------------------------------------------------------------------.
-#' @export
-BuildSeqInfo <- function(x) {
-  s <- fetchExtendedChromInfoFromUCSC(genome = x)
-  s <- with(
-    s, Seqinfo(
-      seqnames = UCSC_seqlevel, seqlengths = UCSC_seqlength,
-      isCircular = circular, genome = x
-    )
-  )
-  s
-}
-
-# HIDDEN #######################################################################
-
-# =============================================================================.
-#' Import UCSC cpgIslandExt.txt file format
+#' Import CpG-islands from UCSC genomes
 # -----------------------------------------------------------------------------.
 #' @seealso
-#'   \link{ImportGenomicRanges}
+#'   \link{ImportGenomicRanges},
+#'   \link{CleanupGRanges},
+#'   \link{ReadCountMatrix}
 # -----------------------------------------------------------------------------.
+#' @param genome
+#' name of an UCSC genome build. When \code{genome} is unspecified, the
+#' \code{fpath} argument must be specified.
+#'
 #' @param fpath
-#' file path or url.
+#' path to a cpgIslandExt.txt.gz file. When \code{fpath} is unspecified, the
+#' \code{genome} argument must be specified.
+#'
+#' @param goldenPath
+#' base URL of UCSC genome repositories
+#' (default = "http://hgdownload.soe.ucsc.edu/goldenPath").
+#'
+#' @param cpgIslandExt
+#' path to cpgIslandExt.txt.gz files in the UCSC genome repositories
+#' (default = "database/cpgIslandExt.txt.gz").
 #'
 #' @param ...
 #' optional parameters forwarded to the \link{ImportGenomicRanges} function.
@@ -36,11 +28,28 @@ BuildSeqInfo <- function(x) {
 #' @return
 #' \code{ImportCpGIslandExt} returns a \link{GRanges} object.
 # -----------------------------------------------------------------------------.
-#' @keywords internal
 #' @export
-ImportCpGIslandExt <- function (fpath, ...) {
-  grg <- ImportGenomicRanges(
-    fpath, chr=2, start=3, end=4,
+ImportCpGIslandExt <- function (
+  genome = NULL, fpath = NULL,
+  goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
+  cpgIslandExt = "database/cpgIslandExt.txt.gz", ...
+) {
+  if(is.null(fpath) & is.null(genome)) stop("missing genome or file path")
+  if(is.null(genome) & ! is.null(fpath)) {
+    if(! file.exists(fpath)) stop("file not found")
+  }
+
+  sinfo <- NULL
+  if(is.null(fpath) & ! is.null(genome)) {
+    fpath <- paste0("UCSC_cpgIslandExt_", genome, ".txt.gz")
+    download.file(
+      paste0(goldenPath, "/", genome, "/", cpgIslandExt), destfile = fpath
+    )
+    sinfo <- BuildSeqInfo(genome)
+  }
+
+  args <- list(
+    fpath = fpath, chr=2, start=3, end=4,
     xidx = c(1,5:11),
     xlbl = c(
       "bin",
@@ -51,11 +60,41 @@ ImportCpGIslandExt <- function (fpath, ...) {
       "perCpg",
       "perGc",
       "obsExp"
-    ),
-    ...
+    )
   )
+  extra <- list(...)
+  if(length(extra) > 0) args <- c(args, extra)
+
+  if(! ("seqinfo" %in% names(args) | is.null(sinfo))) {
+    args <- c(args, seqinfo = sinfo)
+  }
+  grg <- do.call(ImportGenomicRanges, args = args)
+
   grg
 }
+
+# =============================================================================.
+#' Retrieve chromosome information from UCSC and build Seqinfo object
+# -----------------------------------------------------------------------------.
+#' @param genome
+#' name of an UCSC genome build.
+#'
+#' @return
+#' \code{BuildSeqInfo} returns a \link{Seqinfo} object.
+# -----------------------------------------------------------------------------.
+#' @export
+BuildSeqInfo <- function(genome) {
+  s <- fetchExtendedChromInfoFromUCSC(genome = genome)
+  s <- with(
+    s, Seqinfo(
+      seqnames = UCSC_seqlevel, seqlengths = UCSC_seqlength,
+      isCircular = circular, genome = genome
+    )
+  )
+  s
+}
+
+# HIDDEN #######################################################################
 
 # =============================================================================.
 #' Download and import UCSC's liftOver chain files

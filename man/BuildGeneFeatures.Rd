@@ -20,3 +20,8 @@ BuildGeneFeatures(organism, gene_id = "ensembl_gene_id",
 \description{
 Build an R environment containing genomic features from Ensembl
 }
+\seealso{
+\link{ImportCpGIslandExt},
+  \link{ImportGenomicRanges},
+  \link{ReadCountMatrix}
+}
