@@ -11,7 +11,7 @@
 #' @import methods
 #' @import grDevices
 #' @import graphics
-#' @import stats median prcomp approx rnbinom runif
+#' @importFrom stats median prcomp approx rnbinom runif
 #' @importFrom utils download.file read.delim setTxtProgressBar txtProgressBar
 #' @importFrom matrixStats rowMeans2 colMeans2 colSds
 #' @importFrom triangle rtriangle

@@ -11,4 +11,4 @@ EGA91_human
 \description{
 Ensembl genes - Homo sapiens - GRCh38 / hg38 (rel. 91, Dec. 2017)
 }
-\keyword{datasets}
+\keyword{internal}

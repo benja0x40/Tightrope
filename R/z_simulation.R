@@ -22,6 +22,7 @@
 #' @return
 #' \code{DefineSimulation} returns a \code{matrix} of parameters.
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 DefineSimulation <- function(
   chip = 3, replicate = 1, input = 2, enrichment = c(1.0, 3.0), patterns = "^"
@@ -113,6 +114,7 @@ DefineSimulation <- function(
 #'   r <- PlotCountDistributions(l2c[grp == i, ], ylim = xyl, main = main)
 #' }
 # -----------------------------------------------------------------------------.
+#' @keywords internal
 #' @export
 MakeSimulation <- function(p = NULL, m = NULL, f = NULL) {
 

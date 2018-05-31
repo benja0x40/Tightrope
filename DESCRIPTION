@@ -1,6 +1,6 @@
 Package: Tightrope
 Type: Package
-Version: 0.7.0
+Version: 0.7.1
 Authors@R:
     person(
       "Benjamin", "Leblanc",
@@ -9,12 +9,8 @@ Authors@R:
     )
 BugReports: https://github.com/benja0x40/Tightrope/issues
 URL: https://github.com/benja0x40/Tightrope
-Title: Tightrope - Accurate ChIP-seq normalization
-Description:
-    Computational method for the normalization and analysis of ChIP-seq
-    enrichments relative to experimental backgrounds, allowing accurate
-    estimation of normalization factors in conditions involving global
-    variations of chromatin marks.
+Title: ChIP-seq normalization according to background reads density.
+Description: ChIP-seq normalization according to background reads density.
 License: GPL-3
 Imports:
     methods,

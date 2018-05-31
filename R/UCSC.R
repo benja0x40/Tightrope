@@ -1,4 +1,25 @@
 # =============================================================================.
+#' Retrieve chromosome information from UCSC and build Seqinfo object
+# -----------------------------------------------------------------------------.
+#' @param genome
+#' name of an UCSC genome build.
+#'
+#' @return
+#' \code{BuildSeqInfo} returns a \link{Seqinfo} object.
+# -----------------------------------------------------------------------------.
+#' @export
+BuildSeqInfo <- function(genome) {
+  s <- fetchExtendedChromInfoFromUCSC(genome = genome)
+  s <- with(
+    s, Seqinfo(
+      seqnames = UCSC_seqlevel, seqlengths = UCSC_seqlength,
+      isCircular = circular, genome = genome
+    )
+  )
+  s
+}
+
+# =============================================================================.
 #' Import CpG-islands from UCSC genomes
 # -----------------------------------------------------------------------------.
 #' @seealso
@@ -22,6 +43,10 @@
 #' path to cpgIslandExt.txt.gz files in the UCSC genome repositories
 #' (default = "database/cpgIslandExt.txt.gz").
 #'
+#' @param keep.file
+#' logical value controlling whether the downloaded file should be kept or
+#' deleted (default = FALSE, delete).
+#'
 #' @param ...
 #' optional parameters forwarded to the \link{ImportGenomicRanges} function.
 #'
@@ -32,8 +57,10 @@
 ImportCpGIslandExt <- function (
   genome = NULL, fpath = NULL,
   goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
-  cpgIslandExt = "database/cpgIslandExt.txt.gz", ...
+  cpgIslandExt = "database/cpgIslandExt.txt.gz",
+  keep.file = FALSE, quiet = FALSE, ...
 ) {
+
   if(is.null(fpath) & is.null(genome)) stop("missing genome or file path")
   if(is.null(genome) & ! is.null(fpath)) {
     if(! file.exists(fpath)) stop("file not found")
@@ -43,23 +70,17 @@ ImportCpGIslandExt <- function (
   if(is.null(fpath) & ! is.null(genome)) {
     fpath <- paste0("UCSC_cpgIslandExt_", genome, ".txt.gz")
     utils::download.file(
-      paste0(goldenPath, "/", genome, "/", cpgIslandExt), destfile = fpath
+      paste0(goldenPath, "/", genome, "/", cpgIslandExt), destfile = fpath,
+      quiet = quiet
     )
     sinfo <- BuildSeqInfo(genome)
   }
 
   args <- list(
-    fpath = fpath, chr=2, start=3, end=4,
-    xidx = c(1,5:11),
+    fpath = fpath, chr = 2, start = 3, end = 4,
+    xidx = c(1, 5:11),
     xlbl = c(
-      "bin",
-      "name",
-      "length",
-      "cpgNum",
-      "gcNum",
-      "perCpg",
-      "perGc",
-      "obsExp"
+      "bin", "name", "length", "cpgNum", "gcNum", "perCpg", "perGc", "obsExp"
     )
   )
   extra <- list(...)
@@ -70,28 +91,8 @@ ImportCpGIslandExt <- function (
   }
   grg <- do.call(ImportGenomicRanges, args = args)
 
+  if(! keep.file) file.remove(fpath)
   grg
-}
-
-# =============================================================================.
-#' Retrieve chromosome information from UCSC and build Seqinfo object
-# -----------------------------------------------------------------------------.
-#' @param genome
-#' name of an UCSC genome build.
-#'
-#' @return
-#' \code{BuildSeqInfo} returns a \link{Seqinfo} object.
-# -----------------------------------------------------------------------------.
-#' @export
-BuildSeqInfo <- function(genome) {
-  s <- fetchExtendedChromInfoFromUCSC(genome = genome)
-  s <- with(
-    s, Seqinfo(
-      seqnames = UCSC_seqlevel, seqlengths = UCSC_seqlength,
-      isCircular = circular, genome = genome
-    )
-  )
-  s
 }
 
 # HIDDEN #######################################################################
@@ -111,6 +112,7 @@ BuildSeqInfo <- function(genome) {
 #' @keywords internal
 #' @export
 ImportLiftOverChain <- function(url, path = "") {
+
   lfp <- MakePath(path, basename(url))
   utils::download.file(url, lfp)
   system(paste("gunzip", lfp))

@@ -6,7 +6,7 @@
 \usage{
 ImportCpGIslandExt(genome = NULL, fpath = NULL,
   goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
-  cpgIslandExt = "database/cpgIslandExt.txt.gz", ...)
+  cpgIslandExt = "database/cpgIslandExt.txt.gz", keep.file = FALSE, ...)
 }
 \arguments{
 \item{genome}{name of an UCSC genome build. When \code{genome} is unspecified, the
@@ -20,6 +20,9 @@ ImportCpGIslandExt(genome = NULL, fpath = NULL,
 
 \item{cpgIslandExt}{path to cpgIslandExt.txt.gz files in the UCSC genome repositories
 (default = "database/cpgIslandExt.txt.gz").}
+
+\item{keep.file}{logical value controlling whether the downloaded file should be kept or
+deleted (default = FALSE, delete).}
 
 \item{...}{optional parameters forwarded to the \link{ImportGenomicRanges} function.}
 }

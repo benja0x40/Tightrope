@@ -11,4 +11,4 @@ mm10_blacklist
 \description{
 ENCODE blacklist - Mus musculus - GRCm38 / mm10
 }
-\keyword{datasets}
+\keyword{internal}

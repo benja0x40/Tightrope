@@ -11,4 +11,4 @@ EGA91_mouse
 \description{
 Ensembl genes - Mus musculus - GRCm38 / mm10 (rel. 91, Dec. 2017)
 }
-\keyword{datasets}
+\keyword{internal}

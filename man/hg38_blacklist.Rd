@@ -11,4 +11,4 @@ hg38_blacklist
 \description{
 ENCODE blacklist - Homo sapiens - GRCh38 / hg38
 }
-\keyword{datasets}
+\keyword{internal}

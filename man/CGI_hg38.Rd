@@ -11,4 +11,4 @@ CGI_hg38
 \description{
 UCSC CGIs - Homo sapiens - GRCh38 / hg38
 }
-\keyword{datasets}
+\keyword{internal}

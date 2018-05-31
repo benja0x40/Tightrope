@@ -59,7 +59,7 @@ test_that("DitherCounts", {
 
 # + NonZeroCounts ---------------------------------------------------------------
 test_that("NonZeroCounts", {
-  tst <- rbind(
+  cnt <- rbind(
     c(3, 3, 3),
     c(0, 0, 0),
     c(0, 0, 1),
@@ -71,32 +71,40 @@ test_that("NonZeroCounts", {
     c(1, 0, 1),
     c(1, 1, 1)
   )
-  res <- rbind(
+  tst <- rbind(
     c(3, 3, 3),
     c(2, 2, 2),
     c(1, 1, 1)
   )
-  expect_equal(NonZeroCounts(tst), res)
+  expect_equal(NonZeroCounts(cnt), tst)
 })
 
 # + DetectCounts ---------------------------------------------------------------
 test_that("DetectCounts", {
-  tst <- rbind(
+  cnt <- rbind(
     c(0, 0, 0),
     c(0, 0, 1),
     c(0, 1, 0),
     c(1, 0, 0),
-    c(0, 1, 1),
-    c(1, 1, 0),
-    c(1, 0, 1),
+    c(0, 2, 3),
+    c(4, 5, 0),
+    c(6, 0, 7),
     c(1, 1, 1)
   )
-  res <- cbind(
+  tst <- cbind(
     all  = c(F, F, F, F, F, F, F, T),
     none = c(T, F, F, F, F, F, F, F),
-    nbr  = c(0, 1, 1, 1, 2, 2, 2, 3)
+    nbr  = c(0, 1, 1, 1, 2, 2, 2, 3),
+    min  = c(0, 1, 1, 1, 2, 4, 6, 1),
+    max  = c(0, 1, 1, 1, 3, 5, 7, 1)
   )
-  expect_equal(DetectCounts(tst)$all, as.logical(res[,"all"]))
-  expect_equal(DetectCounts(tst)$none, as.logical(res[,"none"]))
-  expect_equal(DetectCounts(tst)$nbr, res[,"nbr"])
+
+  r <- DetectCounts(cnt)
+  expect_equal(r$all, as.logical(tst[,"all"]))
+  expect_equal(r$none, as.logical(tst[,"none"]))
+  expect_equal(r$nbr, tst[,"nbr"])
+
+  r <- DetectCounts(cnt, detailed = TRUE)
+  expect_equal(r$min, tst[,"min"])
+  expect_equal(r$max, tst[,"max"])
 })

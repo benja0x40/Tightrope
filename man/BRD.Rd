@@ -2,7 +2,7 @@
 % Please edit documentation in R/BRD_V3.R
 \name{BRD}
 \alias{BRD}
-\title{Background Read Density}
+\title{Background Reads Density}
 \usage{
 BRD(cnt, controls, sampling = NULL, smobs = TRUE, dither = 5,
   zscore = TRUE, bins = 705, smoothing = 25, bdt = c(0.15, 0.05),

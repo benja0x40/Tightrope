@@ -11,4 +11,4 @@ CGI_mm10
 \description{
 UCSC CGIs - Mus musculus - GRCm38 / mm10
 }
-\keyword{datasets}
+\keyword{internal}

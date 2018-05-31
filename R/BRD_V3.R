@@ -78,7 +78,7 @@ bg_ranking <- function(x, by, controls) {
 }
 
 # =============================================================================.
-#' Background Read Density
+#' Background Reads Density
 # -----------------------------------------------------------------------------.
 #' @seealso
 #'   \link{PlotBRD},
