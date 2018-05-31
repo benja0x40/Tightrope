@@ -19,8 +19,8 @@
 DitherCounts <- function(x) {
 
   zero <- x == 0
-  xmin <- min(x[! zero], na.rm = T)
-  xmax <- max(x[! zero], na.rm = T)
+  xmin <- min(x[! zero], na.rm = TRUE)
+  xmax <- max(x[! zero], na.rm = TRUE)
 
   # dithering
   x <- x + rtriangle(length(x), a = -1, b = 1)
@@ -33,31 +33,6 @@ DitherCounts <- function(x) {
   # no count
   x[zero] <- 0
 
-  x
-}
-
-# =============================================================================.
-#' Localise fully safe numeric observations (i.e. no NA nor Inf)
-# -----------------------------------------------------------------------------.
-#' @seealso
-#'   \link{NonZeroCounts},
-#'   \link{DetectCounts}
-# -----------------------------------------------------------------------------.
-#' @param x
-#' numeric vector or matrix.
-#'
-#' @return
-#' \code{FiniteValues} returns a logical vector.
-# -----------------------------------------------------------------------------.
-#' @export
-FiniteValues <- function(x) {
-  if(is.null(dim(x))) {
-    x <- sapply(x, FUN = is.finite)
-  } else {
-    n <- ncol(x)
-    x <- t(apply(x, MARGIN = 1, FUN = is.finite))
-    x <- rowSums(x) == n
-  }
   x
 }
 
@@ -110,7 +85,7 @@ NonZeroCounts <- function(cnt) {
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-DetectCounts <- function(cnt, detailed = F) {
+DetectCounts <- function(cnt, detailed = FALSE) {
   cnt <- as.matrix(cnt)
   n <- ncol(cnt)
   k <- apply(cnt, MARGIN = 1, FUN = function(x) { sum(x > 0) })

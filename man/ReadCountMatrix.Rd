@@ -5,7 +5,7 @@
 \title{Compute read counts over genomic intervals for multiple bam files}
 \usage{
 ReadCountMatrix(bam.files, grg, paired, names = NULL, maxgap = -1L,
-  minoverlap = 0L, type = "any", ignore.strand = T, ...)
+  minoverlap = 0L, type = "any", ignore.strand = TRUE, ...)
 }
 \arguments{
 \item{bam.files}{character vector containing paths to the bam files (mapped reads).}

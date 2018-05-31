@@ -41,7 +41,7 @@ grp <- r$group # Population memberships
 cnt <- r$data  # Simulated counts
 
 # Prepare figure layout and graphic options
-layout(matrix(1:4, 2, 2, byrow = T))
+layout(matrix(1:4, 2, 2, byrow = TRUE))
 par(pch = 20)
 
 # Show the empirical distribution of simulated populations

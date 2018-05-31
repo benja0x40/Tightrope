@@ -4,7 +4,7 @@
 \alias{ConsensusGRanges}
 \title{Consensus genomic ranges}
 \usage{
-ConsensusGRanges(grl, minoverlap, ignore.strand = T, seqinfo = NULL)
+ConsensusGRanges(grl, minoverlap, ignore.strand = TRUE, seqinfo = NULL)
 }
 \arguments{
 \item{grl}{a list of \link{GRanges} objects refering to the same genome build.}

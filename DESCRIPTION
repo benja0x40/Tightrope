@@ -1,8 +1,13 @@
 Package: Tightrope
 Type: Package
-Version: 0.6.5
-Author: Benjamin Leblanc
-Maintainer: Benjamin Leblanc <benjaminolivierleblanc@gmail.com>
+Version: 0.7.0
+Authors@R:
+    person(
+      "Benjamin", "Leblanc",
+      email = "benjaminolivierleblanc@gmail.com",
+      role = c("aut", "cre")
+    )
+BugReports: https://github.com/benja0x40/Tightrope/issues
 URL: https://github.com/benja0x40/Tightrope
 Title: Tightrope - Accurate ChIP-seq normalization
 Description:
@@ -10,44 +15,35 @@ Description:
     enrichments relative to experimental backgrounds, allowing accurate
     estimation of normalization factors in conditions involving global
     variations of chromatin marks.
-License: GPL (>= 2)
+License: GPL-3
 Imports:
-    stringr,
-    data.table,
+    methods,
+    utils,
+    stats,
+    grDevices,
+    graphics,
+    matrixStats,
     triangle,
-    caTools,
+    data.table,
     ica,
-    FNN,
-    igraph,
     mixtools,
     Rsamtools,
     GenomicAlignments,
-    GenomicRanges,
     GenomicFeatures,
     rtracklayer,
-    biomaRt,
-    Barbouille
+    biomaRt
 Depends:
-    R (>= 3.4.0),
-    stringr,
-    data.table,
-    triangle,
-    caTools,
-    ica,
-    FNN,
-    igraph,
-    mixtools,
-    Rsamtools,
-    GenomicAlignments,
+    R (>= 3.5.0),
     GenomicRanges,
-    GenomicFeatures,
-    rtracklayer,
-    biomaRt,
     Barbouille
 Suggests:
+    devtools,
+    roxygen2,
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    covr
+Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr

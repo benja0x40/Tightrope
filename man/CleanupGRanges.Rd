@@ -4,7 +4,8 @@
 \alias{CleanupGRanges}
 \title{Cleanup genomic ranges}
 \usage{
-CleanupGRanges(grg, seqinfo, organism, blacklist = NULL, keep.strand = F)
+CleanupGRanges(grg, seqinfo, organism, blacklist = NULL,
+  keep.strand = FALSE)
 }
 \arguments{
 \item{grg}{a \link{GRanges} object.}

@@ -100,7 +100,7 @@ DefineSimulation <- function(
 #' cnt <- r$data  # Simulated counts
 #'
 #' # Prepare figure layout and graphic options
-#' layout(matrix(1:4, 2, 2, byrow = T))
+#' layout(matrix(1:4, 2, 2, byrow = TRUE))
 #' par(pch = 20)
 #'
 #' # Show the empirical distribution of simulated populations
@@ -172,14 +172,14 @@ MakeSimulation <- function(p = NULL, m = NULL, f = NULL) {
 #' vector of count values (default = \code{1:k})
 #'
 #' @param extended
-#' logical (default = F)
+#' logical (default = FALSE)
 #'
 #' @return
 #' \code{RandomCounts} returns a list.
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
+RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = FALSE) {
 
   chk <- sum(2^(0:2) * (! sapply(list(k, p, v), is.null)))
 
@@ -212,7 +212,7 @@ RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
   p <- p / sum(p)
 
   x <- matrix(
-    sample(1:k, size = n * d, replace = T, prob = p),
+    sample(1:k, size = n * d, replace = TRUE, prob = p),
     nrow = n, ncol = d
   )
 
@@ -225,7 +225,7 @@ RandomCounts <- function(n, d, k = NULL, p = NULL, v = NULL, extended = F) {
       rep(1:k, k),
       rep(1:k, each = k)
     )
-    z <- rowMeans(apply(m, 2, function(i) p[i]))
+    z <- matrixStats::rowMeans2(apply(m, 2, function(i) p[i]))
     z <- z / sum(z)
     # Value substitution and result
     m <- matrix(v[m], k^2, 2)

@@ -16,7 +16,7 @@
 #' numeric weight (i.e. probability) associated to observations
 #'
 #' @param ML
-#' logical (reserved, default = T)
+#' logical (reserved, default = TRUE)
 #'
 #' @return
 #' \code{mv_mle} returns a list with the following elements:
@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-mv_mle <- function(x, w = NULL, ML = T) {
+mv_mle <- function(x, w = NULL, ML = TRUE) {
 
   x <- as.matrix(x)
   n <- nrow(x)
@@ -35,7 +35,7 @@ mv_mle <- function(x, w = NULL, ML = T) {
   w <- w / sum(w)
 
   # center vector
-  mu <- colSums(w * x, na.rm = T)
+  mu <- colSums(w * x, na.rm = TRUE)
 
   # covariance matrix
   x <- sqrt(w) * (x - matrix(1, n) %*% mu)
@@ -95,7 +95,7 @@ mv_rsg <- function(n, theta) {
   ns <- length(theta)                     # number of sources
   nv <- length(theta[[1]][[2]])           # number of variables (or dimensions)
   nx <- round(n * sapply(theta, "[[", 1)) # number of observations
-  spl <- data.frame(group = 0, matrix(0, sum(nx), nv), stringsAsFactors = F)
+  spl <- data.frame(group = 0, matrix(0, sum(nx), nv), stringsAsFactors = FALSE)
   a <- b <- 0
   for(i in 1:ns) {
     a <- b + 1
@@ -131,7 +131,7 @@ mv_init_param <- function(x, ns) {
   x <- as.matrix(x)
   nv <- ncol(x)       # number of variables (or dimensions)
   nx <- nrow(x)       # number of observations
-  r <- matrix(x[sample(1:nx, size = ns, replace = F), ], nrow = ns)
+  r <- matrix(x[sample(1:nx, size = ns, replace = FALSE), ], nrow = ns)
   a <- mv_mle(x)
   theta <- vector("list", ns)
   for(i in 1:ns) {

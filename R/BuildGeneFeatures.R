@@ -38,7 +38,7 @@ BuildGeneFeatures <- function(
       "CCS",        "constitutive coding sequences (i.e. 'purely' exon)",
       "CNC",        "constitutive intragenic non-coding sequences",
       "ACS",        "alternative coding sequence (not CCS or CNC)"
-    ), nrow = 8, byrow = T, dimnames = list(NULL, c("object", "description"))),
+    ), nrow = 8, byrow = TRUE, dimnames = list(NULL, c("object", "description"))),
     stringsAsFactors = F
   )
   # ---------------------------------------------------------------------------.

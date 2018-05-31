@@ -4,7 +4,7 @@
 \alias{mv_mle}
 \title{Multivariate normal distribution: maximum likelihood estimation}
 \usage{
-mv_mle(x, w = NULL, ML = T)
+mv_mle(x, w = NULL, ML = TRUE)
 }
 \arguments{
 \item{x}{numeric matrix representing multivariate data where rows = observations
@@ -12,7 +12,7 @@ and columns = samples or conditions.}
 
 \item{w}{numeric weight (i.e. probability) associated to observations}
 
-\item{ML}{logical (reserved, default = T)}
+\item{ML}{logical (reserved, default = TRUE)}
 }
 \value{
 \code{mv_mle} returns a list with the following elements:

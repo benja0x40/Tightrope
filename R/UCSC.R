@@ -42,7 +42,7 @@ ImportCpGIslandExt <- function (
   sinfo <- NULL
   if(is.null(fpath) & ! is.null(genome)) {
     fpath <- paste0("UCSC_cpgIslandExt_", genome, ".txt.gz")
-    download.file(
+    utils::download.file(
       paste0(goldenPath, "/", genome, "/", cpgIslandExt), destfile = fpath
     )
     sinfo <- BuildSeqInfo(genome)
@@ -112,7 +112,7 @@ BuildSeqInfo <- function(genome) {
 #' @export
 ImportLiftOverChain <- function(url, path = "") {
   lfp <- MakePath(path, basename(url))
-  download.file(url, lfp)
+  utils::download.file(url, lfp)
   system(paste("gunzip", lfp))
   lfp <- gsub("\\.gz$", "", lfp)
   chain <- import.chain(lfp)

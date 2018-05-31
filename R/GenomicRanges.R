@@ -22,10 +22,10 @@
 #' @export
 GenomicTiling <- function(g, s, w = NULL) {
   if(is.null(w)) w <- s
-  grg <- tileGenome(g, tilewidth = s, cut.last.tile.in.chrom = T)
+  grg <- tileGenome(g, tilewidth = s, cut.last.tile.in.chrom = TRUE)
   if(s != w) {
-    grg <- suppressWarnings(resize(grg, width = w, use.names = F))
-    grg <- trim(grg, use.names = F)
+    grg <- suppressWarnings(resize(grg, width = w, use.names = FALSE))
+    grg <- trim(grg, use.names = FALSE)
     grg <- grg[width(grg) == w]
   }
   grg
@@ -49,7 +49,7 @@ GenomicTiling <- function(g, s, w = NULL) {
 #' \link{Seqinfo} object for the considered organism.
 #'
 #' @param header
-#' logical indicating if column names are present (default = F).
+#' logical indicating if column names are present (default = FALSE).
 #'
 #' @param ...
 #' optional parameters forwarded to the \link{read.delim} function.
@@ -60,10 +60,10 @@ GenomicTiling <- function(g, s, w = NULL) {
 #' @export
 ImportGenomicRanges <- function(
   fpath, chr = 1, start = 2, end = 3, strand = NULL, seqinfo = NULL,
-  xidx = NULL, xlbl = NULL, header = F, ...
+  xidx = NULL, xlbl = NULL, header = FALSE, ...
 ) {
   con <- file(fpath)
-  grg <- read.delim(con, header = header, stringsAsFactors=F, ...)
+  grg <- utils::read.delim(con, header = header, stringsAsFactors=F, ...)
   grg <- df2grg(grg, chr, start, end, strand, xidx, xlbl)
   if(! is.null(seqinfo)) seqinfo(grg) <- seqinfo[seqlevels(grg)]
   grg
@@ -102,7 +102,7 @@ ImportGenomicRanges <- function(
 # -----------------------------------------------------------------------------.
 #' @export
 CleanupGRanges <- function(
-  grg, seqinfo, organism, blacklist = NULL, keep.strand = F
+  grg, seqinfo, organism, blacklist = NULL, keep.strand = FALSE
 ) {
 
   if(! keep.strand) strand(grg)  <- "*"
@@ -206,7 +206,7 @@ FlatGRanges <- function(x, seqinfo) {
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
-ConsensusGRanges <- function(grl, minoverlap, ignore.strand = T, seqinfo = NULL) {
+ConsensusGRanges <- function(grl, minoverlap, ignore.strand = TRUE, seqinfo = NULL) {
   # Merge peak lists
   r <- GRanges(seqinfo = seqinfo)
   for(lbl in names(grl)) {
@@ -233,7 +233,7 @@ ConsensusGRanges <- function(grl, minoverlap, ignore.strand = T, seqinfo = NULL)
     shx <- subjectHits(idx)
     cmn <- GenomicRanges::pintersect(
       r[qhx], grl[[lbl]][shx], ignore.strand = ignore.strand,
-      drop.nohit.ranges = F
+      drop.nohit.ranges = FALSE
     )
     cmn$hit <- NULL
     r[qhx] <- cmn

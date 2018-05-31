@@ -57,17 +57,6 @@ test_that("DitherCounts", {
   expect_equal(round(max(r[!k]), 1), max(x[!k]) + 0.5)
 })
 
-# + FiniteValues ---------------------------------------------------------------
-test_that("FiniteValues", {
-  tst <- log(c(0,NA,1,Inf))
-  res <- c(F,F,T,F)
-  expect_equal(FiniteValues(tst), res)
-  expect_equal(FiniteValues(cbind(tst, tst)), res)
-  expect_equal(FiniteValues(cbind(1, tst)), res)
-  expect_equal(FiniteValues(cbind(tst, 1)), res)
-  expect_equal(FiniteValues(cbind(1, tst, 1)), res)
-})
-
 # + NonZeroCounts ---------------------------------------------------------------
 test_that("NonZeroCounts", {
   tst <- rbind(

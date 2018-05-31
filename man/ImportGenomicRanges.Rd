@@ -5,7 +5,7 @@
 \title{Import tab delimited text files representing genomic interval data}
 \usage{
 ImportGenomicRanges(fpath, chr = 1, start = 2, end = 3, strand = NULL,
-  seqinfo = NULL, xidx = NULL, xlbl = NULL, header = F, ...)
+  seqinfo = NULL, xidx = NULL, xlbl = NULL, header = FALSE, ...)
 }
 \arguments{
 \item{fpath}{path to a text file defining genomic ranges.}
@@ -26,7 +26,7 @@ By default all available columns are imported.}
 \item{xlbl}{character vector defining the name of imported extra columns
 (default = NULL).}
 
-\item{header}{logical indicating if column names are present (default = F).}
+\item{header}{logical indicating if column names are present (default = FALSE).}
 
 \item{...}{optional parameters forwarded to the \link{read.delim} function.}
 }

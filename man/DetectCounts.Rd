@@ -4,7 +4,7 @@
 \alias{DetectCounts}
 \title{DetectCounts}
 \usage{
-DetectCounts(cnt, detailed = F)
+DetectCounts(cnt, detailed = FALSE)
 }
 \arguments{
 \item{cnt}{matrix of read counts

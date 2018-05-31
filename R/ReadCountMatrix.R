@@ -36,18 +36,18 @@
 #' @export
 ReadCountMatrix <- function(
   bam.files, grg, paired, names = NULL,
-  maxgap = -1L, minoverlap = 0L, type = "any", ignore.strand = T, ...
+  maxgap = -1L, minoverlap = 0L, type = "any", ignore.strand = TRUE, ...
 ) {
 
   rex <- "\\.bam$"
-  if(! all(grepl(rex, bam.files, ignore.case = T, perl = T))) {
+  if(! all(grepl(rex, bam.files, ignore.case = TRUE, perl = TRUE))) {
     stop('some file names lack the ".bam" extension')
   }
   if(! all(sapply(bam.files, file.exists))) {
     stop("some bam files are missing")
   }
   if(is.null(names)) {
-    names <- gsub(rex, "", basename(bam.files), ignore.case = T, perl = T)
+    names <- gsub(rex, "", basename(bam.files), ignore.case = TRUE, perl = TRUE)
   }
 
   nbr <- length(bam.files)

@@ -4,7 +4,7 @@
 \alias{RandomCounts}
 \title{Random counts}
 \usage{
-RandomCounts(n, d, k = NULL, p = NULL, v = NULL, extended = F)
+RandomCounts(n, d, k = NULL, p = NULL, v = NULL, extended = FALSE)
 }
 \arguments{
 \item{n}{number of observations (rows).}
@@ -18,7 +18,7 @@ This argument is ignored when arguments \code{p} or \code{v} are provided.}
 
 \item{v}{vector of count values (default = \code{1:k})}
 
-\item{extended}{logical (default = F)}
+\item{extended}{logical (default = FALSE)}
 }
 \value{
 \code{RandomCounts} returns a list.
