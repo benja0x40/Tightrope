@@ -1,0 +1,431 @@
+---
+title: "Genomic regions for BRD normalization"
+subtitle: "`r paste('Tightrope version', packageVersion('Tightrope'), '-', format(Sys.time(), '%d.%m.%Y'))`"
+author: '[Benjamin Leblanc](https://github.com/benja0x40)'
+vignette: >
+  %\VignetteIndexEntry{Genomic regions for BRD normalization}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+fontsize: 11pt
+output:
+  rmarkdown::html_vignette:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+---
+
+```{r hidden_dependencies, include=FALSE}
+library(knitr)
+suppressPackageStartupMessages(library(Tightrope))
+```
+
+```{r hidden_configuration, include=FALSE}
+CFG <- list(
+  UpdatePackageData = F
+)
+```
+
+___
+
+The purpose of this documentation is to provide a practical guide to the use of
+`R` functions available in `Tightrope`. A basic knowledge of the `R` syntax
+and data structures, and of [Bioconductor](http://www.bioconductor.org/)
+objects used to represent and manipulate mapped reads and genomic intervals
+will help to understand and adapt the included source code examples to other
+ChIP-seq datasets.
+
+___
+
+\newpage
+
+# Summary
+
+# Genomic annotations from Ensembl and UCSC
+
+## Provided genomic regions in human and mouse
+
+### Overview
+
+To simplify the generation of read count matrixes, `Tightrope` provides genomic
+regions in human and mouse which correspond to annotated gene features from
+the Ensembl database, as well as CpG-islands from UCSC and blacklisted regions
+from the ENCODE project.
+
+### Usage
+
+The `summary` element in `EGA91_human` and `EGA91_mouse` objects contains a
+brief description of provided gene features.
+
+```{r eval=FALSE}
+library(Tightrope)  # Load package
+data("EGA91_human") # Load R data with gene features in Human
+EGA91_human$summary # Summary of loaded gene features
+```
+
+For instance, gene units in human according to Ensembl GRCh38.p10 release 91 are
+provided by the `GRanges` object `EGA91_human$GNU`.
+
+```{r eval=FALSE}
+EGA91_human$GNU # Gene units
+```
+
+```{r echo=FALSE}
+# Simplify EGA91_human$GNU for cleaner/concise output in the pdf vignette
+grg <- EGA91_human$GNU
+mcols(grg) <- mcols(grg)[, 3, drop = F]
+grg
+suppressWarnings(rm(grg))
+```
+
+### Human genome
+
+#### GRCh38.p10 / hg38
+
+<center>**Genomic regions**</center>  
+| R data object  | Organism     | Genome build  | Source                             |
+|----------------|--------------|---------------|------------------------------------|
+| EGA91_human    | Homo sapiens | GRCh38 (hg38) | Ensembl genes (rel. 91, Dec. 2017) |
+| CGI_hg38       | Homo sapiens | GRCh38 (hg38) | UCSC / cpgIslandExt.txt.gz         |
+| hg38_blacklist | Homo sapiens | GRCh38 (hg38) | ENCODE                             |
+
+&nbsp;
+
+```{r echo=FALSE}
+kable(EGA91_human$summary, caption = "Summary of gene features in EGA91_human")
+```
+
+```{r}
+# Human genome annotations (Ensembl GRCh38.p10 release 91)
+data("EGA91_human")    # Gene features from Ensembl      (environment)
+data("CGI_hg38")       # CpG Islands from UCSC           (GRanges)
+data("hg38_blacklist") # Blacklisted regions from ENCODE (GRanges)
+```
+
+### Mouse genome
+
+#### GRCm38.p5 / mm10
+
+<center>**Genomic regions**</center>  
+| R data object  | Organism     | Genome build  | Source                             |
+|----------------|--------------|---------------|------------------------------------|
+| EGA91_mouse    | Mus musculus | GRCm38 (mm10) | Ensembl genes (rel. 91, Dec. 2017) |
+| CGI_mm10       | Mus musculus | GRCm38 (mm10) | UCSC / cpgIslandExt.txt.gz         |
+| mm10_blacklist | Mus musculus | GRCm38 (mm10) | ENCODE                             |
+
+&nbsp;  
+
+```{r echo=FALSE}
+kable(EGA91_mouse$summary, caption = "Summary of gene features in EGA91_mouse")
+```
+
+```{r}
+# Mouse genome annotations (Ensembl GRCm38.p5 release 91)
+data("EGA91_mouse")    # Gene features from Ensembl      (environment)
+data("CGI_mm10")       # CpG Islands from UCSC           (GRanges)
+data("mm10_blacklist") # Blacklisted regions from ENCODE (GRanges)
+```
+
+## Making genomic regions for other organims or genome assemblies
+
+### Overview
+
+The 4 next examples show how to generate R objects with gene annotations
+for the human and mouse genomes, adding the following genome releases to the
+ones presented in the previous section.
+
+
+In order to save R objects transparently, the next examples use the LittleThumb
+package which can be installed as follows.
+
+```{r eval=FALSE}
+library("devtools") # (devtools can be installed from CRAN repositories)
+install_github("benja0x40/LittleThumb")
+```
+
+```{r include=FALSE}
+suppressPackageStartupMessages(library(LittleThumb))
+```
+
+```{r eval=FALSE}
+library(LittleThumb)
+```
+
+### Human genome
+
+#### GRCh38.p10 / hg38
+
+```{r eval=FALSE}
+# =============================================================================.
+# Human genome annotations (Ensembl GRCh38.p10 release 91)
+# -----------------------------------------------------------------------------.
+organism <- list(
+  name    = "Homo sapiens",
+  taxid   = 9606,
+  UCSC    = list(genome = "hg38"),
+  Ensembl = list(release = 91),
+  BSg_pkg = "BSgenome.Hsapiens.UCSC.hg38",
+  TxDb = list(
+    source = "Ensembl GRCh38.p10 release 91 (December 2017)",
+    portal = "http://Dec2017.archive.ensembl.org/Homo_sapiens",
+    gtf = paste0(
+      "ftp://ftp.ensembl.org/pub/",
+      "release-91/gtf/homo_sapiens/Homo_sapiens.GRCh38.91.gtf.gz"
+    )
+  ),
+  BioMart = list(
+    host     = "www.ensembl.org", # Dec2017.archive.ensembl.org
+    database = "ensembl",
+    dataset  = "hsapiens_gene_ensembl"
+  )
+)
+
+# Gene features from Ensembl
+MakeObj(EGA91_human, {
+  EGA91_human <- BuildGeneFeatures(organism)
+})
+
+# CpG Islands from UCSC
+MakeObj(CGI_hg38, {
+  CGI_hg38 <- ImportCpGIslandExt(organism$UCSC$genome)
+})
+```
+
+```{r include=FALSE}
+if(CFG$UpdatePackageData) {
+  devtools::use_data(EGA91_human, overwrite = T)
+  devtools::use_data(CGI_hg38, overwrite = T)
+}
+```
+
+This script generates and saves `EGA91_human` and `CGI_hg38` R objects
+as summarized in the table below.
+
+| R data object  | Organism     | Genome build  | Source                             |
+|----------------|--------------|---------------|------------------------------------|
+| EGA91_human    | Homo sapiens | GRCh38 (hg38) | Ensembl genes (rel. 91, Dec. 2017) |
+| CGI_hg38       | Homo sapiens | GRCh38 (hg38) | UCSC / cpgIslandExt.txt.gz         |
+&nbsp;  
+
+#### GRCh37.p13 / hg19
+
+```{r eval=FALSE}
+# =============================================================================.
+# Human genome annotations (Ensembl GRCh37.p13 release 75)
+# -----------------------------------------------------------------------------.
+organism <- list(
+  name  = "Homo sapiens",
+  taxid = 9606,
+  UCSC    = list(genome = "hg19"),
+  Ensembl = list(release = 75),
+  BSg_pkg = "BSgenome.Hsapiens.UCSC.hg19",
+  TxDb = list(
+    source = "Ensembl GRCh37.p13 release 75 (February 2014)",
+    portal = "http://Feb2014.archive.ensembl.org/Homo_sapiens",
+    gtf = paste0(
+      "ftp://ftp.ensembl.org/pub/",
+      "release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz"
+    )
+  ),
+  BioMart = list(
+    host     = "Feb2014.archive.ensembl.org", # "grch37.ensembl.org"
+    database = "ensembl",
+    dataset  = "hsapiens_gene_ensembl"
+  )
+)
+
+# Gene features from Ensembl
+MakeObj(EGA75_human, {
+  EGA75_human <- BuildGeneFeatures(organism)
+})
+
+# CpG Islands from UCSC
+MakeObj(CGI_hg19, {
+  CGI_hg19 <- ImportCpGIslandExt(organism$UCSC$genome)
+})
+```
+
+```{r include=FALSE}
+if(CFG$UpdatePackageData) {
+  devtools::use_data(EGA75_human, overwrite = T)
+  devtools::use_data(CGI_hg19, overwrite = T)
+}
+```
+
+```{r eval=FALSE, include=FALSE, echo=FALSE}
+kable(EGA75_human$summary, caption = "Summary of gene features in EGA75_human")
+```
+
+This script generates and saves `EGA75_human` and `CGI_hg19` R objects
+as summarized in the table below.
+
+| R data object | Organism     | Genome build  | Source                             |
+|---------------|--------------|---------------|------------------------------------|
+| EGA75_human   | Homo sapiens | GRCh37 (hg19) | Ensembl genes (rel. 75, Feb. 2014) |
+| CGI_hg19      | Homo sapiens | GRCh37 (hg19) | UCSC / cpgIslandExt.txt.gz         |
+&nbsp;  
+
+### Mouse genome
+
+#### GRCm38.p5 / mm10
+
+```{r eval=FALSE}
+# =============================================================================.
+# Mouse genome annotations (Ensembl GRCm38.p5 release 91)
+# -----------------------------------------------------------------------------.
+organism <- list(
+  name    = "Mus musculus",
+  taxid   = 10090,
+  UCSC    = list(genome = "mm10"),
+  Ensembl = list(release = 91),
+  BSg_pkg = "BSgenome.Mmusculus.UCSC.mm10",
+  TxDb = list(
+    source = "Ensembl GRCm38.p5 release 91 (December 2017)",
+    portal = "http://Dec2017.archive.ensembl.org/Mus_musculus",
+    gtf = paste0(
+      "ftp://ftp.ensembl.org/pub/",
+      "release-91/gtf/mus_musculus/Mus_musculus.GRCm38.91.gtf.gz"
+    )
+  ),
+  BioMart = list(
+    host     = "www.ensembl.org", # Dec2017.archive.ensembl.org
+    database = "ensembl",
+    dataset  = "mmusculus_gene_ensembl"
+  )
+)
+
+# Gene features from Ensembl
+MakeObj(EGA91_mouse, {
+  EGA91_mouse <- BuildGeneFeatures(organism)
+})
+
+# CpG Islands from UCSC
+MakeObj(CGI_mm10, {
+  CGI_mm10 <- ImportCpGIslandExt(organism$UCSC$genome)
+})
+```
+
+```{r include=FALSE}
+if(CFG$UpdatePackageData) {
+  devtools::use_data(EGA91_mouse, overwrite = T)
+  devtools::use_data(CGI_mm10, overwrite = T)
+}
+```
+
+This script generates and saves `EGA91_mouse` and `CGI_mm10` R objects
+as summarized in the table below.
+
+| R data object  | Organism     | Genome build  | Source                             |
+|----------------|--------------|---------------|------------------------------------|
+| EGA91_mouse    | Mus musculus | GRCm38 (mm10) | Ensembl genes (rel. 91, Dec. 2017) |
+| CGI_mm10       | Mus musculus | GRCm38 (mm10) | UCSC / cpgIslandExt.txt.gz         |
+&nbsp;  
+
+#### NCBIM37 / mm9
+
+```{r eval=FALSE}
+# =============================================================================.
+# Mouse genome annotations (Ensembl NCBIM37 release 67)
+# -----------------------------------------------------------------------------.
+organism <- list(
+  name    = "Mus musculus",
+  taxid   = 10090,
+  UCSC    = list(genome = "mm9"),
+  Ensembl = list(release = 67),
+  BSg_pkg = "BSgenome.Mmusculus.UCSC.mm9",
+  TxDb = list(
+    source = "Ensembl NCBIM37 release 67 (May 2012)",
+    portal = "http://May2012.archive.ensembl.org/Mus_musculus",
+    gtf = paste0(
+      "ftp://ftp.ensembl.org/pub/",
+      "release-67/gtf/mus_musculus/Mus_musculus.NCBIM37.67.gtf.gz"
+    )
+  ),
+  BioMart = list(
+    host     = "May2012.archive.ensembl.org",
+    database = "ensembl",
+    dataset  = "mmusculus_gene_ensembl"
+  )
+)
+
+# Gene features from Ensembl
+MakeObj(EGA67_mouse, {
+  EGA67_mouse <- BuildGeneFeatures(organism)
+})
+
+# CpG Islands from UCSC
+MakeObj(CGI_mm9, {
+  CGI_mm9 <- ImportCpGIslandExt(organism$UCSC$genome)
+})
+```
+
+```{r include=FALSE}
+if(CFG$UpdatePackageData) {
+  devtools::use_data(EGA67_mouse, overwrite = T)
+  devtools::use_data(CGI_mm9, overwrite = T)
+}
+```
+
+```{r eval=FALSE, include=FALSE, echo=FALSE}
+kable(EGA67_mouse$summary, caption = "Summary of gene features in EGA67_mouse")
+```
+
+This script generates and saves `EGA67_mouse` and `CGI_mm9` R objects
+as summarized in the table below.
+
+| R data object | Organism     | Genome build  | Source                             |
+|---------------|--------------|---------------|------------------------------------|
+| EGA67_mouse   | Mus musculus | NCBIM37 (mm9) | Ensembl genes (rel. 67, May  2012) |
+| CGI_mm9       | Mus musculus | NCBIM37 (mm9) | UCSC / cpgIslandExt.txt.gz         |
+&nbsp;  
+
+# Genomic tiling with regular bins
+
+```{r eval=FALSE}
+ANN <- EGA91_mouse
+CGI <- CGI_mm10
+BLK <- mm10_blacklist
+
+# Make 4kb windows every 1kb over the whole genome
+WGT <- GenomicTiling(ANN$seqinfo, s = 1000, w = 4000)
+
+# Functional annotation of genomic bins
+grp <- factor(
+  rep(1, length(WGT)), levels = 1:5, ordered = T,
+  labels = c("intergenic", "genic", "TSS", "CGI", "blacklist")
+)
+grp[which(countOverlaps(WGT, ANN$GNU) > 0)] <- "genic"
+grp[which(countOverlaps(WGT, ANN$TSS) > 0)] <- "TSS"
+grp[which(countOverlaps(WGT, CGI) > 0)] <- "CGI"
+grp[which(countOverlaps(WGT, BLK) > 0)] <- "blacklist"
+
+WGT$category <- grp
+```
+
+# Defining other relevant regions
+
+```{r eval=FALSE}
+ANN <- EGA91_mouse
+CGI <- CGI_mm10
+BLK <- mm10_blacklist
+
+# Define promoter regions
+TSS <- resize(ANN$TSS, width = 4000, fix = "center", use.names = F)
+
+# Define CGI regions as 4kb windows centered at CpG-islands annotated by UCSC
+CGI <- resize(CGI, width = 4000, fix = "center", use.names = F)
+CGI <- with(ANN, CleanupGRanges(CGI, seqinfo, organism = organism$name))
+
+```
+
+```{r eval=FALSE, include=FALSE}
+kable(
+  data.frame(
+    `R object` = c("GNU", "TSS", "CGI", "WGT"),
+    description = c("Gene units", "Promoter regions", "CpG-islands", "Whole genome tiling"),
+    `number of regions` = sapply(list(ann, TSS, CGI, WGT), length),
+    `genomic coverage (bp)` = sapply(lapply(list(ANN$GNU, TSS, CGI, WGT), coverage), CoveredLength),
+    stringsAsFactors = F, check.names = F
+  ), caption = "Regions of interest for H3K27me3"
+)
+```
+

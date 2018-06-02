@@ -58,7 +58,7 @@ ImportCpGIslandExt <- function (
   genome = NULL, fpath = NULL,
   goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
   cpgIslandExt = "database/cpgIslandExt.txt.gz",
-  keep.file = FALSE, quiet = FALSE, ...
+  keep.file = FALSE, quiet = FALSE
 ) {
 
   if(is.null(fpath) & is.null(genome)) stop("missing genome or file path")
@@ -83,9 +83,6 @@ ImportCpGIslandExt <- function (
       "bin", "name", "length", "cpgNum", "gcNum", "perCpg", "perGc", "obsExp"
     )
   )
-  extra <- list(...)
-  if(length(extra) > 0) args <- c(args, extra)
-
   if(! ("seqinfo" %in% names(args) | is.null(sinfo))) {
     args <- c(args, seqinfo = sinfo)
   }

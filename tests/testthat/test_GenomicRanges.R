@@ -12,11 +12,20 @@ test_that("GenomicTiling", {
     genome = asm
   )
 
-  grg <- GenomicTiling(gnm, 100, w = 50)
+  grg <- GenomicTiling(gnm, 100)
 
   expect_is(grg, "GRanges")
   expect_identical(unique(genome(grg)), asm)
   expect_equal(length(grg), 60)
+  expect_true(all(width(grg) == 100))
+  expect_identical(
+    as.vector(seqnames(grg)), c(rep("A", 10), rep("B", 20), rep("C", 30))
+  )
+
+  grg <- GenomicTiling(gnm, 100, w = 50)
+
+  expect_equal(length(grg), 60)
+  expect_true(all(width(grg) == 50))
 
 })
 

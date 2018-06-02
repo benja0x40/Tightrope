@@ -6,7 +6,8 @@
 \usage{
 ImportCpGIslandExt(genome = NULL, fpath = NULL,
   goldenPath = "http://hgdownload.soe.ucsc.edu/goldenPath",
-  cpgIslandExt = "database/cpgIslandExt.txt.gz", keep.file = FALSE, ...)
+  cpgIslandExt = "database/cpgIslandExt.txt.gz", keep.file = FALSE,
+  quiet = FALSE)
 }
 \arguments{
 \item{genome}{name of an UCSC genome build. When \code{genome} is unspecified, the
