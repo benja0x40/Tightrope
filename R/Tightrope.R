@@ -11,6 +11,7 @@
 #' @import methods
 #' @import grDevices
 #' @import graphics
+#' @importFrom shades gradient
 #' @importFrom stats median prcomp approx rnbinom runif
 #' @importFrom utils download.file read.delim setTxtProgressBar txtProgressBar
 #' @importFrom matrixStats rowMeans2 colMeans2 colSds
@@ -21,7 +22,8 @@
 #' @import GenomicAlignments
 #' @import GenomicRanges
 #' @import GenomicFeatures
-#' @import Barbouille
+#' @importFrom QuickShift QuickShiftClustering
+#' @importFrom Barbouille xylim FiniteValues RankScore ColorMapper ColorLegend ScatterMaps SideBySide
 # -----------------------------------------------------------------------------.
 #' @keywords internal
 #' @export
@@ -37,7 +39,6 @@ DefaultOptions <- function() {
     bdt       = c(0.15, 0.05),
     ncl       = 1,
     mincs     = 50,
-    progress  = FALSE,
 
     # PlotBRD
     palette    = "magma",

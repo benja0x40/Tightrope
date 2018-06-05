@@ -47,13 +47,18 @@
 #' @keywords internal
 #' @export
 CDaDaDR.2D <- function(
-  cnt, movs = NULL, bins = 500, smoothing = 10, dither = 5, zscore = TRUE,
-  method = c("pca", "ica"), progress = F
+  cnt, movs = NULL, bins = NULL, smoothing = NULL, dither = NULL, zscore = NULL,
+  method = c("pca", "ica")
 ) {
 
   method <- match.arg(method)
-  bins      <- rep(bins, length.out = 2)
-  smoothing <- rep(smoothing, length.out = 2)
+
+  cfg <- Tightrope() # Global options
+  DefaultArgs(cfg, ignore = c("cnt", "movs"), from = BRD)
+  VectorArgs(c("bins", "smoothing"), size = 2)
+
+  # bins      <- rep(bins, length.out = 2)
+  # smoothing <- rep(smoothing, length.out = 2)
 
   parameters <- list(
     bins = bins, smoothing = smoothing, dither = dither, zscore = zscore
@@ -69,7 +74,6 @@ CDaDaDR.2D <- function(
 
   p <- 0
 
-  if(progress) pb <- utils::txtProgressBar(min = 0, max = dither, char = "|", style = 3)
   for(i in 1:dither) {
 
     # Count transformations
@@ -89,9 +93,7 @@ CDaDaDR.2D <- function(
     # Density estimation
     p <- p + Barbouille::ASH2D(x, n = bins, k = smoothing) / dither
 
-    if(progress) utils::setTxtProgressBar(pb, i)
   }
-  if(progress) close(pb)
 
   list(
     parameters = parameters,

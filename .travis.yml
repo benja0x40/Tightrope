@@ -16,6 +16,7 @@ r_packages:
 
 r_github_packages:
   - benja0x40/LittleThumb
+  - benja0x40/QuickShift
   - benja0x40/Barbouille
 
 warnings_are_errors: false

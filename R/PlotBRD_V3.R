@@ -39,11 +39,43 @@
 #' }
 # -----------------------------------------------------------------------------.
 #' @export
-PlotCountDistributions <- function(x, ...) {
-  r <- SideBySide(
-    x, colors = "Wry", gradient = "colorize",
-    ylab = "log2(counts)", las = 2, ...
-  )
+PlotCountDistributions <- function(
+  X, pops = NULL, sampling = NULL, vb = 0, names = T,
+  palette = "magma", gradient = "hcl.mono.grey", # "hcl.duo.light"
+  legend = T, inset = c(-0.25, 0), saturation = 0.9, ...
+) {
+  if(is.null(pops)) {
+    par(mar = c( 5 + 11 * names, 5, 4, 2))
+    SideBySide(
+      X, vb = vb, sampling = sampling,
+      colors = "Wry", gradient = "colorize", saturation = saturation,
+      las = 2, label = "log2(counts)", names = names, ...
+    )
+  } else{
+    par(mar = c( 5 + 11 * names, 5, 4, 2 + 6 * legend))
+    clr <- list(
+      d = "grey",
+      p = c("grey", shades::gradient(palette, steps = nlevels(pops)))
+    )
+    SideBySide(
+      X, pops = pops, db = nlevels(pops) * 10, vb = vb,
+      sampling = sampling, smoothing = c(3, 5),
+      proportions = "static", ordering = "static", scales = "maximized",
+      colors = clr["p"], saturation = saturation, gradient = gradient,
+      las = 2, label = "log2(counts)", names = names, ...
+    )
+    if(legend) {
+      mpr <- lapply(
+        clr$p, ColorMapper, gradient = gradient, saturation = saturation
+      )
+      mpr.clr <- sapply(mpr, function(x) x$cmf(0.8))
+      k <- which(summary(pops) > 0)
+      legend(
+        "topright", inset = inset,
+        legend = levels(pops)[k], fill = mpr.clr[k], bty = "n", xpd = T
+      )
+    }
+  }
 }
 
 # =============================================================================.

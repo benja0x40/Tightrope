@@ -4,9 +4,9 @@
 \alias{BRD}
 \title{Background Reads Density}
 \usage{
-BRD(cnt, controls, sampling = NULL, smobs = TRUE, dither = 5,
-  zscore = TRUE, bins = 705, smoothing = 25, bdt = c(0.15, 0.05),
-  ncl = 1, mincs = 50, progress = FALSE)
+BRD(cnt, controls, sampling = NULL, smobs = NULL, dither = NULL,
+  zscore = NULL, bins = NULL, smoothing = NULL, bdt = NULL,
+  ncl = NULL, mincs = NULL)
 }
 \arguments{
 \item{cnt}{matrix of read counts

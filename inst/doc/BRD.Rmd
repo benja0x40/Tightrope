@@ -1,0 +1,1066 @@
+---
+title: "Normalization of ChIP-seq data using Background Reads Density"
+subtitle: "`r paste('Tightrope version', packageVersion('Tightrope'), '-', format(Sys.time(), '%d.%m.%Y'))`"
+author: '[Benjamin Leblanc](https://github.com/benja0x40)'
+vignette: >
+  %\VignetteIndexEntry{ChIP-seq normalization using BRD}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+fontsize: 11pt
+output:
+  rmarkdown::html_vignette:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+---
+
+```{r hidden_dependencies, include=FALSE}
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(shades))
+
+suppressPackageStartupMessages(library(LittleThumb))
+suppressPackageStartupMessages(library(Barbouille))
+suppressPackageStartupMessages(library(Tightrope))
+```
+
+```{r hidden_functions, include=FALSE}
+# =============================================================================.
+# Markdown links
+# -----------------------------------------------------------------------------.
+MarkdownLink <- function(x, txt = NULL, lnk = "") {
+  if(is.null(txt)) txt <- x
+  lnk <- paste0("[", txt, "](", lnk, x, ")")
+  chk <- x == ""
+  lnk[chk] <- txt[chk]
+  lnk
+}
+```
+
+```{r hidden_configuration, include=FALSE}
+# =============================================================================.
+#
+# -----------------------------------------------------------------------------.
+CFG <- new.env()
+
+CFG$path <- "~/OneDrive/_Work_/@BRIC - Copenhagen/ChIP-seq spike-in & Tightrope/_R_ANALYSES_BRD/analyses/Tightrope/cache/"
+
+CFG$images <- list(
+  
+  build = F,
+  
+  path    = "images/BRD/",
+  name    = "img",
+  counter = 0,
+  
+  resolution = 300,
+  width      = 4,
+  height     = 4.25,
+  units      = "in",
+  
+  par = list(pch = 20, mar = c(4.5, 4.5, 4.0, 2.0))
+)
+```
+___
+
+The purpose of this documentation is to provide a practical guide to the use of
+`R` functions available in `Tightrope`. A basic knowledge of the `R` syntax
+and data structures, and of [Bioconductor](http://www.bioconductor.org/)
+objects used to represent and manipulate mapped reads and genomic intervals
+will help to understand and adapt the included source code examples to other
+ChIP-seq datasets.
+
+___
+
+\newpage
+
+# Introduction
+
+`Tightrope` is an `R` package proposing a ChIP-seq normalization method, named
+Background Read Density (BRD)^[1,2](#R1)^, capable of accurate estimation
+of normalization factors in conditions involving global variations of chromatin
+marks.
+
+Basic sequencing depth correction can be dramatically misleading in such
+experimental conditions, and since these experiments have become important 
+for research on chromatin regulation and in specific cancer studies, accurate
+ChIP-seq normalization methods are increasingly needed.
+
+In the recent years, several spike-in protocols^[3-6](#R3)^ were introduced to
+circumvent ChIP-seq normalization issues with an accessible experimental
+strategy. Seeking an alternative due to reliability concerns with our own
+spike-in attempts, we used an empirical computational approach to design
+the BRD method while we were studying H3K27me3 profiles in a cellular model
+of Diffuse Intrinsic Pontine Glioma (DIPG)^[1](#R1)^.
+
+After initial validation and application of the BRD normalization to these
+H3K27me3 ChIP-seq experiments, we used original data and published datasets to
+significantly improve the versatility and reliability of our method.
+As illustrated by the examples included in this document, with different
+experimental setups and chromatin marks this improved BRD method leads to
+normalizations that are rather equivalent to spike-in-based normalizations or
+which are the most consistent ones in cases where both methods differ
+noticeably.
+
+Following these developments, we are now preparing a manuscript describing
+the BRD method and reporting our comparative analyses between spike-in and
+BRD normalizations for the most representative datasets^[2](#R2)^.
+
+## Principle and prerequisites
+
+The BRD normalization aims to rescale read counts or genomic coverage values
+from different ChIP-seq experiments, such that background levels - which should
+correspond mainly to ChIP-seq reads from non-specific DNA fragments - become
+equalized between the experimental conditions.
+
+To achieve this goal the BRD method is designed upon the following assumptions
+and prerequisites.
+
+  a. For all considered experimental conditions, some portions of the genome are
+     invariably devoid of the immuno-precipitated chromatin mark.
+   
+     We use the term **background candidates** to designate such invariable
+     genomic regions in a given experimental setup.
+   
+  b. Background candidates can be distinguished as a specific density mode in
+     appropriately transformed ChIP-seq read count distributions.
+
+A first prerequisite when applying the BRD method is to define the portions of
+the genome that are biologically relevant for the search of background
+candidates.
+
+Although a completely naive search of background candidates among the whole
+genome should be possible in theory, without further assumptions this search
+may not lead to the selection of valid candidates.
+For instance, some chromatin marks can cover most of the genome at low but
+distinguishable levels, as it can be observed with H3K27me3 ChIP-seq profiles
+in populations of Embryonic Stem Cells (ESCs) or Neural Stem Cells (NSCs).
+In such situation the second assumption (**b.** above) of the BRD method does
+not hold since the density mode of background candidates can be masked
+by a close and more prevalent mode corresponding to minimal but extensive
+ChIP enrichments.
+
+For commonly studied marks that are linked with the regulation of gene
+expression, a reasonable option consist in searching background candidates
+over gene units or transcription start sites (TSS), assuming
+that the mark of interest would be always absent at a subpopulation
+of genes, for instance the constitutively expressed ones or silent ones in the
+considered experimental conditions. 
+
+The second prerequisite is that the ChIP-seq dataset must include background
+profiles (e.g. input DNA, ChIP-seq performed with IgG or in KO conditions),
+preferably generated using the same sequencing setup as for the ChIP profiles.
+For technical reasons, 2 background profiles is the minimum for the current
+version of `Tightrope`.
+
+## Technical overview
+
+The figure below illustrates a ChIP-seq normalization workflow with the current
+version of `Tightrope`, giving an overview of algorithms implemented in its
+core functions (**A**), as well as examples of resulting control graphs
+(**B,C**) which provide guidance for the choice of parameters required by these
+functions.
+
+```{r overview, echo=FALSE, out.width="80%", fig.align='center'}
+include_graphics("images/Overview.png")
+```
+
+As shown in this workflow, the BRD method consists mainly in the transformation
+of read counts over chosen genomic regions (**A**) into a bivariate density 
+distribution (**B**), a technique that we name Count Density after Dithering
+and Dimensionality Reduction (CDaDaDR) which combines a principal component
+analysis and a non-parametric density estimation, followed by the identification
+of the local density mode which corresponds to the best background candidates
+(**C**) thanks to a clustering technique based on density gradients.
+
+## User interventions
+
+Overall, using the BRD method involves two key interventions. As explained in
+the previous section, the first one consists in choosing genomic regions that
+are relevant for the search of background candidates and generating the
+corresponding read count matrix.
+
+The second intervention consists in tuning the most influencial parameters of
+the `BRD` function, which are the number of distinct density modes
+(i.e. clusters) and the density threshold values used to define these clusters.
+Practically, the default threshold values should perform reasonably well for
+common use cases and the remaining decisions after generating read count
+matrixes will often be limited to a choice between 1 or 2 clusters.
+This choice should be made after observing the bivariate density distribution
+generated by the `PlotBRD` function, opting for a value of 1 or 2 clusters
+for a globally unimodal or bimodal density respectively.
+
+\newpage
+
+# Installations
+
+The following softwares must be installed before `Tightrope` can be used.
+
+  - [R environment](https://www.r-project.org/) version 3.5 or newer.
+  - To develop and execute `R` scripts we recommend using [RStudio](https://www.rstudio.com/products/rstudio/download).
+  - [Bioconductor](http://www.bioconductor.org/) packages `Rsamtools`, `GenomicAlignments`, `GenomicRanges`, `GenomicFeatures`, `rtracklayer`, `biomaRt`.
+  - GitHub packages
+    [Barbouille](https://github.com/benja0x40/Barbouille)
+    [Tightrope](https://github.com/benja0x40/Tightrope)
+
+The next subsections provide further indications for these installations.
+
+## R and RStudio environments
+
+If `R` and RStudio are not already installed.
+  
+  * Manually download and install [R](https://cloud.r-project.org).
+    
+  * Manually download and install [RStudio](https://www.rstudio.com/products/rstudio/download).
+
+## R packages
+
+Once `R` and RStudio are installed, open RStudio and run the `R` code below
+which should install all required packages automatically. While `R` will perfom
+these tasks, you may be prompted for a confirmation of package installations
+or updates.
+
+```R
+# Detect already installed packages
+pkg <- installed.packages()[, "Package"]
+
+# CRAN packages
+lst <- setdiff(c("devtools"), pkg)
+if(length(lst) > 0) install.packages(lst)
+
+# Bioconductor packages
+source("https://bioconductor.org/biocLite.R")
+lst <- c(
+  "Rsamtools", "GenomicAlignments", "GenomicRanges", "GenomicFeatures",
+  "rtracklayer", "biomaRt"
+)
+lst <- setdiff(lst, pkg)
+if(length(lst) > 0) biocLite(lst)
+
+# GitHub packages
+library("devtools")
+install_github("benja0x40/Barbouille")
+install_github("benja0x40/Tightrope")
+```
+
+## Tightrope
+
+Once `Tightrope` is installed, the first thing to do when starting a work
+session is to load the package into the active `R` session.
+
+```{r}
+ # Load Tightrope package (this will produce numerous messages)
+library(Tightrope)
+```
+
+At this stage, it is possible to obtain the list of `R` functions available
+in `Tightrope` and to browse the builtin documentation by calling the `help()`
+function in the `R` console.
+
+```{r eval=FALSE}
+help(package = "Tightrope")
+```
+
+And the present document can be shown by using the `vignette()` function.
+
+```{r eval=FALSE}
+vignette("BRD", package = "Tightrope")
+```
+
+\newpage
+
+# ChIP-seq normalization workflow
+
+## Auto saving and loading of R data
+
+```{r include=FALSE}
+library(LittleThumb)
+LittleThumb(rootpath = "AutoSaved")
+```
+
+## Genomic annotations and relevant regions
+
+See the dedicated vignette.
+
+```{r eval=FALSE}
+vignette("Annotations", package = "Tightrope")
+```
+
+```{r}
+# Load mouse genome annotations (mm10)
+data("EGA91_mouse")    # Gene features from Ensembl      (environment)
+data("CGI_mm10")       # CpG Islands from UCSC           (GRanges)
+data("mm10_blacklist") # Blacklisted regions from ENCODE (GRanges)
+```
+
+```{r message=FALSE}
+# Load whole genome tiling object WGT or create it and save it if necessary
+MakeObj(WGT, {
+  # Make 4kb windows every 1kb over the whole genome (GRanges object)
+  WGT <- GenomicTiling(EGA91_mouse$seqinfo, s = 1000, w = 4000)
+  
+  WGT <- CleanupGRanges(
+    WGT, EGA91_mouse$seqinfo, "Mus musculus", mm10_blacklist
+  )
+  
+  # Functional annotation of genomic bins
+  grp <- factor(
+    rep(1, length(WGT)), levels = 1:5, ordered = T,
+    labels = c("intergenic", "genic", "TSS", "CGI", "blacklist")
+  )
+  grp[which(countOverlaps(WGT, EGA91_mouse$GNU) > 0)] <- "genic"
+  grp[which(countOverlaps(WGT, EGA91_mouse$TSS) > 0)] <- "TSS"
+  grp[which(countOverlaps(WGT, CGI_mm10) > 0)] <- "CGI"
+  grp[which(countOverlaps(WGT, mm10_blacklist) > 0)] <- "blacklist"
+  
+  WGT$category <- grp
+})
+```
+
+\newpage
+
+## Read count data
+
+### Making read count matrixes from mapped reads
+
+The function `ReadCountMatrix` can generate read counts over genomic intervals
+for multiple bam files. First, let's consider a virtual dataset in mouse
+with 4 experimental conditions.
+
+Example of paths to bam files (mapped reads of the ChIP-seq dataset)
+
+```{r eval=FALSE}
+# Define bam file paths and the corresponding names of experimental conditions
+bam.files <- c(
+  H3WT_DMSO_H3K27me3_R1 = "~/sequencing/sample1.bam",
+  K27M_DMSO_H3K27me3_R1 = "~/sequencing/sample2.bam",
+  H3WT_DMSO_Input_R1    = "~/sequencing/sample3.bam",
+  K27M_DMSO_Input_R1    = "~/sequencing/sample4.bam"
+  # etc.
+)
+conditions <- names(bam.files)
+```
+
+Assuming that this virtual ChIP-seq dataset was generated by single-end
+sequencing and that the reads were mapped on the GRCm38 (UCSC mm10)
+genome build, a matrix of read counts over genes could be generated as follows.
+
+```{r eval=FALSE, message=FALSE}
+# Define accepted reads (single-end sequencing)
+bam.flag <- scanBamFlag(isDuplicate = F, isUnmappedQuery = F)
+
+# Read counts over genomic tiling bins WGT (single-end sequencing)
+COUNTS <- ReadCountMatrix(
+    bam.files, WGT, paired = F, names = conditions,
+    param = ScanBamParam(flag = bam.flag)
+)
+```
+
+Similarly if the dataset was generated by paired-end sequencing, 
+a matrix of read counts over genes would be generated as follows.
+
+```{r eval=FALSE}
+# Define accepted reads (paired-end sequencing)
+bam.flag <- scanBamFlag(
+  isDuplicate = F, isUnmappedQuery = F, isProperPair = T
+)
+  
+# Read counts over genomic tiling bins WGT (paired-end sequencing)
+COUNTS <- ReadCountMatrix(
+    bam.files, WGT, paired = T, names = conditions,
+    param = ScanBamParam(flag = bam.flag)
+)
+```
+
+```{r eval=FALSE, include=FALSE}
+# Define ChIP and Input conditions
+chip <- c("H3K27me3_WT", "H3K27me3_K27M")
+ctrl <- c("Input_WT", "Input_K27M")
+
+# Precomputed number of mapped reads from chromatin spike-in
+spikein.reads <- c(
+  Input_WT      = 308729,
+  H3K27me3_WT   = 1640186,
+  Input_K27M    = 209380,
+  H3K27me3_K27M = 9088680
+)
+
+# Scaling factors based on chromatin spike-in
+spikein.factors <- mean(spikein.reads) / spikein.reads
+```
+
+### Example with H3K27me3 ChIP-seq in mouse NSCs
+
+```{r reshape_dataset, eval=FALSE, message=FALSE, include=FALSE}
+MakeObj(NSC_K27M, {
+  # Rename genomic annotations
+  ANN <- EGA91_mouse
+  CGI <- CGI_mm10
+  BLK <- mm10_blacklist
+  
+  # Cleanup (optional)
+  # rm(EGA91_mouse, CGI_mm10, mm10_blacklist)
+  
+  data("NSC_K27M_METADATA") # Annotation of experimental conditions
+  data("NSC_K27M_COUNTS")   # Precomputed read count matrixes
+  data("NSC_K27M_SPIKEIN")  # Number of Drosophila reads (spike-in) 
+  
+  # Load precomputed whole genome tiling object WGT
+  WGT <- readRDS("~/Google Drive/Work/@BRIC - Copenhagen/ChIP-seq spike-in & Tightrope/_R_ANALYSES_BRD/analyses/NextSeq_K27M_spike_in/data/WGT.rdata")
+  
+  # Functional annotation of genomic bins
+  grp <- factor(
+    rep(1, length(WGT)), levels = 1:5, ordered = T,
+    labels = c("intergenic", "genic", "TSS", "CGI", "blacklist")
+  )
+  grp[which(countOverlaps(WGT, ANN$GNU) > 0)] <- "genic"
+  grp[which(countOverlaps(WGT, ANN$TSS) > 0)] <- "TSS"
+  grp[which(countOverlaps(WGT, CGI) > 0)] <- "CGI"
+  grp[which(countOverlaps(WGT, BLK) > 0)] <- "blacklist"
+  
+  WGT$category <- grp
+
+  NSC_K27M <- new.env()
+  NSC_K27M$METADATA <- NSC_K27M_METADATA
+  NSC_K27M$SPIKEIN  <- NSC_K27M_SPIKEIN
+  NSC_K27M$COUNTS   <- NSC_K27M_COUNTS$WGT
+  NSC_K27M$WGT      <- WGT
+  
+  # Cleanup
+  rm(grp, NSC_K27M_METADATA, NSC_K27M_COUNTS, NSC_K27M_SPIKEIN)
+  gc()
+})
+```
+
+This dataset was generated by reproducing experiments presented in our study
+about the role of the H3.3K27M histone mutation in DIPG^[1](#R1)^, but
+adding spike-in with Drosophila chromatin in the ChIP-seq protocol.
+Briefly, H3K27me3 ChIP-seq experiments were performed in mouse NSCs, in
+presence or absence of expression of the H3.3K27M histone mutant (K27M)
+as well as with or without treatment with EPZ6438 (EPZ), an inhibitor of the
+catalytic reaction producing the H3K27me3 histone mark.
+
+From a ChIP-seq normalization perspective, this dataset presents 4 experimental
+conditions with highly variable global levels of H3K27me3 due to the presence
+or absence of both the K27M mutation and the EPZ treatment.
+
+```{r}
+# Load the NSC dataset (replicate of experiments from Mohammad et al. 2017)
+data("NSC_K27M")
+library(data.table)
+```
+
+```{r eval=FALSE}
+NSC_K27M$METADATA # Annotation of experimental conditions (data.table object)
+NSC_K27M$SPIKEIN  # Number of Drosophila reads (chromatin spike-in)
+NSC_K27M$COUNTS   # Precomputed read count matrixes over genomic tiling bins
+NSC_K27M$WGT      # Whole genome tiling bins (GRanges object)
+```
+
+```{r echo=FALSE}
+kable(NSC_K27M$METADATA[, -(1:3)])
+```
+
+The `NSC_K27M$METADATA` object contains a detailed annotation of experimental
+conditions and the `NSC_K27M$COUNTS` object contains a matrix of read counts
+over genomic tiling bins.
+
+```{r message=FALSE}
+COUNTS <- NSC_K27M$COUNTS
+WGT    <- NSC_K27M$WGT
+```
+
+```{r echo=FALSE}
+tbl <- colSums(COUNTS)
+kable(
+  data.frame(
+    sample_id = names(tbl),
+    number    = as.vector(tbl)
+  ),
+  caption = "Total read counts"
+)
+suppressWarnings(rm(tbl))
+```
+
+## Genomic read count distributions
+
+Here we select the `chip` and `ctrl` sample identifiers corresponding to 
+H3K27me3 and Input ChIP-seq profiles in duplicate experiments.
+
+```{r}
+chip <- NSC_K27M$METADATA[antibody == "H3K27me3"]$sample_id
+ctrl <- NSC_K27M$METADATA[antibody == "Input"]$sample_id
+```
+
+```{r}
+# log2 transformed counts with dithering
+MakeObj(l2c, {
+  l2c <- log2(DitherCounts(COUNTS))
+  l2c <- RemoveInputBias(l2c, controls = ctrl, as.log2 = T)
+})
+
+# RPM
+MakeObj(rpm, {
+  rpm <- log2(colSums(COUNTS))
+  rpm <- t(t(l2c) - rpm + mean(rpm))
+})
+```
+
+```{r eval=FALSE}
+PlotCountDistributions(
+  rpm[, chip], pops = WGT$category, sampling = 5E5, main = "Genomic bins"
+)
+chk <- FiniteValues(rpm[, ctrl])
+abline(h = median(rpm[chk, ctrl]), lwd = 1.5, lty = 3)
+```
+
+```{r echo=FALSE, message=FALSE, out.width="60%", fig.align="center"}
+img <- list("GenomicBins", h = 6, w = 8)
+MkImg({
+  PlotCountDistributions(
+    rpm[, chip], pops = WGT$category, sampling = 5E5, main = "Genomic bins"
+  )
+  chk <- FiniteValues(rpm[, ctrl])
+  abline(h = median(rpm[chk, ctrl]), lwd = 1.5, lty = 3)
+})
+```
+
+```{r echo=FALSE, message=FALSE, out.width="25%"}
+img <- list("ScatterPlots")
+
+grd <- "hcl.duo.light"
+grp <- "intergenic"
+clr <- c("grey", shades::gradient("magma", steps = nlevels(WGT$category)))
+names(clr) <- c(levels(WGT$category), NA)
+
+rng <- range(rpm[FiniteValues(rpm), ])
+x <- chip[c(1, 5)]
+y <- chip[c(2, 6)]
+xlab <- "WT"
+ylab <- "K27M"
+
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    rpm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "genic"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    rpm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "TSS"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    rpm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "CGI"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    rpm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+```
+
+\newpage
+
+## Preview of BRD using genes, promoters and CGI bins
+
+```{r eval=FALSE}
+# Prepare figure layout
+layout(matrix(1:6, 2, 3, byrow = F))
+
+# Run BRD with default parameters and plot the density graph
+PlotBRD(
+  BRD(cnt = COUNTS[WGT$category == "genic", ], controls = ctrl, sampling = 1E5),
+  plots = c("density", "thresholds"), title = "using genes"
+)
+PlotBRD(
+  BRD(cnt = COUNTS[WGT$category == "TSS", ], controls = ctrl, sampling = 1E5),
+  plots = c("density", "thresholds"), title = "using promoters"
+)
+PlotBRD(
+  BRD(cnt = COUNTS[WGT$category == "CGI", ], controls = ctrl, sampling = 1E5),
+  plots = c("density", "thresholds"), title = "using CpG-islands"
+)
+```
+
+```{r echo=FALSE, message=FALSE, fig.align="center", out.width="75%"}
+img <- list("PreviewBRD", h = 6.375, w = 9)
+MkImg({
+  layout(matrix(1:6, 2, 3, byrow = F))
+  PlotBRD(
+    BRD(cnt = COUNTS[WGT$category == "genic", ], controls = ctrl, sampling = 1E5),
+    plots = c("density", "thresholds"), title = "using genes"
+  )
+  PlotBRD(
+    BRD(cnt = COUNTS[WGT$category == "TSS", ], controls = ctrl, sampling = 1E5),
+    plots = c("density", "thresholds"), title = "using promoters"
+  )
+  PlotBRD(
+    BRD(cnt = COUNTS[WGT$category == "CGI", ], controls = ctrl, sampling = 1E5),
+    plots = c("density", "thresholds"), title = "using CpG-islands"
+  )
+})
+```
+
+When using gene units, we observe that the bivariate density distribution
+(upper left panel) is bimodal, meaning that BRD should account for 2 density
+clusters when searching for the background candidates (`ncl = 2`).
+
+When using promoters, we observe that the bivariate density distribution
+(upper left panel) is unimodal, meaning that BRD should account for a single
+density cluster when searching for the background candidates (`ncl = 1`).
+
+When using CGIs, we observe that the bivariate density distribution
+(upper left panel) is bimodal, meaning that BRD should account for 2 density
+clusters when searching for the background candidates (`ncl = 2`).
+
+\newpage
+
+## Estimation of scaling factors using genes, promoters and CGI bins
+
+```{r brd_estimation, eval = FALSE}
+# Run BRD using read counts over gene units (unimodal density)
+brd.gnu <- BRD(
+  cnt = COUNTS[WGT$category == "genic", ], controls = ctrl, ncl = 1,
+  sampling = 3E5, dither = 10
+)
+# Run BRD using read counts over promoters (bimodal density)
+brd.tss <- BRD(
+  cnt = COUNTS[WGT$category == "TSS", ], controls = ctrl, ncl = 1,
+  sampling = 3E5, dither = 10
+)
+# Run BRD using read counts over CpG-islands (unimodal density)
+brd.cgi <- BRD(
+  cnt = COUNTS[WGT$category == "CGI", ], controls = ctrl, ncl = 1,
+  sampling = 3E5, dither = 10
+)
+```
+
+```{r include=FALSE}
+# Run BRD using read counts over gene units (unimodal density)
+MakeObj(brd.gnu, {
+  brd.gnu <- BRD(
+    cnt = COUNTS[WGT$category == "genic", ], controls = ctrl, ncl = 1,
+    sampling = 3E5, dither = 10
+  )
+})
+# Run BRD using read counts over promoters (bimodal density)
+MakeObj(brd.tss, {
+  brd.tss <- BRD(
+    cnt = COUNTS[WGT$category == "TSS", ], controls = ctrl, ncl = 1,
+    sampling = 3E5, dither = 10
+  )
+})
+# Run BRD using read counts over CpG-islands (unimodal density)
+MakeObj(brd.cgi, {
+  brd.cgi <- BRD(
+    cnt = COUNTS[WGT$category == "CGI", ], controls = ctrl, ncl = 1,
+    sampling = 3E5, dither = 10
+  )
+})
+```
+
+```{r eval=FALSE}
+# Value of BRD scaling factors
+ScalingFactors(brd.gnu) # Estimated using gene units
+ScalingFactors(brd.tss) # Estimated using promoters
+ScalingFactors(brd.cgi) # Estimated using CpG-islands
+```
+
+```{r echo=FALSE}
+tbl <- data.frame(
+  genes = ScalingFactors(brd.gnu),
+  promoters = ScalingFactors(brd.tss),
+  CGIs = ScalingFactors(brd.cgi)
+)
+
+tbl$`delta max. (%)` <- apply(
+  tbl[, 1:3], 1, function(x) round(100 * diff(range(x)) / mean(x), 1)
+)
+tbl$`TSS vs CGI (%)` <- apply(
+  tbl[, 2:3], 1, function(x) round(100 * diff(range(x)) / mean(x), 1)
+)
+
+kable(tbl, caption = "BRD scaling factors")
+```
+
+```{r echo=FALSE, fig.height=6, out.width="45%"}
+
+# Scaling factors based on chromatin spike-in
+spikein.factors <- mean(NSC_K27M$SPIKEIN) / NSC_K27M$SPIKEIN
+spikein.factors <- spikein.factors[colnames(COUNTS)]
+
+x <- factor(rownames(tbl), levels = rownames(tbl))
+chk <- x %in% chip
+
+# spikein.factors <- spikein.factors / median(spikein.factors[chk]) * median(as.matrix(tbl[chk, 1:3]))
+
+par(mar = par()$mar + c(8, 0, 0, 6))
+clr <- c(grey(0), rgb(0.9, 0, 0), rgb(1, 0.5, 0), rgb(0, 0.5, 1))
+names(clr) <- c(colnames(tbl)[1:3], "spike-in")
+
+plot(x, rep(0, length(x)), ylim = c(0, 1.1 * max(tbl[, 1:3], spikein.factors)), las = 2, type = "n", col = NA, border = NA, ylab = "scaling factor", main = "unmatched")
+
+for(idx in list(1:4, 5:8, 9:12, 13:16)) {
+  points(x[idx], tbl$genes[idx], type = "b", col = clr[1], lwd = 2, pch = 20)
+  points(x[idx], tbl$promoters[idx], type = "b", col = clr[2], lwd = 2, pch = 20)
+  points(x[idx], tbl$CGIs[idx], type = "b", col =  clr[3], lwd = 2, pch = 20)
+  points(x[idx], spikein.factors[idx], type = "b", col = clr[4], lwd = 2, pch = 20)
+}
+
+legend(
+  "topright", inset = c(-0.2, 0), legend = names(clr), fill = clr, bty = "n", xpd = T
+)
+
+# Match WT DMSO factors
+for(idx in list(1:4, 5:8, 9:12, 13:16)) {
+  spikein.factors[idx] <- spikein.factors[idx] / spikein.factors[idx[1]] * tbl$CGIs[idx[1]]
+}
+
+plot(x, rep(0, length(x)), ylim = c(0, 1.1 * max(tbl[, 1:3], spikein.factors)), las = 2, type = "n", col = NA, border = NA, ylab = "scaling factor", main = "WT DMSO matched")
+
+for(idx in list(1:4, 5:8, 9:12, 13:16)) {
+  points(x[idx], tbl$genes[idx], type = "b", col = clr[1], lwd = 2, pch = 20)
+  points(x[idx], tbl$promoters[idx], type = "b", col = clr[2], lwd = 2, pch = 20)
+  points(x[idx], tbl$CGIs[idx], type = "b", col =  clr[3], lwd = 2, pch = 20)
+  points(x[idx], spikein.factors[idx], type = "b", col = clr[4], lwd = 2, pch = 20)
+}
+
+legend(
+  "topright", inset = c(-0.2, 0), legend = names(clr), fill = clr, bty = "n", xpd = T
+)
+
+```
+
+The scaling factors estimated from either gene units, promoters or CpG-islands
+are globally similar, with differences below 10%.
+For normalizations, we choose to use scaling factors estimated with CpG-islands
+read counts, which present intermediate values compared to the estimations
+from genes or promoter read counts.
+
+The next page summarizes the BRD control graphs.
+
+```{r eval=FALSE}
+# Prepare figure layout
+layout(matrix(1:12, 4, 3, byrow = F))
+
+# Plot BRD control graphs using genes, promoters and CpG-islands
+PlotBRD(brd.gnu, title = "using genes")       # Left panels
+PlotBRD(brd.tss, title = "using promoters")   # Center panels
+PlotBRD(brd.cgi, title = "using CpG-islands") # Right panels
+```
+
+```{r echo=FALSE, message=FALSE, out.width="90%", fig.align="center"}
+img <- list("TestBRD", h = 12.75, w = 9)
+MkImg({
+  layout(matrix(1:12, 4, 3, byrow = F))
+  PlotBRD(brd.gnu, title = "using genes")       # Left panels
+  PlotBRD(brd.tss, title = "using promoters")   # Center panels
+  PlotBRD(brd.cgi, title = "using CpG-islands") # Right panels
+})
+```
+
+\newpage
+
+## Normalization of read counts
+
+```{r}
+# l2c <- log2(DitherCounts(COUNTS))
+# 
+# chk <- NormalizeCountMatrix(l2c, brd.cgi, as.log2 = T)
+# nrm <- RemoveInputBias(chk, controls = ctrl, as.log2 = T)
+# 
+# rmb <- RemoveInputBias(l2c, controls = ctrl, as.log2 = T)
+# rmb <- NormalizeCountMatrix(rmb, brd.cgi, as.log2 = T)
+# 
+# layout(matrix(1:6, 2, 3, byrow = T))
+# trash <- SideBySideDensity(
+#   chk[WGT$category == "CGI", ], mapper = cmf, las = 2, x.labels = F, main = "chk"
+# )
+# trash <- SideBySideDensity(
+#   nrm[WGT$category == "CGI", ], mapper = cmf, las = 2, x.labels = F, main = "nrm"
+# )
+# trash <- SideBySideDensity(
+#   rmb[WGT$category == "CGI", ], mapper = cmf, las = 2, x.labels = F, main = "rmb"
+# )
+
+```
+
+```{r}
+# Normalize genomic read counts using BRD scaling factors from CGI bins
+MakeObj(nrm, {
+  nrm <- NormalizeCountMatrix(l2c, brd.cgi, as.log2 = T)
+})
+```
+
+
+```{r eval=FALSE}
+# Show genomic read count distributions after BRD normalization
+PlotCountDistributions(
+  nrm[, chip], pops = WGT$category, sampling = 5E5,
+  main = "Genomic bins"
+)
+
+```
+
+```{r echo=FALSE, message=FALSE, out.width="60%", fig.align="center"}
+img <- list("GenomicBinsNorm", h = 6, w = 8)
+MkImg({
+  PlotCountDistributions(
+    nrm[, chip], pops = WGT$category, sampling = 5E5,
+    main = "Genomic bins"
+  )
+  chk <- FiniteValues(nrm[, ctrl])
+  abline(h = median(nrm[chk, ctrl]), lwd = 1.5, lty = 3)
+})
+```
+
+
+```{r echo=FALSE, message=FALSE, out.width="25%"}
+img <- list("ScatterPlotsNorm")
+
+grd <- "hcl.duo.light"
+grp <- "intergenic"
+clr <- c("grey", shades::gradient("magma", steps = nlevels(WGT$category)))
+names(clr) <- c(levels(WGT$category), NA)
+
+rng <- range(nrm[FiniteValues(nrm), ])
+x <- chip[c(1, 5)]
+y <- chip[c(2, 6)]
+xlab <- "WT"
+ylab <- "K27M"
+
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    nrm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "genic"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    nrm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "TSS"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    nrm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+grp <- "CGI"
+idx <- which(WGT$category == grp)
+MkImg({
+  ScatterMaps(
+    nrm[idx, chip], rng, x = x, y = y, bins = 705, smoothing = 25,
+    gradient = grd, colors = list(m = clr[grp], p = clr[grp]),
+    xlab = xlab, ylab = ylab, main = paste0(grp, "")
+  )
+  abline(-1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 1, 1, lwd = 1.5, col = grey(0.5, 0.4))
+  abline( 0, 1, lwd = 1.5, lty = 3)
+})
+```
+
+The distribution of normalized read counts over CpG-islands looks consistent.
+However, as opposed to the expected effect of K27M on global H3K27me3 levels, 
+we observe that in these experiments, ChIP-seq enrichments in the K27M condition
+are globally higher than in the WT condition.
+
+\newpage
+
+## WORK IN PROGRESS
+
+```{r eval=FALSE, include=FALSE}
+grp <- as.integer(1 + (WGT$category == "CGI"))
+layout(matrix(1:4, 2, 2, byrow = T))
+ScatterMaps(
+  l2c[, chip], x = c(1,5), y = c(2,6), pops = grp,
+  gradient = "hcl.duo.light", scales = "balanced",
+  render = "maximum",
+  bins = 705, smoothing = 25, extend = c(1, 1.1),
+  colors = list(p = clr[c(2, 4)])
+)
+ScatterMaps(
+  l2c[, chip], x = c(1,5), y = c(2,6), pops = grp,
+  gradient = "hcl.duo.light", scales = "balanced",
+  render = "prevalence", scoring = "glf",
+  bins = 705, smoothing = 25, extend = c(1, 1.1),
+  colors = list(p = clr[c(2, 4)])
+)
+```
+
+
+\newpage
+
+## Adjustment of parameters
+
+Once the read count matrix aimed for the search of background candidates has
+been generated, a preliminary application of the BRD method takes the following
+form.
+
+```{r eval=FALSE}
+# Define column identifiers corresponding to Input profiles
+ctrl <- c("Input_WT", "Input_K27M")
+
+# Preliminary application of the BRD method based on the read count matrix cnt
+brd <- BRD(cnt, controls = ctrl)
+```
+
+After this, calling the `PlotBRD` function will generate control graphs that
+are necessary to adjust key parameters of the `BRD` function, that is
+the number of clusters `ncl` and the density thresholds `bdt`.
+
+```{r eval=FALSE}
+PlotBRD(brd) # Generate BRD control graphs (e.g. bivariate density distribution)
+```
+
+For instance, with a bivariate density distribution similar to the one shown in
+section [1.2](#1.2), the number of clusters must be set to 2 for an accurate
+estimation of normalization factors.
+
+```{r eval=FALSE}
+# Adjusted application of the BRD method for a bimodal bivariate density  
+brd <- BRD(cnt, controls = ctrl, ncl = 2)
+```
+
+In this virtual example, the estimated normalization factor for each
+experimental condition would be given by the object `brd$normfactors`.
+
+Applying the BRD normalization to log2 transformed read counts or coverage
+vectors simply consist in adding these factors.
+Thus, the raw read counts should be normalized as follows.
+
+```{r eval=FALSE}
+# Apply BRD normalization factors to raw read counts
+nrm <- t(t(cnt) * 2^brd$normfactors)
+```
+
+More detailed examples of normalization with real ChIP-seq datasets can be
+found in the next section.
+
+## Normalization
+
+## Verifications
+
+# Documentation and troubleshooting
+
+## Examples
+
+## Questions & answers
+
+  * Can I apply BRD "blindly" for validated marks (or automatically on many datasets)
+
+Short answer: no you should not unless you know that the extact same protocol
+has been used and the data quality is consistenly good.
+Because variation of protocols or experimental setup may
+break BRD assumptions, one needs to verify that the background candidates and
+read count distributions make sense (look convincing). BRD remains an empirical
+approach.
+
+  * Can I normalize ChIP-seq for different marks all together.
+  
+Although this is technically possible, the BRD method was not designed for this
+and there are several reasons not to do so.
+The PCA projection does not allow more than one enrichment dimension.
+The antibody response may yield to different dynamic ranges of enrichment and backgrounds.
+The background candidates may be mutually exclusive for the distinct marks.
+In summary: bad idea.
+
+  * If I have replicates, should I normalize them separately or all together?
+
+Yes, as much as you like!
+BRD does take into account replicate variations thanks to the 
+bivariate PCA projection and the estimations are improved.
+
+  * Should I have replicates.
+
+Absolutely!
+We recommend having two replicates for any study aiming at quatitative differences.
+The more replicates the better. Same for inputs/controls although beyond a handful
+is going to be an overkill.
+
+  * I don't have replicate inputs. 
+
+  * I would like to load and use my own annotation object, how should I do?
+  
+  * Why BRD results differ when runned several times with same parameters?
+  * Why estimated scaling factors differ slightly whether `ncl` is unspecified or manually set to `1`?
+
+  * I have spike-in data showing strong discrepancy with BRD scaling factors
+
+\newpage
+
+# Acknowledgements
+
+Thanks to Itys Comet, Daria Shlyueva, Aliaksandra Radzisheuskaya,
+Sachin Pundhir and Albin Sandelin for their comments and suggestions
+during the development of the BRD method,
+and to Jens Vilstrup Johansen and Sudeep Sahadevan
+from the bioinformatics core facility at the
+[Biotech Research and Innovation Centre](http://www.bric.ku.dk)
+for their support.
+
+# References
+
+<a name="R1"></a>1. Mohammad et al. 2017 - *EZH2 is a potential therapeutic target for H3K27M-mutant pediatric gliomas.*  
+[publisher](https://dx.doi.org/10.1038/nm.4293) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/28263309)
+
+<a name="R2"></a>2. Leblanc B., Mohammad F., Hojfeldt J., Helin K. - *Normalization of ChIP-seq experiments involving global variations of chromatin marks.*  
+(in preparation)
+
+<a name="R3"></a>3. Bonhoure et al. 2014 - *Quantifying ChIP-seq data: a spiking method providing an internal reference for sample-to-sample normalization*  
+[publisher](https://dx.doi.org/10.1101/gr.168260.113) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/24709819)
+
+<a name="R4"></a>4. Orlando et al. 2014 - *Quantitative ChIP-Seq normalization reveals global modulation of the epigenome.*  
+[publisher](https://dx.doi.org/10.1016/j.celrep.2014.10.018) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/25437568)
+
+<a name="R5"></a>5. Hu et al. 2015 - *Biological chromodynamics: a general method for measuring protein occupancy across the genome by calibrating ChIP-seq.*  
+[publisher](https://dx.doi.org/10.1093/nar/gkv670) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/26130708)
+
+<a name="R6"></a>6. Egan et al. 2016 - *An Alternative Approach to ChIP-Seq Normalization Enables Detection of Genome-Wide Changes in Histone H3 Lysine 27 Trimethylation upon EZH2 Inhibition.*  
+[publisher](https://dx.doi.org/10.1371/journal.pone.0166438) | [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27875550)

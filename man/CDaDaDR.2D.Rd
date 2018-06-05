@@ -4,8 +4,8 @@
 \alias{CDaDaDR.2D}
 \title{Density estimation in reduced dimensions}
 \usage{
-CDaDaDR.2D(cnt, movs = NULL, bins = 500, smoothing = 10, dither = 5,
-  zscore = TRUE, method = c("pca", "ica"), progress = F)
+CDaDaDR.2D(cnt, movs = NULL, bins = NULL, smoothing = NULL,
+  dither = NULL, zscore = NULL, method = c("pca", "ica"))
 }
 \arguments{
 \item{cnt}{matrix of read counts

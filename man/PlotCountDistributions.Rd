@@ -4,12 +4,14 @@
 \alias{PlotCountDistributions}
 \title{Plot empirical distributions of read counts}
 \usage{
-PlotCountDistributions(x, ...)
+PlotCountDistributions(X, pops = NULL, sampling = NULL, vb = 0,
+  names = T, palette = "magma", gradient = "hcl.mono.grey", legend = T,
+  inset = c(-0.25, 0), saturation = 0.9, ...)
 }
 \arguments{
-\item{x}{a read count matrix, preferably dithered and log2 transformed.}
-
 \item{...}{optional arguments forwarded to the \link{SideBySide} function.}
+
+\item{x}{a read count matrix, preferably dithered and log2 transformed.}
 }
 \description{
 Plot empirical distributions of read counts

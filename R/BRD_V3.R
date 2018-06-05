@@ -145,13 +145,16 @@ bg_ranking <- function(x, by, controls) {
 # -----------------------------------------------------------------------------.
 #' @export
 BRD <- function(
-  cnt, controls, sampling = NULL, smobs = TRUE, dither = 5, zscore = TRUE,
-  bins = 705, smoothing = 25,
-  bdt = c(0.15, 0.05), ncl = 1, mincs = 50, progress = FALSE
+  cnt, controls, sampling = NULL, smobs = NULL, dither = NULL, zscore = NULL,
+  bins = NULL, smoothing = NULL, bdt = NULL, ncl = NULL, mincs = NULL
 ) {
 
   if(is.null(colnames(cnt))) stop("missing column names in the count matrix")
   if(length(controls) < 2) stop("BRD requires at least 2 controls")
+
+  cfg <- Tightrope() # Global options
+  DefaultArgs(cfg, ignore = c("cnt", "controls"), from = BRD)
+
 
   xps <- colnames(cnt)
   inp <- match(controls, xps)
@@ -184,7 +187,7 @@ BRD <- function(
   dred <- CDaDaDR.2D(
     cnt, movs = movs,
     bins = bins, smoothing = smoothing, dither = dither, zscore = zscore,
-    method = "pca", progress = progress
+    method = "pca"
   )
   dred <- c(dred, list(ctl = movs, enr = menr, intensity = intensity))
 
@@ -199,7 +202,7 @@ BRD <- function(
   )
 
   # Find clusters by density gradient ascent in the dred space
-  qsc <- with(sbs, QuickShiftClustering(x, d, n = ncl, progress = progress))
+  qsc <- with(sbs, QuickShiftClustering(x, d, n = ncl))
   sbs$cluster <- qsc$membership
 
   # Select top density (core) observations in each cluster and count members
