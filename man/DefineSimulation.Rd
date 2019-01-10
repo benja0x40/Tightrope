@@ -4,8 +4,8 @@
 \alias{DefineSimulation}
 \title{Define different populations for ChIP-seq simulations}
 \usage{
-DefineSimulation(chip = 3, replicate = 1, input = 2, enrichment = c(1,
-  3), patterns = "^")
+DefineSimulation(chip = 3, replicate = 1, input = 2,
+  enrichment = c(1, 3), patterns = "^")
 }
 \arguments{
 \item{chip}{number of ChIP profiles (default = 3).}

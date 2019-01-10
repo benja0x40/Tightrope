@@ -4,8 +4,9 @@
 \alias{ImportGenomicRanges}
 \title{Import tab delimited text files representing genomic interval data}
 \usage{
-ImportGenomicRanges(fpath, chr = 1, start = 2, end = 3, strand = NULL,
-  seqinfo = NULL, xidx = NULL, xlbl = NULL, header = FALSE, ...)
+ImportGenomicRanges(fpath, chr = 1, start = 2, end = 3,
+  strand = NULL, seqinfo = NULL, xidx = NULL, xlbl = NULL,
+  header = FALSE, ...)
 }
 \arguments{
 \item{fpath}{path to a text file defining genomic ranges.}

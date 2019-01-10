@@ -202,7 +202,7 @@ BRD <- function(
   )
 
   # Find clusters by density gradient ascent in the dred space
-  qsc <- with(sbs, QuickShiftClustering(x, d, n = ncl))
+  qsc <- QuickShift(sbs$x, n = ncl, d = sbs$d)
   sbs$cluster <- qsc$membership
 
   # Select top density (core) observations in each cluster and count members

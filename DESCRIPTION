@@ -1,6 +1,6 @@
 Package: Tightrope
 Type: Package
-Version: 0.7.4
+Version: 0.7.5
 Authors@R:
     person(
       "Benjamin", "Leblanc",
@@ -44,5 +44,5 @@ Suggests:
     covr
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr

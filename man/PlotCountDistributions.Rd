@@ -5,8 +5,8 @@
 \title{Plot empirical distributions of read counts}
 \usage{
 PlotCountDistributions(X, pops = NULL, sampling = NULL, vb = 0,
-  names = T, palette = "magma", gradient = "hcl.mono.grey", legend = T,
-  inset = c(-0.25, 0), saturation = 0.9, ...)
+  names = T, palette = "magma", gradient = "hcl.mono.grey",
+  legend = T, inset = c(-0.25, 0), saturation = 0.9, ...)
 }
 \arguments{
 \item{...}{optional arguments forwarded to the \link{SideBySide} function.}

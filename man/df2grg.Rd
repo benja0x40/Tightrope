@@ -4,8 +4,8 @@
 \alias{df2grg}
 \title{Convert \code{data.frame} to \link{GRanges}}
 \usage{
-df2grg(df, chr = 1, start = 2, end = 3, strand = NULL, xidx = NULL,
-  xlbl = NULL)
+df2grg(df, chr = 1, start = 2, end = 3, strand = NULL,
+  xidx = NULL, xlbl = NULL)
 }
 \arguments{
 \item{df}{a data.frame defining genomic ranges.}

@@ -183,7 +183,7 @@ CoveredLength <- function(cvg) {
 #' @keywords internal
 #' @export
 FlatGRanges <- function(x, seqinfo) {
-  x <- unlist(x)
+  if(is.list(x) | is(x, "GRangesList")) x <- unlist(x)
   strand(x) <- "*"
   x <- reduce(x)
   seqinfo(x) <- seqinfo[seqlevels(x)]

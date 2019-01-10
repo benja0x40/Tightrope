@@ -19,10 +19,11 @@
 #' @importFrom ica icafast
 #' @importFrom mixtools dmvnorm rmvnorm
 #' @importFrom biomaRt useMart getBM
+#' @import Rsamtools
 #' @import GenomicAlignments
 #' @import GenomicRanges
 #' @import GenomicFeatures
-#' @importFrom QuickShift QuickShiftClustering
+#' @importFrom QuickShift QuickShift
 #' @importFrom Barbouille xylim FiniteValues RankScore ColorMapper ColorLegend ScatterMaps SideBySide
 # -----------------------------------------------------------------------------.
 #' @keywords internal
